@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Job Pilot Prototype (v0.4) - Mocked LLM Edition
 
-## Getting Started
+A complete end-to-end prototype for managing parallel job tracks with AI-assisted resume tailoring and interview prep. Built to satisfy all 7 User Journeys in the v0.4 PRD.
 
-First, run the development server:
+> **Note:** This version uses a **mocked LLM service** so it can be run immediately without needing a Gemini or Anthropic API key. All "AI" interactions (Parsing, Tailoring, Prepping) are simulated with delays to mimic the user experience.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
+   No API keys required!
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## The 7 User Journeys Implemented
 
-## Learn More
+1. **First-Time Setup (`/settings`)**: Set global preferences and manage your master markdown resume.
+2. **Job Discovery (`/`)**: Paste a raw Job Description to automatically "parse" it and add it to your pipeline.
+3. **Targeted Tailoring (`/job/[id]`)**: Hit the mock service to produce a tailored resume targeting the specific competencies of a job.
+4. **Pipeline Management (`/` and `/job/[id]`)**: Update the status of applications and track notes.
+5. **Story Bank Maintenance (`/stories`)**: Full CRUD interface for managing STAR-format stories with competency tagging.
+6. **Interview Preparation (`/job/[id]`)**: The mock service will surface and rank the 3 most relevant stories from your bank for a specific role.
+7. **Resume Generation (`/export`)**: Convert your master markdown resume into DocX or PDF format instantly.
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **Framework**: Next.js App Router
+- **Storage**: Local filesystem JSON/MD (in `data/`) via `lib/store.ts`.
+- **LLM**: Simulated via `lib/llm.ts`
+- **Document Generation**: `docx` and `md-to-pdf` npm packages.

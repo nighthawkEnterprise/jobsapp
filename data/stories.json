@@ -1,0 +1,35 @@
+[
+  {
+    "id": "story-1",
+    "title": "AI Model Gateway Launch",
+    "situation": "Our enterprise customers were experiencing significant latency when accessing multiple AI models via different APIs.",
+    "task": "Simplify the developer experience and reduce latency through a unified gateway.",
+    "action": "I defined the requirements for a central proxy layer that cached common requests and normalized response formats. I collaborated with the infra team to deploy this on Kubernetes.",
+    "result": "Latency decreased by 40% on average, and developer adoption grew by 200% within the first quarter.",
+    "competencies": ["execution", "technical depth", "product sense"],
+    "domains": ["AI infrastructure", "developer tools"],
+    "metrics": "40% latency reduction, 200% adoption"
+  },
+  {
+    "id": "story-2",
+    "title": "Legacy Identity Migration",
+    "situation": "Our legacy identity system was fragmented and didn't support modern SSO requirements, causing friction for enterprise sales.",
+    "task": "Migrate all users to a new OIDC-compliant system without downtime.",
+    "action": "I led the cross-functional effort across security, frontend, and backend teams. We used a dual-write approach to ensure data consistency during the transition.",
+    "result": "Successfully migrated 1M+ users with zero downtime. This unblocked 3 major enterprise deals worth $5M.",
+    "competencies": ["leadership", "cross-functional collaboration", "ambiguity navigation"],
+    "domains": ["identity", "security"],
+    "metrics": "$5M in unblocked deals"
+  },
+  {
+    "id": "story-3",
+    "title": "DevOps Tooling NPS Turnaround",
+    "situation": "Our CLI tool was powerful but difficult to use, leading to an NPS of 15.",
+    "task": "Improve the developer experience (DX) and increase user satisfaction.",
+    "action": "I conducted 50+ deep-dive interviews with users. Based on feedback, I prioritized a complete overhaul of the CLI documentation and introduced an interactive setup wizard.",
+    "result": "NPS increased from 15 to 45 within six months, and GitHub stars for the project doubled.",
+    "competencies": ["analytics", "product sense", "cross-functional collaboration"],
+    "domains": ["developer tools"],
+    "metrics": "NPS 15 to 45"
+  }
+]
