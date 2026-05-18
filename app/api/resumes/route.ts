@@ -6,6 +6,8 @@ import mammoth from 'mammoth';
 import TurndownService from 'turndown';
 
 const OUTPUT_DIR = path.join(process.cwd(), 'output');
+const DATA_DIR = path.join(process.cwd(), 'data');
+const DOCX_FILE = path.join(DATA_DIR, 'resume.docx');
 const turndownService = new TurndownService({ headingStyle: 'atx' });
 
 export async function GET() {
@@ -29,7 +31,7 @@ export async function GET() {
     }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
-  return NextResponse.json({ master, tailored });
+  return NextResponse.json({ master, tailored, hasDocx: fs.existsSync(DOCX_FILE) });
 }
 
 export async function POST(req: Request) {
@@ -44,12 +46,16 @@ export async function POST(req: Request) {
     let finalContent = '';
 
     if (file.name.endsWith('.docx')) {
-      // It's a binary docx file, we need to extract to HTML then Markdown
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
+      // Save original .docx for high-fidelity visual preview and direct download
+      fs.writeFileSync(DOCX_FILE, buffer);
+      // Also convert to Markdown so the LLM can read it
       const { value: html } = await mammoth.convertToHtml({ buffer });
       finalContent = turndownService.turndown(html);
     } else {
+      // If a new plain-text resume is uploaded, remove any stale .docx source
+      if (fs.existsSync(DOCX_FILE)) fs.unlinkSync(DOCX_FILE);
       // Treat as plain text (.md, .txt)
       finalContent = await file.text();
     }

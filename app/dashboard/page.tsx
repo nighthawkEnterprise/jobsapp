@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Trash2 } from 'lucide-react';
+import { Toast } from '@/components/Toast';
 
 export default function PipelinePage() {
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   const [rawJD, setRawJD] = useState('');
+  const [toast, setToast] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const fetchJobs = () => {
     fetch('/api/jobs')
@@ -33,6 +37,17 @@ export default function PipelinePage() {
     setRawJD('');
     setAdding(false);
     fetchJobs();
+    setToast('Job added to pipeline');
+  };
+
+  const handleDelete = async (id: string) => {
+    await fetch('/api/jobs', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    setConfirmDelete(null);
+    setJobs(prev => prev.filter(j => j.id !== id));
   };
 
   const handleStatusChange = async (id: string, newStatus: string) => {
@@ -63,41 +78,102 @@ export default function PipelinePage() {
               No jobs in pipeline yet. Paste a JD on the right to get started.
             </div>
           ) : (
-            jobs.map(job => (
-              <div key={job.id} className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex gap-5 items-center">
-                <div className="flex-none flex flex-col items-center justify-center bg-blue-50 border border-blue-100 h-20 w-20 rounded-lg">
-                  <div className="text-3xl font-black text-blue-600">{job.score}</div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-blue-800 mt-1">Fit Score</div>
-                </div>
-                <div className="flex-grow">
-                  <h3 className="font-bold text-lg text-gray-900">
-                    <Link href={`/job/${job.id}`} className="hover:text-blue-600 transition-colors">
-                      {job.title}
-                    </Link>
-                  </h3>
-                  <div className="text-sm text-gray-600 font-medium mt-0.5">{job.company} <span className="text-gray-300 mx-1">•</span> {job.location}</div>
-                  <div className="mt-2 flex items-center gap-3 text-xs text-gray-500">
-                    <span className="bg-gray-100 px-2 py-1 rounded text-gray-700 font-medium">${job.salary?.toLocaleString() || 'N/A'}</span>
-                    <span>Updated {new Date(job.updatedAt).toLocaleDateString()}</span>
+            jobs.map(job => {
+              const d = job.dimensions;
+              return (
+                <div key={job.id} className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex gap-5 items-start">
+                    <div className="flex-none flex flex-col items-center justify-center bg-blue-50 border border-blue-100 h-20 w-20 rounded-lg relative">
+                      <div className="text-2xl font-black text-blue-600">
+                        {job.dimensions?.overall != null ? job.dimensions.overall.toFixed(1) : job.score != null ? job.score.toFixed(1) : '—'}
+                      </div>
+                      <div className="text-[9px] font-bold uppercase tracking-wider text-blue-800 mt-0.5">/ 5</div>
+                      {!job.dimensions && job.score != null && (
+                        <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-amber-400 rounded-full border-2 border-white" title="Discover score — LLM analysis in progress" />
+                      )}
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <h3 className="font-bold text-lg text-gray-900">
+                        <Link href={`/job/${job.id}`} className="hover:text-blue-600 transition-colors">
+                          {job.title}
+                        </Link>
+                      </h3>
+                      <div className="text-sm text-gray-600 font-medium mt-0.5">{job.company} <span className="text-gray-300 mx-1">•</span> {job.location}</div>
+                      <div className="mt-1.5 flex items-center gap-3 text-xs text-gray-500">
+                        <span className="bg-gray-100 px-2 py-1 rounded text-gray-700 font-medium">${job.salary?.toLocaleString() || 'N/A'}</span>
+                        <span>Updated {new Date(job.updatedAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex-none flex flex-col items-end gap-2">
+                      <select
+                        value={job.status}
+                        onChange={(e) => handleStatusChange(job.id, e.target.value)}
+                        className="w-44 border border-gray-300 rounded-lg p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer font-medium text-gray-700 shadow-sm"
+                      >
+                        <option value="interested">Interested</option>
+                        <option value="applied">Applied</option>
+                        <option value="screened">Screened</option>
+                        <option value="interviewing">Interviewing</option>
+                        <option value="offer">Offer</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="withdrawn">Withdrawn</option>
+                      </select>
+                      {confirmDelete === job.id ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-gray-500">Remove?</span>
+                          <button onClick={() => handleDelete(job.id)} className="text-xs font-bold text-red-600 hover:text-red-800 px-2 py-1 rounded hover:bg-red-50 transition-colors">Yes</button>
+                          <button onClick={() => setConfirmDelete(null)} className="text-xs font-bold text-gray-500 hover:text-gray-700 px-2 py-1 rounded hover:bg-gray-100 transition-colors">No</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDelete(job.id)}
+                          className="flex items-center gap-1 text-xs text-gray-400 hover:text-red-500 transition-colors px-2 py-1 rounded hover:bg-red-50"
+                          title="Remove from pipeline"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
+
+                  {d && (
+                    <div className="mt-4 pt-3 border-t border-gray-100 space-y-2">
+                      {d.summary && (
+                        <p className="text-xs text-gray-500 italic">{d.summary}</p>
+                      )}
+                      <div className="flex flex-wrap gap-2 text-[11px] font-semibold">
+                        {([
+                          ['CV', d.cv_match],
+                          ['North Star', d.north_star],
+                          ['Comp', d.comp],
+                          ['Culture', d.cultural],
+                        ] as [string, { score: number; reasoning: string }][]).map(([label, dim]) => (
+                          <span
+                            key={label}
+                            title={dim.reasoning}
+                            className={`px-2 py-1 rounded border cursor-help ${
+                              dim.score >= 4 ? 'bg-green-50 border-green-200 text-green-800'
+                              : dim.score === 3 ? 'bg-amber-50 border-amber-200 text-amber-800'
+                              : 'bg-red-50 border-red-200 text-red-700'
+                            }`}
+                          >
+                            {label} {dim.score}/5
+                          </span>
+                        ))}
+                        {d.red_flags.length > 0 && (
+                          <span
+                            title={d.red_flags.map(r => `−${r.deduction} ${r.flag}`).join('\n')}
+                            className="px-2 py-1 rounded border bg-red-50 border-red-200 text-red-700 cursor-help"
+                          >
+                            ⚠ {d.red_flags.length} flag{d.red_flags.length > 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <div className="flex-none w-44">
-                  <select 
-                    value={job.status} 
-                    onChange={(e) => handleStatusChange(job.id, e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg p-2.5 text-sm bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all cursor-pointer font-medium text-gray-700 shadow-sm"
-                  >
-                    <option value="interested">Interested</option>
-                    <option value="applied">Applied</option>
-                    <option value="screened">Screened</option>
-                    <option value="interviewing">Interviewing</option>
-                    <option value="offer">Offer</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="withdrawn">Withdrawn</option>
-                  </select>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -119,6 +195,7 @@ export default function PipelinePage() {
           </button>
         </div>
       </div>
+      {toast && <Toast message={toast} onDismiss={() => setToast(null)} />}
     </div>
   );
 }

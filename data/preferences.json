@@ -1,8 +1,20 @@
 {
-  "jobTitles": ["Senior PM", "Staff PM", "Principal PM"],
+  "jobTitles": [
+    "Senior PM",
+    "Staff PM",
+    "Principal PM"
+  ],
   "salaryFloor": 250000,
-  "locationPreferences": ["Seattle", "Remote"],
-  "domainsOfInterest": ["developer tools", "AI infrastructure", "identity"],
+  "locationPreferences": [
+    "Seattle",
+    "Remote",
+    "San Franciso"
+  ],
+  "domainsOfInterest": [
+    "developer tools",
+    "AI infrastructure",
+    "identity"
+  ],
   "companiesToExclude": [],
   "roleType": "IC or management",
   "workStyle": "hybrid or remote"

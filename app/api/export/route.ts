@@ -1,51 +1,79 @@
-import { NextResponse } from 'next/server';
 import { getMasterResume } from '@/lib/store';
-import { Document, Packer, Paragraph, TextRun } from 'docx';
-import { mdToPdf } from 'md-to-pdf';
+import { BorderStyle, Document, ExternalHyperlink, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
 import fs from 'fs';
 import path from 'path';
 
-const OUTPUT_DIR = path.join(process.cwd(), 'output');
+const DOCX_SOURCE = path.join(process.cwd(), 'data', 'resume.docx');
+
+function parseInlineRuns(text: string): (TextRun | ExternalHyperlink)[] {
+  const result: (TextRun | ExternalHyperlink)[] = [];
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|\[[^\]]+\]\([^)]+\))/g);
+  for (const part of parts) {
+    if (!part) continue;
+    if (part.startsWith('**') && part.endsWith('**')) {
+      result.push(new TextRun({ text: part.slice(2, -2), bold: true }));
+    } else if (part.startsWith('*') && part.endsWith('*')) {
+      result.push(new TextRun({ text: part.slice(1, -1), italics: true }));
+    } else {
+      const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+      if (linkMatch) {
+        result.push(new ExternalHyperlink({
+          link: linkMatch[2],
+          children: [new TextRun({ text: linkMatch[1], style: 'Hyperlink' })],
+        }));
+      } else {
+        result.push(new TextRun({ text: part }));
+      }
+    }
+  }
+  return result;
+}
+
+function mdToDocxChildren(md: string): Paragraph[] {
+  const paragraphs: Paragraph[] = [];
+  for (const line of md.split('\n')) {
+    if (line.startsWith('# '))   { paragraphs.push(new Paragraph({ text: line.slice(2),  heading: HeadingLevel.HEADING_1 })); continue; }
+    if (line.startsWith('## '))  { paragraphs.push(new Paragraph({ text: line.slice(3),  heading: HeadingLevel.HEADING_2 })); continue; }
+    if (line.startsWith('### ')) { paragraphs.push(new Paragraph({ text: line.slice(4),  heading: HeadingLevel.HEADING_3 })); continue; }
+    if (line.trim() === '---') {
+      paragraphs.push(new Paragraph({
+        border: { bottom: { color: 'auto', space: 1, style: BorderStyle.SINGLE, size: 6 } },
+      }));
+      continue;
+    }
+    if (line.startsWith('- ') || line.startsWith('* ')) {
+      paragraphs.push(new Paragraph({ children: parseInlineRuns(line.slice(2)), bullet: { level: 0 } }));
+      continue;
+    }
+    paragraphs.push(new Paragraph({ children: parseInlineRuns(line) }));
+  }
+  return paragraphs;
+}
 
 export async function POST(req: Request) {
-  const { format } = await req.json(); // 'docx' | 'pdf'
-  const resumeMd = getMasterResume();
+  const body = await req.json() as { content?: string; filename?: string };
+  const filename = body.filename ?? 'resume.docx';
 
-  if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  // If no explicit content was passed and the original .docx is on disk, serve it directly
+  // to preserve all original formatting.
+  if (!body.content && fs.existsSync(DOCX_SOURCE)) {
+    const buffer = Buffer.from(fs.readFileSync(DOCX_SOURCE));
+    return new Response(buffer, {
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+      },
+    });
   }
 
-  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const md = body.content ?? getMasterResume();
+  const doc = new Document({ sections: [{ properties: {}, children: mdToDocxChildren(md) }] });
+  const buffer = Buffer.from(await Packer.toBuffer(doc));
 
-  try {
-    if (format === 'docx') {
-      // Extremely basic Markdown to Docx mapping for prototype
-      const lines = resumeMd.split('\n');
-      const docChildren = lines.map(line => {
-        if (line.startsWith('# ')) return new Paragraph({ text: line.replace('# ', ''), heading: 'Heading1' });
-        if (line.startsWith('## ')) return new Paragraph({ text: line.replace('## ', ''), heading: 'Heading2' });
-        if (line.startsWith('### ')) return new Paragraph({ text: line.replace('### ', ''), heading: 'Heading3' });
-        if (line.startsWith('- ')) return new Paragraph({ text: line.replace('- ', ''), bullet: { level: 0 } });
-        return new Paragraph({ text: line });
-      });
-
-      const doc = new Document({ sections: [{ properties: {}, children: docChildren }] });
-      const buffer = await Packer.toBuffer(doc);
-      const filePath = path.join(OUTPUT_DIR, `master-resume-${timestamp}.docx`);
-      fs.writeFileSync(filePath, buffer);
-      
-      return NextResponse.json({ success: true, filePath });
-
-    } else if (format === 'pdf') {
-      const filePath = path.join(OUTPUT_DIR, `master-resume-${timestamp}.pdf`);
-      await mdToPdf({ content: resumeMd }, { dest: filePath });
-      return NextResponse.json({ success: true, filePath });
-    }
-
-    return NextResponse.json({ error: 'Invalid format' }, { status: 400 });
-
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: 'Generation failed' }, { status: 500 });
-  }
+  return new Response(buffer, {
+    headers: {
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'Content-Disposition': `attachment; filename="${filename}"`,
+    },
+  });
 }

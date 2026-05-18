@@ -26,6 +26,21 @@ export interface Story {
 
 export type JobStatus = 'interested' | 'applied' | 'screened' | 'interviewing' | 'offer' | 'rejected' | 'withdrawn';
 
+export interface JobDimension {
+  score: number;   // 1–5
+  reasoning: string;
+}
+
+export interface JobDimensions {
+  cv_match:  JobDimension;
+  north_star: JobDimension;
+  comp:       JobDimension;
+  cultural:   JobDimension;
+  red_flags:  Array<{ flag: string; deduction: number }>;
+  summary:    string;
+  overall:    number;  // 1.0–5.0
+}
+
 export interface Job {
   id: string;
   company: string;
@@ -39,14 +54,35 @@ export interface Job {
   createdAt: string;
   updatedAt: string;
   score?: number;
-  reasoning?: string[];
+  dimensions?: JobDimensions;
+  scoredAt?: string;
+}
+
+export interface ScoredDiscovery {
+  company: string;
+  title: string;
+  url: string;
+  location: string;
+  score: number;
+  scoreReasons: string[];
+  alreadyTracked: boolean;
+  salary?: { min?: number; max?: number; currency?: string };
+  postedAt?: string;
+}
+
+export interface ScanCache {
+  scannedAt: string;
+  discoveries: ScoredDiscovery[];
+  errors: Array<{ company: string; error: string }>;
 }
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const PREF_FILE = path.join(DATA_DIR, 'preferences.json');
 const STORIES_FILE = path.join(DATA_DIR, 'stories.json');
 const RESUME_FILE = path.join(DATA_DIR, 'resume.md');
-const JOBS_FILE = path.join(DATA_DIR, 'jobs.json'); // Changed to single JSON for easier updates
+const JOBS_FILE = path.join(DATA_DIR, 'jobs.json');
+const SCAN_CACHE_FILE = path.join(DATA_DIR, 'scan-cache.json');
+const PROFILE_FILE = path.join(DATA_DIR, '_profile.md');
 
 // Ensure data dir exists
 if (!fs.existsSync(DATA_DIR)) {
@@ -143,4 +179,24 @@ export function updateJob(id: string, updates: Partial<Job>) {
     jobs[index] = { ...jobs[index], ...updates, updatedAt: new Date().toISOString() };
     saveJobs(jobs);
   }
+}
+
+// --- Profile ---
+export function getProfile(): string {
+  if (!fs.existsSync(PROFILE_FILE)) return '';
+  return fs.readFileSync(PROFILE_FILE, 'utf8');
+}
+
+export function saveProfile(content: string) {
+  fs.writeFileSync(PROFILE_FILE, content);
+}
+
+// --- Scan Cache ---
+export function getScanCache(): ScanCache | null {
+  if (!fs.existsSync(SCAN_CACHE_FILE)) return null;
+  return JSON.parse(fs.readFileSync(SCAN_CACHE_FILE, 'utf8'));
+}
+
+export function saveScanCache(cache: ScanCache) {
+  fs.writeFileSync(SCAN_CACHE_FILE, JSON.stringify(cache, null, 2));
 }

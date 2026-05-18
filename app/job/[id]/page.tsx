@@ -44,8 +44,18 @@ export default function JobDetailPage() {
           </div>
         </div>
         <div className="flex-none flex flex-col items-center justify-center bg-blue-600 text-white p-6 rounded-xl shadow-inner min-w-[140px]">
-          <div className="text-4xl font-black">{job.score}</div>
-          <div className="text-xs font-bold uppercase tracking-wider text-blue-200 mt-1">Fit Score</div>
+          <div className="text-4xl font-black">
+            {job.dimensions?.overall != null ? job.dimensions.overall.toFixed(1) : '—'}
+          </div>
+          <div className="text-xs font-bold uppercase tracking-wider text-blue-200 mt-1">out of 5</div>
+          {job.dimensions?.overall != null && (
+            <div className="text-[10px] text-blue-200 mt-1.5 text-center leading-tight">
+              {job.dimensions.overall >= 4.5 ? 'Apply immediately' :
+               job.dimensions.overall >= 4.0 ? 'Worth applying' :
+               job.dimensions.overall >= 3.5 ? 'Apply if specific reason' :
+               'Not recommended'}
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,0 +1,38 @@
+[
+  {
+    "company": "Databricks",
+    "title": "Staff Product Manager, Security",
+    "location": "San Francisco, California",
+    "salary": 0,
+    "sourceUrl": "https://databricks.com/company/careers/open-positions/job?gh_jid=7110499002",
+    "content": "Staff Product Manager, Security",
+    "id": "c8bcf659-6289-4559-a4c1-14a06d375be1",
+    "status": "interested",
+    "notes": "",
+    "createdAt": "2026-05-18T19:40:23.112Z",
+    "updatedAt": "2026-05-18T19:40:23.115Z",
+    "dimensions": {
+      "cv_match": {
+        "score": 3,
+        "reasoning": "LLM scoring unavailable — set ANTHROPIC_API_KEY to enable."
+      },
+      "north_star": {
+        "score": 3,
+        "reasoning": ""
+      },
+      "comp": {
+        "score": 3,
+        "reasoning": ""
+      },
+      "cultural": {
+        "score": 3,
+        "reasoning": ""
+      },
+      "red_flags": [],
+      "overall": 3,
+      "summary": "Score estimated — add ANTHROPIC_API_KEY for full analysis."
+    },
+    "score": 3,
+    "scoredAt": "2026-05-18T19:40:23.115Z"
+  }
+]

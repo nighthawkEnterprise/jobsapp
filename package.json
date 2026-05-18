@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.20.0",
-    "@google/generative-ai": "^0.24.1",
+    "@anthropic-ai/sdk": "^0.39.0",
     "@types/uuid": "^10.0.0",
     "date-fns": "^4.1.0",
     "docx": "^9.6.1",
@@ -19,6 +19,7 @@
     "mammoth": "^1.12.0",
     "md-to-pdf": "^5.2.5",
     "next": "^16.2.6",
+    "paperclipai": "^2026.517.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-markdown": "^10.1.0",

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { NorthStarEditor } from '@/components/NorthStarEditor';
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
@@ -15,6 +16,7 @@ export default function SettingsPage() {
     workStyle: ''
   });
   const [resume, setResume] = useState('');
+  const [profile, setProfile] = useState('');
 
   useEffect(() => {
     fetch('/api/settings')
@@ -30,6 +32,7 @@ export default function SettingsPage() {
           workStyle: data.preferences.workStyle
         });
         setResume(data.resume);
+        setProfile(data.profile || '');
         setLoading(false);
       });
   }, []);
@@ -49,7 +52,8 @@ export default function SettingsPage() {
           domainsOfInterest: split(prefs.domainsOfInterest),
           companiesToExclude: split(prefs.companiesToExclude),
         },
-        resume
+        resume,
+        profile,
       })
     });
     setSaving(false);
@@ -101,13 +105,21 @@ export default function SettingsPage() {
       </section>
 
       <section className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
+        <h2 className="text-lg font-bold mb-2 text-gray-800">North Star Profile</h2>
+        <p className="text-sm text-gray-500 mb-6">
+          Define your target archetypes, career goals, and anti-targets. The LLM uses this to score <strong>North Star alignment</strong> on every job.
+        </p>
+        <NorthStarEditor value={profile} onChange={setProfile} />
+      </section>
+
+      <section className="bg-white p-8 rounded-xl shadow-sm border border-gray-100">
         <h2 className="text-lg font-bold mb-2 text-gray-800">Master Resume</h2>
-        <p className="text-sm text-gray-500 mb-6">Paste your base resume in Markdown format. The LLM will use this as the foundation for tailoring.</p>
-        <textarea 
-          value={resume} 
-          onChange={e => setResume(e.target.value)} 
+        <p className="text-sm text-gray-500 mb-6">Paste your base resume in Markdown format. The LLM uses this for CV Match scoring and resume tailoring.</p>
+        <textarea
+          value={resume}
+          onChange={e => setResume(e.target.value)}
           className="w-full h-[500px] border border-gray-300 rounded-md p-4 font-mono text-sm leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-          placeholder="# Your Name\n\n## Experience..."
+          placeholder="# Your Name&#10;&#10;## Experience..."
         />
       </section>
     </div>

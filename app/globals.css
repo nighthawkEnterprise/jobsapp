@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brand */
+  --color-navy: #1C1F2E;
+  --color-blue: #3B5BDB;
+  --color-blue-hover: #3451c7;
+
+  /* App design-system (existing) */
   --color-blue-600: #2563eb;
   --color-blue-700: #1d4ed8;
   --color-blue-50: #eff6ff;
@@ -25,31 +31,61 @@
   --color-gray-700: #374151;
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
+
+  /* Typography */
+  --font-heading: var(--font-bricolage), system-ui, sans-serif;
+  --font-sans:    var(--font-outfit), system-ui, sans-serif;
 }
 
+html { scroll-behavior: smooth; }
+
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans, system-ui, sans-serif);
   background-color: var(--color-gray-50);
   color: var(--color-gray-900);
 }
 
-/* Custom minimal prose styles for the JD view */
-.prose {
-  line-height: 1.6;
+/* Prose (JD view) */
+.prose { line-height: 1.6; }
+.prose h1, .prose h2, .prose h3 { font-weight: 700; margin-top: 1.5em; margin-bottom: 0.5em; }
+.prose p  { margin-bottom: 1em; }
+.prose ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
+.prose li { margin-bottom: 0.25em; }
+
+/* Mammoth .docx preview — preserve document formatting from the original file */
+.docx-preview { line-height: 1.5; color: #1f2937; font-size: 0.875rem; }
+.docx-preview h1 { font-size: 1.5rem; font-weight: 700; margin: 1.25em 0 0.4em; }
+.docx-preview h2 { font-size: 1.15rem; font-weight: 700; margin: 1em 0 0.3em; }
+.docx-preview h3 { font-size: 1rem; font-weight: 600; margin: 0.8em 0 0.25em; }
+.docx-preview p  { margin-bottom: 0.6em; }
+.docx-preview ul, .docx-preview ol { padding-left: 1.5em; margin-bottom: 0.75em; }
+.docx-preview li { margin-bottom: 0.2em; }
+.docx-preview table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
+.docx-preview td, .docx-preview th { padding: 0.3em 0.6em; border: 1px solid #d1d5db; vertical-align: top; }
+.docx-preview strong { font-weight: 700; }
+.docx-preview em { font-style: italic; }
+.docx-preview a { color: #2563eb; text-decoration: underline; }
+
+/* Toast */
+@keyframes toast-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.prose h1, .prose h2, .prose h3 {
-  font-weight: 700;
-  margin-top: 1.5em;
-  margin-bottom: 0.5em;
+.toast-slide-up { animation: toast-up 0.2s ease-out both; }
+
+/* ── Hero stagger ── */
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
-.prose p {
-  margin-bottom: 1em;
-}
-.prose ul {
-  list-style-type: disc;
-  padding-left: 1.5em;
-  margin-bottom: 1em;
-}
-.prose li {
-  margin-bottom: 0.25em;
+
+.hero-hed      { animation: reveal-up 0.55s ease-out 0.05s both; }
+.hero-sub      { animation: reveal-up 0.55s ease-out 0.2s  both; }
+.hero-cta      { animation: reveal-up 0.55s ease-out 0.33s both; }
+.hero-terminal { animation: reveal-up 0.65s ease-out 0.48s both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-hed, .hero-sub, .hero-cta, .hero-terminal {
+    animation: none; opacity: 1; transform: none;
+  }
 }

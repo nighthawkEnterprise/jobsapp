@@ -1,0 +1,244 @@
+[
+  {
+    "company": "Vanta",
+    "careersUrl": "https://jobs.ashbyhq.com/vanta",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Supabase",
+    "careersUrl": "https://jobs.ashbyhq.com/supabase",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Clerk",
+    "careersUrl": "https://jobs.ashbyhq.com/clerk",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "WorkOS",
+    "careersUrl": "https://jobs.ashbyhq.com/workos",
+    "platform": "ashby",
+    "notes": "Previously also listed on jobs.lever.co/workos; Ashby is now primary"
+  },
+  {
+    "company": "Descope",
+    "careersUrl": "https://job-boards.greenhouse.io/descope",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Stytch",
+    "careersUrl": "https://jobs.ashbyhq.com/stytch",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "1Password",
+    "careersUrl": "https://jobs.ashbyhq.com/1password",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "JumpCloud",
+    "careersUrl": "https://jobs.lever.co/jumpcloud",
+    "platform": "lever",
+    "notes": ""
+  },
+  {
+    "company": "Snyk",
+    "careersUrl": "https://job-boards.greenhouse.io/snyk",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Cloudflare",
+    "careersUrl": "https://job-boards.greenhouse.io/cloudflare",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Datadog",
+    "careersUrl": "https://job-boards.greenhouse.io/datadog",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "GitLab",
+    "careersUrl": "https://job-boards.greenhouse.io/gitlab",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Tailscale",
+    "careersUrl": "https://job-boards.greenhouse.io/tailscale",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Teleport",
+    "careersUrl": "https://jobs.ashbyhq.com/goteleport",
+    "platform": "ashby",
+    "notes": "Previously jobs.lever.co/teleport; goteleport.com/careers now links to Ashby"
+  },
+  {
+    "company": "Twingate",
+    "careersUrl": "https://jobs.lever.co/twingate",
+    "platform": "lever",
+    "notes": ""
+  },
+  {
+    "company": "Oso",
+    "careersUrl": "https://jobs.ashbyhq.com/Oso",
+    "platform": "ashby",
+    "notes": "osohq.com authorization platform"
+  },
+  {
+    "company": "AuthZed",
+    "careersUrl": "https://jobs.ashbyhq.com/authzed",
+    "platform": "ashby",
+    "notes": "SpiceDB maker"
+  },
+  {
+    "company": "LangChain",
+    "careersUrl": "https://jobs.ashbyhq.com/langchain",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Cohere",
+    "careersUrl": "https://jobs.ashbyhq.com/cohere",
+    "platform": "ashby",
+    "notes": "Cohere AI (not Cohere Health)"
+  },
+  {
+    "company": "Anthropic",
+    "careersUrl": "https://job-boards.greenhouse.io/anthropic",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "OpenAI",
+    "careersUrl": "https://jobs.ashbyhq.com/openai",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Vercel",
+    "careersUrl": "https://job-boards.greenhouse.io/vercel",
+    "platform": "greenhouse",
+    "notes": "79 active listings confirmed; vercel.com/careers also embeds these"
+  },
+  {
+    "company": "Replicate",
+    "careersUrl": "https://jobs.ashbyhq.com/replicate",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Modal",
+    "careersUrl": "https://jobs.ashbyhq.com/modal",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Baseten",
+    "careersUrl": "https://jobs.ashbyhq.com/baseten",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Mistral AI",
+    "careersUrl": "https://jobs.lever.co/mistral",
+    "platform": "lever",
+    "notes": ""
+  },
+  {
+    "company": "Together AI",
+    "careersUrl": "https://job-boards.greenhouse.io/togetherai",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Fireworks AI",
+    "careersUrl": "https://job-boards.greenhouse.io/fireworksai",
+    "platform": "greenhouse",
+    "notes": "fireworks.ai/careers links directly to Greenhouse"
+  },
+  {
+    "company": "LlamaIndex",
+    "careersUrl": "https://jobs.ashbyhq.com/llamaindex",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Pinecone",
+    "careersUrl": "https://jobs.ashbyhq.com/pinecone",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Weaviate",
+    "careersUrl": "https://jobs.ashbyhq.com/weaviate",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Netlify",
+    "careersUrl": "https://job-boards.greenhouse.io/netlify",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Railway",
+    "careersUrl": "https://jobs.ashbyhq.com/Railway",
+    "platform": "ashby",
+    "notes": "Slug is case-sensitive: Railway (capital R)"
+  },
+  {
+    "company": "Render",
+    "careersUrl": "https://jobs.ashbyhq.com/render",
+    "platform": "ashby",
+    "notes": ""
+  },
+  {
+    "company": "Retool",
+    "careersUrl": "https://job-boards.greenhouse.io/retool",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Braintrust",
+    "careersUrl": "https://jobs.ashbyhq.com/Braintrust",
+    "platform": "ashby",
+    "notes": "braintrustdata.com AI observability platform; slug is case-sensitive: Braintrust"
+  },
+  {
+    "company": "Arize AI",
+    "careersUrl": "https://job-boards.greenhouse.io/arizeai",
+    "platform": "greenhouse",
+    "notes": ""
+  },
+  {
+    "company": "Vellum AI",
+    "careersUrl": "https://jobs.ashbyhq.com/vellum",
+    "platform": "ashby",
+    "notes": "Slug on Ashby is 'vellum' (not 'vellum-ai')"
+  },
+  {
+    "company": "Databricks",
+    "careersUrl": "https://job-boards.greenhouse.io/databricks",
+    "platform": "greenhouse",
+    "notes": "Root URL redirects to databricks.com, but individual job URLs at job-boards.greenhouse.io/databricks/jobs/{id} are valid"
+  },
+  {
+    "company": "Salesforce",
+    "careersUrl": "https://salesforce.wd12.myworkdayjobs.com/External_Career_Site",
+    "platform": "workday",
+    "shard": "wd12",
+    "site": "External_Career_Site",
+    "notes": "Also has salesforce.wd1.myworkdayjobs.com/External_Career_Site; wd12 is the primary external site"
+  }
+]

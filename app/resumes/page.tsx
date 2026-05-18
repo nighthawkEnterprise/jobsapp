@@ -1,53 +1,50 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Upload, FileText, Calendar, ChevronRight } from 'lucide-react';
+import { Upload, FileText, Calendar, ChevronRight, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
 export default function ResumesPage() {
   const [masterResume, setMasterResume] = useState('');
+  const [hasDocx, setHasDocx] = useState(false);
+  const [masterHtml, setMasterHtml] = useState<string | null>(null);
   const [tailoredResumes, setTailoredResumes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [activeResume, setActiveResume] = useState<'master' | string>('master');
   const [viewMode, setViewMode] = useState<'visual' | 'raw'>('visual');
-  
+  const [downloading, setDownloading] = useState(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchResumes = () => {
-    fetch('/api/resumes')
-      .then(res => res.json())
-      .then(data => {
-        setMasterResume(data.master);
-        setTailoredResumes(data.tailored);
-        setLoading(false);
-      });
+  const fetchResumes = async () => {
+    const data = await fetch('/api/resumes').then(r => r.json());
+    setMasterResume(data.master);
+    setTailoredResumes(data.tailored);
+    setHasDocx(!!data.hasDocx);
+    if (data.hasDocx) {
+      const v = await fetch('/api/resumes/visual').then(r => r.json());
+      setMasterHtml(v.html ?? null);
+    } else {
+      setMasterHtml(null);
+    }
+    setLoading(false);
   };
 
-  useEffect(() => {
-    fetchResumes();
-  }, []);
+  useEffect(() => { fetchResumes(); }, []);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
-
-      const res = await fetch('/api/resumes', {
-        method: 'POST',
-        body: formData
-      });
-
+      const res = await fetch('/api/resumes', { method: 'POST', body: formData });
       if (!res.ok) throw new Error('Upload failed');
-
-      fetchResumes();
+      await fetchResumes();
       setActiveResume('master');
-      alert('Master Resume uploaded successfully!');
-    } catch (e) {
+    } catch {
       alert('Failed to upload resume.');
     } finally {
       setUploading(false);
@@ -61,11 +58,38 @@ export default function ResumesPage() {
     return found ? found.content : '';
   };
 
+  const downloadDocx = async () => {
+    const name = activeResume === 'master' ? 'resume' : activeResume.replace('.md', '');
+    setDownloading(true);
+    try {
+      // For master with a stored .docx source, omit content so the API serves the original file
+      const body = activeResume === 'master' && hasDocx
+        ? { filename: `${name}.docx` }
+        : { content: getActiveContent(), filename: `${name}.docx` };
+      const res = await fetch('/api/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${name}.docx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const showDocxPreview = viewMode === 'visual' && activeResume === 'master' && !!masterHtml;
+
   if (loading) return <div className="p-8 text-center text-gray-500">Loading resumes...</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-8">
-      {/* Sidebar List */}
+      {/* Sidebar */}
       <div className="md:w-1/3 flex-none space-y-6">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Resumes</h1>
@@ -76,8 +100,8 @@ export default function ResumesPage() {
           <div className="p-4 bg-gray-50 border-b border-gray-200">
             <h2 className="font-bold text-gray-800 text-sm uppercase tracking-wider">Master Source</h2>
           </div>
-          
-          <button 
+
+          <button
             onClick={() => setActiveResume('master')}
             className={`w-full text-left p-4 flex items-center justify-between border-b border-gray-100 transition-colors ${activeResume === 'master' ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'hover:bg-gray-50 border-l-4 border-l-transparent'}`}
           >
@@ -87,27 +111,27 @@ export default function ResumesPage() {
               </div>
               <div>
                 <div className="font-bold text-gray-900">Master Resume</div>
-                <div className="text-xs text-gray-500">Used as base for tailoring</div>
+                <div className="text-xs text-gray-500">{hasDocx ? '.docx source on file' : 'Used as base for tailoring'}</div>
               </div>
             </div>
             {activeResume === 'master' && <ChevronRight className="w-4 h-4 text-blue-600" />}
           </button>
 
           <div className="p-4 bg-white">
-            <input 
-              type="file" 
-              accept=".md,.txt,.docx" 
-              className="hidden" 
-              ref={fileInputRef} 
+            <input
+              type="file"
+              accept=".md,.txt,.docx"
+              className="hidden"
+              ref={fileInputRef}
               onChange={handleFileUpload}
             />
-            <button 
+            <button
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
               className="w-full flex flex-col items-center justify-center gap-2 border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-blue-500 hover:bg-blue-50 transition-all text-gray-500 hover:text-blue-600 group"
             >
-              <Upload className="w-6 h-6 group-hover:-translate-y-1 transition-transform" /> 
-              <span className="text-sm font-bold">{uploading ? 'Processing File...' : 'Replace Master Resume'}</span>
+              <Upload className="w-6 h-6 group-hover:-translate-y-1 transition-transform" />
+              <span className="text-sm font-bold">{uploading ? 'Processing…' : 'Replace Master Resume'}</span>
               <span className="text-xs text-gray-400">Accepts .md, .txt, or .docx</span>
             </button>
           </div>
@@ -120,7 +144,7 @@ export default function ResumesPage() {
             </div>
             <div className="max-h-[500px] overflow-y-auto">
               {tailoredResumes.map(resume => (
-                <button 
+                <button
                   key={resume.id}
                   onClick={() => setActiveResume(resume.id)}
                   className={`w-full text-left p-4 flex items-center justify-between border-b border-gray-100 transition-colors ${activeResume === resume.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : 'hover:bg-gray-50 border-l-4 border-l-transparent'}`}
@@ -139,52 +163,68 @@ export default function ResumesPage() {
         )}
       </div>
 
-      {/* Main Preview Area */}
+      {/* Main Preview */}
       <div className="md:w-2/3 flex-grow">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm h-[800px] flex flex-col overflow-hidden">
-          
+
           {/* Viewer Header */}
-          <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-none">
-            <h3 className="font-mono text-sm font-bold text-gray-700">
-              {activeResume === 'master' ? 'resume.md' : activeResume}
+          <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-none gap-3">
+            <h3 className="font-mono text-sm font-bold text-gray-700 truncate">
+              {activeResume === 'master' ? (hasDocx ? 'resume.docx' : 'resume.md') : activeResume}
             </h3>
-            <div className="flex bg-gray-200 rounded-lg p-1">
-              <button 
-                onClick={() => setViewMode('visual')} 
-                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${viewMode === 'visual' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+            <div className="flex items-center gap-2 flex-none">
+              <div className="flex bg-gray-200 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('visual')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${viewMode === 'visual' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Visual Document
+                </button>
+                <button
+                  onClick={() => setViewMode('raw')}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${viewMode === 'raw' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  Raw Markdown
+                </button>
+              </div>
+              <button
+                onClick={downloadDocx}
+                disabled={downloading || !getActiveContent()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all"
+                title="Download as .docx"
               >
-                Visual Document
-              </button>
-              <button 
-                onClick={() => setViewMode('raw')} 
-                className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${viewMode === 'raw' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-              >
-                Raw Markdown
+                <Download className="w-3.5 h-3.5" />
+                {downloading ? 'Downloading…' : '.docx'}
               </button>
             </div>
           </div>
 
           {/* Viewer Body */}
           <div className={`p-8 overflow-y-auto flex-grow ${viewMode === 'visual' ? 'bg-gray-100' : 'bg-gray-900'}`}>
-             {getActiveContent() ? (
-               viewMode === 'visual' ? (
-                 <div className="bg-white max-w-3xl mx-auto p-12 shadow-md border border-gray-200 min-h-full">
+            {getActiveContent() || showDocxPreview ? (
+              viewMode === 'visual' ? (
+                <div className="bg-white max-w-3xl mx-auto p-12 shadow-md border border-gray-200 min-h-full">
+                  {showDocxPreview ? (
+                    <div
+                      className="docx-preview"
+                      dangerouslySetInnerHTML={{ __html: masterHtml! }}
+                    />
+                  ) : (
                     <div className="prose prose-sm max-w-none text-gray-800">
-                      <ReactMarkdown>
-                        {getActiveContent()}
-                      </ReactMarkdown>
+                      <ReactMarkdown>{getActiveContent()}</ReactMarkdown>
                     </div>
-                 </div>
-               ) : (
-                 <pre className="text-gray-200 font-mono text-sm leading-loose whitespace-pre-wrap">
-                   {getActiveContent()}
-                 </pre>
-               )
-             ) : (
-               <div className="h-full flex items-center justify-center text-gray-500 italic">
-                 {activeResume === 'master' ? 'No master resume uploaded yet.' : 'Empty file.'}
-               </div>
-             )}
+                  )}
+                </div>
+              ) : (
+                <pre className="text-gray-200 font-mono text-sm leading-loose whitespace-pre-wrap">
+                  {getActiveContent()}
+                </pre>
+              )
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-500 italic">
+                {activeResume === 'master' ? 'No master resume uploaded yet.' : 'Empty file.'}
+              </div>
+            )}
           </div>
 
         </div>

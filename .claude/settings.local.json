@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:jobs.ashbyhq.com)",
+      "WebFetch(domain:frontegg.com)",
+      "WebFetch(domain:www.kinde.com)",
+      "WebFetch(domain:www.hashicorp.com)",
+      "WebFetch(domain:www.ibm.com)",
+      "WebFetch(domain:www.cerbos.dev)",
+      "WebFetch(domain:www.permit.io)",
+      "WebFetch(domain:www.databricks.com)",
+      "WebFetch(domain:careers.snowflake.com)",
+      "WebFetch(domain:www.atlassian.com)",
+      "WebFetch(domain:boards.greenhouse.io)",
+      "WebFetch(domain:job-boards.greenhouse.io)",
+      "WebFetch(domain:salesforce.wd12.myworkdayjobs.com)",
+      "WebFetch(domain:vercel.com)",
+      "WebFetch(domain:goteleport.com)",
+      "WebFetch(domain:fireworks.ai)",
+      "WebFetch(domain:neon.tech)",
+      "WebFetch(domain:neon.com)",
+      "Bash(Select-String -Pattern '\"name\"')",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(node *)",
+      "Bash(curl -s \"https://api.ashbyhq.com/posting-api/job-board/1password/job-posting/26af8030-5e7b-4bd3-9535-7ec7df3f3e87\")",
+      "Bash(xargs grep -l \"filePath\\\\|OUTPUT_DIR\\\\|Packer\\\\|mdToPdf\")",
+      "Bash(npx tsc *)",
+      "Bash(Get-Item \"C:\\\\Users\\\\nithi\\\\Documents\\\\projects\\\\jobapps\\\\tailored-resume.docx\")",
+      "Bash(Select-Object LastWriteTime)",
+      "Bash(Get-Item \"C:\\\\Users\\\\nithi\\\\Documents\\\\projects\\\\jobapps\\\\output\\\\*.md\")",
+      "Bash(Sort-Object LastWriteTime)",
+      "Bash(Select-Object Name, LastWriteTime)"
+    ]
+  }
+}
