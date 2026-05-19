@@ -3,6 +3,7 @@ import { auth0 } from "@/lib/auth0";
 import { Bricolage_Grotesque, Outfit } from 'next/font/google';
 import Image from 'next/image';
 import type { Metadata } from 'next';
+import { FeedbackWidget } from '@/components/FeedbackWidget';
 
 export const metadata: Metadata = {
   title: 'ApplyOS',
@@ -65,6 +66,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <main className="flex-grow py-8">
           {children}
         </main>
+
+        <FeedbackWidget />
 
       </body>
     </html>
