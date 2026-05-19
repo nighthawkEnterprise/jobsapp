@@ -4,8 +4,8 @@ import { mockLLM } from '@/lib/llm';
 
 export async function POST(req: Request) {
   const { jobId } = await req.json();
-  const job = getJobs().find(j => j.id === jobId);
-  const stories = getStories();
+  const [jobs, stories] = await Promise.all([getJobs(), getStories()]);
+  const job = jobs.find(j => j.id === jobId);
 
   if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
   if (stories.length === 0) return NextResponse.json({ error: 'No stories available' }, { status: 400 });
