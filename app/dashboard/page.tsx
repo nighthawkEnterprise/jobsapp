@@ -162,7 +162,7 @@ export default function PipelinePage() {
                         ))}
                         {d.red_flags.length > 0 && (
                           <span
-                            title={d.red_flags.map(r => `−${r.deduction} ${r.flag}`).join('\n')}
+                            title={d.red_flags.map((r: { flag: string; deduction: number }) => `−${r.deduction} ${r.flag}`).join('\n')}
                             className="px-2 py-1 rounded border bg-red-50 border-red-200 text-red-700 cursor-help"
                           >
                             ⚠ {d.red_flags.length} flag{d.red_flags.length > 1 ? 's' : ''}

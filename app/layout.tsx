@@ -56,11 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   <a href="/profile"     className="text-xs text-gray-500 hover:text-gray-800 transition-colors truncate max-w-[180px]">{session.user.email}</a>
                   <a href="/auth/logout" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">Logout</a>
                 </>
-              ) : (
-                <a href="/auth/login?returnTo=/dashboard" className="text-sm font-medium text-[#3B5BDB] hover:text-[#3451c7] transition-colors">
-                  Sign in
-                </a>
-              )}
+              ) : null}
             </div>
 
           </div>
