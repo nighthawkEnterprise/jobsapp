@@ -7,6 +7,7 @@ export interface Preferences {
   locationPreferences: string[];
   domainsOfInterest: string[];
   companiesToExclude: string[];
+  targetCompanies: string[];
   roleType: string;
   workStyle: string;
 }
@@ -85,7 +86,7 @@ export interface TailoredResume {
 
 export const defaultPreferences: Preferences = {
   jobTitles: [], salaryFloor: 0, locationPreferences: [],
-  domainsOfInterest: [], companiesToExclude: [], roleType: '', workStyle: '',
+  domainsOfInterest: [], companiesToExclude: [], targetCompanies: [], roleType: '', workStyle: '',
 };
 
 // --- Preferences ---
@@ -98,22 +99,25 @@ export async function getPreferences(): Promise<Preferences> {
     locationPreferences: data.location_preferences ?? [],
     domainsOfInterest: data.domains_of_interest ?? [],
     companiesToExclude: data.companies_to_exclude ?? [],
+    targetCompanies: data.target_companies ?? [],
     roleType: data.role_type ?? '',
     workStyle: data.work_style ?? '',
   };
 }
 
 export async function savePreferences(prefs: Preferences): Promise<void> {
-  await supabase.from('preferences').upsert({
+  const { error } = await supabase.from('preferences').upsert({
     id: 1,
     job_titles: prefs.jobTitles,
     salary_floor: prefs.salaryFloor,
     location_preferences: prefs.locationPreferences,
     domains_of_interest: prefs.domainsOfInterest,
     companies_to_exclude: prefs.companiesToExclude,
+    target_companies: prefs.targetCompanies,
     role_type: prefs.roleType,
     work_style: prefs.workStyle,
   });
+  if (error) throw new Error(`savePreferences failed: ${error.message}`);
 }
 
 // --- Resume ---
@@ -142,7 +146,8 @@ export async function getProfile(): Promise<string> {
 }
 
 export async function saveProfile(content: string): Promise<void> {
-  await supabase.from('profile').upsert({ id: 1, content });
+  const { error } = await supabase.from('profile').upsert({ id: 1, content });
+  if (error) throw new Error(`saveProfile failed: ${error.message}`);
 }
 
 // --- Stories ---

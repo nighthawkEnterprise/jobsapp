@@ -12,10 +12,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const data = await req.json();
-  await Promise.all([
-    data.preferences ? savePreferences(data.preferences) : Promise.resolve(),
-    data.resume !== undefined ? saveMasterResume(data.resume) : Promise.resolve(),
-    data.profile !== undefined ? saveProfile(data.profile) : Promise.resolve(),
-  ]);
-  return NextResponse.json({ success: true });
+  try {
+    await Promise.all([
+      data.preferences ? savePreferences(data.preferences) : Promise.resolve(),
+      data.resume !== undefined ? saveMasterResume(data.resume) : Promise.resolve(),
+      data.profile !== undefined ? saveProfile(data.profile) : Promise.resolve(),
+    ]);
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

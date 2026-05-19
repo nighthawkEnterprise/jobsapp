@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Target, RefreshCw, ExternalLink, Plus, Check, AlertCircle, ChevronDown, ChevronUp, EyeOff, RotateCcw } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Target, RefreshCw, ExternalLink, Plus, Check, AlertCircle, ChevronDown, ChevronUp, EyeOff, RotateCcw, Search, X, Trash2 } from 'lucide-react';
 import { Toast } from '@/components/Toast';
+import type { Portal } from '@/lib/scanner';
+
+interface CompanyEntry { name: string; slug: string; ats: string; careers_url: string; }
 
 interface JobSalary { min?: number; max?: number; currency?: string }
 
@@ -313,7 +316,74 @@ export default function RelevantJobsPage() {
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [hideTracked, setHideTracked] = useState(false);
 
+  // Portal management
+  const [portals, setPortals] = useState<Portal[]>([]);
+  const [portalQuery, setPortalQuery] = useState('');
+  const [portalResults, setPortalResults] = useState<CompanyEntry[]>([]);
+  const [addingPortal, setAddingPortal] = useState<string | null>(null);
+  const [removingPortal, setRemovingPortal] = useState<string | null>(null);
+  const [customCompany, setCustomCompany] = useState('');
+  const [customUrl, setCustomUrl] = useState('');
+  const [showCustomAdd, setShowCustomAdd] = useState(false);
+  const portalInputRef = useRef<HTMLInputElement>(null);
+
+  const loadPortals = () =>
+    fetch('/api/scan').then(r => r.json()).then(setPortals);
+
+  const handlePortalSearch = (q: string) => {
+    setPortalQuery(q);
+    if (!q.trim() || q.length < 2) { setPortalResults([]); return; }
+    fetch(`/api/companies?q=${encodeURIComponent(q)}`)
+      .then(r => r.json())
+      .then(setPortalResults)
+      .catch(() => {});
+  };
+
+  const addPortalFromDirectory = async (entry: CompanyEntry) => {
+    setAddingPortal(entry.name);
+    await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'add', portal: { company: entry.name, careersUrl: entry.careers_url } }),
+    });
+    await loadPortals();
+    setPortalQuery('');
+    setPortalResults([]);
+    setAddingPortal(null);
+    setToast(`${entry.name} added to scan list`);
+  };
+
+  const addCustomPortal = async () => {
+    const company = customCompany.trim();
+    const careersUrl = customUrl.trim();
+    if (!company || !careersUrl) return;
+    setAddingPortal(company);
+    await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'add', portal: { company, careersUrl } }),
+    });
+    await loadPortals();
+    setCustomCompany('');
+    setCustomUrl('');
+    setShowCustomAdd(false);
+    setAddingPortal(null);
+    setToast(`${company} added to scan list`);
+  };
+
+  const removePortal = async (company: string) => {
+    setRemovingPortal(company);
+    await fetch('/api/scan', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ company }),
+    });
+    setPortals(prev => prev.filter(p => p.company !== company));
+    setRemovingPortal(null);
+  };
+
   useEffect(() => {
+    loadPortals();
     fetch('/api/scan?cache=true')
       .then(res => res.json())
       .then(data => { if (data) setCache(data); });
@@ -490,62 +560,163 @@ export default function RelevantJobsPage() {
       </div>
 
       <div className="flex gap-8 items-start">
-        {/* ── Sidebar filters (relevant tab only) ── */}
-        {activeTab === 'relevant' && (
-          <aside className="w-52 flex-none sticky top-24 space-y-6">
-            <div>
-              <input
-                type="text"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search title or company…"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-              />
+        {/* ── Sidebar ── */}
+        <aside className="w-56 flex-none sticky top-24 space-y-6">
+
+          {/* Filters — only on relevant tab */}
+          {activeTab === 'relevant' && (
+            <>
+              <div>
+                <input
+                  type="text"
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search title or company…"
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
+                />
+              </div>
+
+              <div className="h-px bg-gray-100" />
+
+              <FilterSection label="Min Score">
+                <RadioOption label="Any"  active={minScore === 0}   onClick={() => setMinScore(0)} />
+                <RadioOption label="3.5+" active={minScore === 3.5} onClick={() => setMinScore(3.5)} />
+                <RadioOption label="4.0+" active={minScore === 4.0} onClick={() => setMinScore(4.0)} />
+                <RadioOption label="4.5+" active={minScore === 4.5} onClick={() => setMinScore(4.5)} />
+              </FilterSection>
+
+              <div className="h-px bg-gray-100" />
+
+              <FilterSection label="Salary">
+                <RadioOption label="Any"    active={minSalary === 0}      onClick={() => setMinSalary(0)} />
+                <RadioOption label="$150k+" active={minSalary === 150000} onClick={() => setMinSalary(150000)} />
+                <RadioOption label="$200k+" active={minSalary === 200000} onClick={() => setMinSalary(200000)} />
+                <RadioOption label="$250k+" active={minSalary === 250000} onClick={() => setMinSalary(250000)} />
+              </FilterSection>
+
+              <div className="h-px bg-gray-100" />
+
+              <FilterSection label="Posted">
+                <RadioOption label="Any time"   active={postedWithin === 0}  onClick={() => setPostedWithin(0)} />
+                <RadioOption label="This week"  active={postedWithin === 7}  onClick={() => setPostedWithin(7)} />
+                <RadioOption label="This month" active={postedWithin === 30} onClick={() => setPostedWithin(30)} />
+              </FilterSection>
+
+              <div className="h-px bg-gray-100" />
+
+              <FilterSection label="Options">
+                <CheckOption label="Remote only"  checked={remoteOnly}  onChange={setRemoteOnly} />
+                <CheckOption label="Hide tracked" checked={hideTracked} onChange={setHideTracked} />
+              </FilterSection>
+
+              {hasActiveFilters && (
+                <button onClick={clearFilters} className="text-xs text-blue-500 hover:text-blue-700 font-medium">
+                  Clear all filters
+                </button>
+              )}
+
+              <div className="h-px bg-gray-100" />
+            </>
+          )}
+
+          {/* ── Portal management ── */}
+          <div className="space-y-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+              Watching ({portals.length})
+            </p>
+
+            {/* Current portals */}
+            {portals.length > 0 && (
+              <div className="space-y-1">
+                {portals.map(p => (
+                  <div key={p.company} className="flex items-center justify-between group py-0.5">
+                    <span className="text-sm text-gray-700 truncate">{p.company}</span>
+                    <button
+                      onClick={() => removePortal(p.company)}
+                      disabled={removingPortal === p.company}
+                      className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all disabled:opacity-50 flex-none ml-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Company search */}
+            <div className="relative">
+              <div className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-400 transition-all">
+                <Search className="w-3.5 h-3.5 text-gray-400 flex-none" />
+                <input
+                  ref={portalInputRef}
+                  value={portalQuery}
+                  onChange={e => handlePortalSearch(e.target.value)}
+                  placeholder="Find a company…"
+                  className="flex-1 text-sm outline-none placeholder-gray-400 min-w-0"
+                />
+                {portalQuery && (
+                  <button onClick={() => { setPortalQuery(''); setPortalResults([]); }} className="text-gray-300 hover:text-gray-500">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Search results dropdown */}
+              {portalResults.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
+                  {portalResults.map(entry => {
+                    const alreadyAdded = portals.some(p => p.company === entry.name);
+                    return (
+                      <button
+                        key={entry.name}
+                        onClick={() => !alreadyAdded && addPortalFromDirectory(entry)}
+                        disabled={alreadyAdded || addingPortal === entry.name}
+                        className={`w-full flex items-center justify-between px-3 py-2 text-left transition-colors ${
+                          alreadyAdded ? 'opacity-50 cursor-default' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-gray-800 truncate">{entry.name}</p>
+                          <p className="text-[10px] text-gray-400 uppercase tracking-wide">{entry.ats}</p>
+                        </div>
+                        {alreadyAdded
+                          ? <Check className="w-3.5 h-3.5 text-green-500 flex-none" />
+                          : addingPortal === entry.name
+                            ? <RefreshCw className="w-3.5 h-3.5 text-blue-400 animate-spin flex-none" />
+                            : <Plus className="w-3.5 h-3.5 text-gray-400 flex-none" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            <div className="h-px bg-gray-100" />
+            {/* Custom URL toggle */}
+            <button
+              onClick={() => setShowCustomAdd(v => !v)}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showCustomAdd ? '− Cancel' : '+ Custom URL'}
+            </button>
 
-            <FilterSection label="Min Score">
-              <RadioOption label="Any"  active={minScore === 0}   onClick={() => setMinScore(0)} />
-              <RadioOption label="3.5+" active={minScore === 3.5} onClick={() => setMinScore(3.5)} />
-              <RadioOption label="4.0+" active={minScore === 4.0} onClick={() => setMinScore(4.0)} />
-              <RadioOption label="4.5+" active={minScore === 4.5} onClick={() => setMinScore(4.5)} />
-            </FilterSection>
-
-            <div className="h-px bg-gray-100" />
-
-            <FilterSection label="Salary">
-              <RadioOption label="Any"    active={minSalary === 0}      onClick={() => setMinSalary(0)} />
-              <RadioOption label="$150k+" active={minSalary === 150000} onClick={() => setMinSalary(150000)} />
-              <RadioOption label="$200k+" active={minSalary === 200000} onClick={() => setMinSalary(200000)} />
-              <RadioOption label="$250k+" active={minSalary === 250000} onClick={() => setMinSalary(250000)} />
-            </FilterSection>
-
-            <div className="h-px bg-gray-100" />
-
-            <FilterSection label="Posted">
-              <RadioOption label="Any time"   active={postedWithin === 0}  onClick={() => setPostedWithin(0)} />
-              <RadioOption label="This week"  active={postedWithin === 7}  onClick={() => setPostedWithin(7)} />
-              <RadioOption label="This month" active={postedWithin === 30} onClick={() => setPostedWithin(30)} />
-            </FilterSection>
-
-            <div className="h-px bg-gray-100" />
-
-            <FilterSection label="Options">
-              <CheckOption label="Remote only"  checked={remoteOnly}  onChange={setRemoteOnly} />
-              <CheckOption label="Hide tracked" checked={hideTracked} onChange={setHideTracked} />
-            </FilterSection>
-
-            {hasActiveFilters && (
-              <button
-                onClick={clearFilters}
-                className="text-xs text-blue-500 hover:text-blue-700 font-medium"
-              >
-                Clear all filters
-              </button>
+            {showCustomAdd && (
+              <div className="space-y-2">
+                <input value={customCompany} onChange={e => setCustomCompany(e.target.value)}
+                  placeholder="Company name"
+                  className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400" />
+                <input value={customUrl} onChange={e => setCustomUrl(e.target.value)}
+                  placeholder="Greenhouse / Ashby / Lever URL"
+                  className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400"
+                  onKeyDown={e => { if (e.key === 'Enter') addCustomPortal(); }} />
+                <button onClick={addCustomPortal} disabled={!customCompany.trim() || !customUrl.trim() || !!addingPortal}
+                  className="w-full py-1.5 bg-gray-900 text-white rounded-lg text-xs font-semibold hover:bg-black disabled:opacity-40 transition-all">
+                  {addingPortal ? 'Adding…' : 'Add'}
+                </button>
+              </div>
             )}
-          </aside>
-        )}
+          </div>
+
+        </aside>
 
         {/* ── Main content ── */}
         <div className="flex-1 min-w-0">

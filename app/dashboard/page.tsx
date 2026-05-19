@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Trash2 } from 'lucide-react';
 import { Toast } from '@/components/Toast';
 
 export default function PipelinePage() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
@@ -23,7 +25,17 @@ export default function PipelinePage() {
   };
 
   useEffect(() => {
-    fetchJobs();
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(({ preferences, resume }) => {
+        const hasTitles = preferences?.jobTitles?.length > 0;
+        if (!hasTitles) {
+          router.replace('/onboarding');
+        } else {
+          fetchJobs();
+        }
+      })
+      .catch(() => fetchJobs());
   }, []);
 
   const handleAddJob = async () => {
