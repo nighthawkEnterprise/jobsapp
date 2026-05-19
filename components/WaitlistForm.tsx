@@ -48,11 +48,9 @@ export function WaitlistForm({ source = 'landing', variant = 'dark' }: Props) {
         </div>
         <div>
           <p className="font-semibold text-sm">You're on the list!</p>
-          {position && (
-            <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              You're #{position} on the waitlist. We'll be in touch.
-            </p>
-          )}
+          <p className={`text-xs mt-0.5 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+            We'll be in touch soon.
+          </p>
         </div>
       </div>
     );
