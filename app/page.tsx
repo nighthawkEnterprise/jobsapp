@@ -90,7 +90,7 @@ export default async function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 text-blue-300 text-xs font-medium px-3 py-1.5 rounded-full mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] inline-block" />
-                500,000+ live roles across Greenhouse, Ashby &amp; Lever · zero LLM cost
+                Greenhouse · Ashby · Lever · zero LLM cost for discovery
               </div>
 
               <div className="hero-hed mb-6">
@@ -99,7 +99,7 @@ export default async function LandingPage() {
               </div>
 
               <p className="hero-sub text-gray-400 text-lg leading-relaxed mb-10 max-w-md">
-                500,000+ live roles across every major ATS — scored 1–5 across four dimensions, tailored CVs from your real proof points, and a pipeline that tracks every application to offer.
+                500,000+ live roles, scored and ranked before you read them. Tailored CVs from your real proof points. One pipeline from first click to offer.
               </p>
 
               <div className="hero-cta">
