@@ -1,5 +1,4 @@
-import fs from 'fs';
-import path from 'path';
+import { supabase } from './supabase';
 
 export interface Portal {
   company: string;
@@ -33,15 +32,37 @@ export interface ScanResult {
 
 type Platform = 'greenhouse' | 'ashby' | 'lever' | 'bamboohr' | 'teamtailor' | 'workday' | 'workable' | 'unknown';
 
-const PORTALS_FILE = path.join(process.cwd(), 'data', 'portals.json');
-
-export function getPortals(): Portal[] {
-  if (!fs.existsSync(PORTALS_FILE)) return [];
-  return JSON.parse(fs.readFileSync(PORTALS_FILE, 'utf8'));
+export async function getPortals(): Promise<Portal[]> {
+  const { data } = await supabase.from('portals').select('*').order('company');
+  if (!data) return [];
+  return data.map(r => ({
+    company: r.company as string,
+    careersUrl: r.careers_url as string,
+    shard: r.shard as string | undefined,
+    site: r.site as string | undefined,
+  }));
 }
 
-export function savePortals(portals: Portal[]) {
-  fs.writeFileSync(PORTALS_FILE, JSON.stringify(portals, null, 2));
+export async function savePortals(portals: Portal[]): Promise<void> {
+  await supabase.from('portals').delete().neq('company', '');
+  if (portals.length > 0) {
+    await supabase.from('portals').insert(
+      portals.map(p => ({ company: p.company, careers_url: p.careersUrl, shard: p.shard, site: p.site }))
+    );
+  }
+}
+
+export async function addPortal(portal: Portal): Promise<void> {
+  await supabase.from('portals').upsert({
+    company: portal.company,
+    careers_url: portal.careersUrl,
+    shard: portal.shard,
+    site: portal.site,
+  });
+}
+
+export async function deletePortal(company: string): Promise<void> {
+  await supabase.from('portals').delete().eq('company', company);
 }
 
 function detectPlatform(url: string): Platform {

@@ -41,7 +41,10 @@
       "PowerShell(cmd /c \"dir /s /b /a:d C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\")",
       "PowerShell(cmd /c \"dir C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\\\\competitive_analysis\")",
       "PowerShell(cmd /c \"dir /s /b C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\\\\public\")",
-      "PowerShell(Copy-Item *)"
+      "PowerShell(Copy-Item *)",
+      "Bash(npm install *)",
+      "Bash(npm list *)",
+      "Bash(npx --yes simple-icons-query openai microsoft salesforce)"
     ]
   }
 }

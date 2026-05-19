@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
+import { getResumeHasDocx } from '@/lib/store';
 import mammoth from 'mammoth';
 
-const DOCX_FILE = path.join(process.cwd(), 'data', 'resume.docx');
+const DOCX_BUCKET = 'resumes';
+const DOCX_STORAGE_PATH = 'master.docx';
 
 export async function GET() {
-  if (!fs.existsSync(DOCX_FILE)) {
-    return NextResponse.json({ error: 'No docx source on file' }, { status: 404 });
-  }
-  const buffer = fs.readFileSync(DOCX_FILE);
+  const hasDocx = await getResumeHasDocx();
+  if (!hasDocx) return NextResponse.json({ error: 'No docx source on file' }, { status: 404 });
+
+  const { data, error } = await supabase.storage.from(DOCX_BUCKET).download(DOCX_STORAGE_PATH);
+  if (error || !data) return NextResponse.json({ error: 'Failed to load docx' }, { status: 500 });
+
+  const buffer = Buffer.from(await data.arrayBuffer());
   const { value: html } = await mammoth.convertToHtml({ buffer });
   return NextResponse.json({ html });
 }

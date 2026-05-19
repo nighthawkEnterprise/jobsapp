@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getPortals, savePortals, scanPortal, scanAllPortals } from '@/lib/scanner';
+import { getPortals, addPortal, deletePortal, scanPortal, scanAllPortals } from '@/lib/scanner';
 import { getPreferences, getJobs, getScanCache, saveScanCache, getDismissedUrls } from '@/lib/store';
 import type { Portal, ScannedJob } from '@/lib/scanner';
 import type { ScoredDiscovery, ScanCache, Preferences } from '@/lib/store';
 
-// Known single-word abbreviations → expanded role name
 const ABBREV: Record<string, string> = {
   pm:  'product manager',
   tpm: 'technical program manager',
@@ -25,7 +24,6 @@ function coreRole(expanded: string): string {
   return expanded.split(/\s+/).filter(w => !SENIORITY.has(w)).join(' ');
 }
 
-// Returns [expandedFull, coreKeyword] for each pref title
 function prefKeywords(prefs: Preferences): Array<{ full: string; core: string }> {
   return prefs.jobTitles.map(pt => {
     const full = expandTitle(pt);
@@ -35,22 +33,18 @@ function prefKeywords(prefs: Preferences): Array<{ full: string; core: string }>
 
 function isRelevantTitle(title: string, prefs: Preferences): boolean {
   if (prefs.jobTitles.length === 0) return true;
-  // Expand abbreviations in the incoming title too (company may post "Senior PM" not "Senior Product Manager")
   const t = expandTitle(title);
   return prefKeywords(prefs).some(({ full, core }) =>
     t.includes(full) || (core.length > 3 && t.includes(core))
   );
 }
 
-// Discover scoring is 1–5 (rule-based; no JD available).
-// Base 3.0 — all portals are already target companies, so neutral is "decent".
 function scoreScanResult(job: ScannedJob, prefs: Preferences): { score: number; reasons: string[] } {
   let score = 3.0;
   const reasons: string[] = [];
   const expandedTitle = expandTitle(job.title);
   const keywords = prefKeywords(prefs);
 
-  // Title match
   const matchedFull = keywords.find(({ full }) => expandedTitle.includes(full));
   const matchedCore = !matchedFull && keywords.find(({ core }) => core.length > 3 && expandedTitle.includes(core));
 
@@ -62,18 +56,14 @@ function scoreScanResult(job: ScannedJob, prefs: Preferences): { score: number; 
     reasons.push(`Title contains role keyword "${matchedCore.core}" (+0.5)`);
   }
 
-  // Domain of interest match in title (e.g. "PM, Identity" gets a boost)
   if (prefs.domainsOfInterest.length > 0) {
-    const matchedDomain = prefs.domainsOfInterest.find(d =>
-      expandedTitle.includes(d.toLowerCase())
-    );
+    const matchedDomain = prefs.domainsOfInterest.find(d => expandedTitle.includes(d.toLowerCase()));
     if (matchedDomain) {
       score += 0.3;
       reasons.push(`Title mentions domain of interest "${matchedDomain}" (+0.3)`);
     }
   }
 
-  // Location match
   if (job.location) {
     const matchedLoc = prefs.locationPreferences.find(loc =>
       job.location.toLowerCase().includes(loc.toLowerCase()) ||
@@ -96,9 +86,9 @@ function scoreScanResult(job: ScannedJob, prefs: Preferences): { score: number; 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   if (searchParams.get('cache') === 'true') {
-    return NextResponse.json(getScanCache());
+    return NextResponse.json(await getScanCache());
   }
-  return NextResponse.json(getPortals());
+  return NextResponse.json(await getPortals());
 }
 
 export async function POST(req: Request) {
@@ -108,15 +98,14 @@ export async function POST(req: Request) {
     if (!body.portal?.company || !body.portal?.careersUrl) {
       return NextResponse.json({ error: 'company and careersUrl are required' }, { status: 400 });
     }
-    const portals = getPortals();
-    portals.push(body.portal);
-    savePortals(portals);
+    await addPortal(body.portal);
     return NextResponse.json({ success: true });
   }
 
   if (body.action === 'scan') {
     if (body.company) {
-      const portal = getPortals().find(p => p.company === body.company);
+      const portals = await getPortals();
+      const portal = portals.find(p => p.company === body.company);
       if (!portal) return NextResponse.json({ error: 'Portal not found' }, { status: 404 });
       return NextResponse.json(await scanPortal(portal));
     }
@@ -124,11 +113,14 @@ export async function POST(req: Request) {
   }
 
   if (body.action === 'discover') {
-    const prefs = getPreferences();
-    const existingUrls = new Set(getJobs().map(j => j.sourceUrl));
-    const dismissedUrls = getDismissedUrls();
+    const [prefs, jobs, dismissedUrls, portals] = await Promise.all([
+      getPreferences(),
+      getJobs(),
+      getDismissedUrls(),
+      getPortals(),
+    ]);
+    const existingUrls = new Set(jobs.map(j => j.sourceUrl));
     const excludedSet = new Set(prefs.companiesToExclude.map(c => c.toLowerCase()));
-    const portals = getPortals();
     const encoder = new TextEncoder();
 
     const allDiscoveries: ScoredDiscovery[] = [];
@@ -139,7 +131,6 @@ export async function POST(req: Request) {
         const send = (msg: object) =>
           controller.enqueue(encoder.encode(JSON.stringify(msg) + '\n'));
 
-        // Fire all portal scans in parallel; stream each result as it arrives
         await Promise.all(portals.map(async portal => {
           const result = await scanPortal(portal);
 
@@ -165,14 +156,13 @@ export async function POST(req: Request) {
           }
         }));
 
-        // Persist sorted cache then signal done
         allDiscoveries.sort((a, b) => b.score - a.score);
         const scanCache: ScanCache = {
           scannedAt: new Date().toISOString(),
           discoveries: allDiscoveries,
           errors: allErrors,
         };
-        saveScanCache(scanCache);
+        await saveScanCache(scanCache);
         send({ type: 'done', scannedAt: scanCache.scannedAt });
         controller.close();
       },
@@ -188,6 +178,6 @@ export async function POST(req: Request) {
 
 export async function DELETE(req: Request) {
   const { company } = await req.json() as { company: string };
-  savePortals(getPortals().filter(p => p.company !== company));
+  await deletePortal(company);
   return NextResponse.json({ success: true });
 }

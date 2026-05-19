@@ -1,7 +1,6 @@
 import './globals.css';
 import { auth0 } from "@/lib/auth0";
 import { Bricolage_Grotesque, Outfit } from 'next/font/google';
-import Image from 'next/image';
 import type { Metadata } from 'next';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
 
@@ -34,8 +33,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto flex items-center h-14 px-6 md:px-12">
 
-            <a href="/" className="mr-10 flex-shrink-0">
-              <Image src="/apply_os_logo.png" alt="ApplyOS" width={200} height={54} className="h-11 w-auto" priority />
+            <a href="/" className="mr-10 flex-shrink-0 font-heading text-xl font-extrabold tracking-tight leading-none select-none">
+              <span className="text-gray-900">Apply</span><span className="text-[#3B5BDB]">OS</span>
             </a>
 
             <div className="flex gap-6 text-sm text-gray-500">

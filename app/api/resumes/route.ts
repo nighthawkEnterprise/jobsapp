@@ -1,70 +1,53 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { getMasterResume, saveMasterResume } from '@/lib/store';
+import { getMasterResume, saveMasterResume, getTailoredResumes, getResumeHasDocx, setResumeHasDocx } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 import mammoth from 'mammoth';
 import TurndownService from 'turndown';
 
-const OUTPUT_DIR = path.join(process.cwd(), 'output');
-const DATA_DIR = path.join(process.cwd(), 'data');
-const DOCX_FILE = path.join(DATA_DIR, 'resume.docx');
 const turndownService = new TurndownService({ headingStyle: 'atx' });
+const DOCX_STORAGE_PATH = 'master.docx';
+const DOCX_BUCKET = 'resumes';
 
 export async function GET() {
-  const master = getMasterResume();
-
-  let tailored: any[] = [];
-  if (fs.existsSync(OUTPUT_DIR)) {
-    const files = fs.readdirSync(OUTPUT_DIR).filter(f => f.endsWith('.md'));
-    tailored = files.map(file => {
-      const filePath = path.join(OUTPUT_DIR, file);
-      const stat = fs.statSync(filePath);
-      const content = fs.readFileSync(filePath, 'utf8');
-      
-      return {
-        id: file,
-        name: file,
-        content: content,
-        // Fallback to mtime if birthtime is not available (like on some Linux systems)
-        createdAt: stat.birthtimeMs > 0 ? stat.birthtime.toISOString() : stat.mtime.toISOString()
-      };
-    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }
-
-  return NextResponse.json({ master, tailored, hasDocx: fs.existsSync(DOCX_FILE) });
+  const [master, tailored, hasDocx] = await Promise.all([
+    getMasterResume(),
+    getTailoredResumes(),
+    getResumeHasDocx(),
+  ]);
+  return NextResponse.json({ master, tailored, hasDocx });
 }
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File;
-    
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
+    if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 });
 
     let finalContent = '';
 
     if (file.name.endsWith('.docx')) {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
-      // Save original .docx for high-fidelity visual preview and direct download
-      fs.writeFileSync(DOCX_FILE, buffer);
-      // Also convert to Markdown so the LLM can read it
+
+      // Upload DOCX to Supabase Storage
+      await supabase.storage.from(DOCX_BUCKET).upload(DOCX_STORAGE_PATH, buffer, {
+        contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        upsert: true,
+      });
+      await setResumeHasDocx(true);
+
+      // Convert to markdown for LLM use
       const { value: html } = await mammoth.convertToHtml({ buffer });
       finalContent = turndownService.turndown(html);
     } else {
-      // If a new plain-text resume is uploaded, remove any stale .docx source
-      if (fs.existsSync(DOCX_FILE)) fs.unlinkSync(DOCX_FILE);
-      // Treat as plain text (.md, .txt)
+      await setResumeHasDocx(false);
       finalContent = await file.text();
     }
 
-    saveMasterResume(finalContent);
+    await saveMasterResume(finalContent);
     return NextResponse.json({ success: true });
-    
   } catch (error) {
-    console.error("Error processing file upload:", error);
+    console.error('Error processing file upload:', error);
     return NextResponse.json({ error: 'Failed to process and save resume' }, { status: 500 });
   }
 }

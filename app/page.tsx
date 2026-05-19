@@ -11,7 +11,26 @@ const mockJobs = [
   { company: "Okta",      title: "Senior Product Manager",       initials: "O",  iconBg: "bg-rose-100 text-rose-600",    score: "2.9", scoreBg: "bg-red-50 text-red-600 border border-red-200",       status: "Interested",   statusBg: "bg-gray-100 text-gray-500"    },
 ];
 
-const companies = ["Stripe", "Google", "Meta", "Anthropic", "OpenAI", "Microsoft", "Linear", "Notion", "Figma", "Rippling", "Airbnb", "Netflix", "Apple", "Vercel", "Databricks", "Salesforce", "Shopify", "Atlassian"];
+const companyLogos = [
+  { name: "Stripe",     domain: "stripe.com" },
+  { name: "Google",     domain: "google.com" },
+  { name: "Meta",       domain: "meta.com" },
+  { name: "Anthropic",  domain: "anthropic.com" },
+  { name: "OpenAI",     domain: "openai.com" },
+  { name: "Microsoft",  domain: "microsoft.com" },
+  { name: "Linear",     domain: "linear.app" },
+  { name: "Notion",     domain: "notion.so" },
+  { name: "Figma",      domain: "figma.com" },
+  { name: "GitHub",     domain: "github.com" },
+  { name: "Airbnb",     domain: "airbnb.com" },
+  { name: "Netflix",    domain: "netflix.com" },
+  { name: "Apple",      domain: "apple.com" },
+  { name: "Vercel",     domain: "vercel.com" },
+  { name: "Databricks", domain: "databricks.com" },
+  { name: "Salesforce", domain: "salesforce.com" },
+  { name: "Shopify",    domain: "shopify.com" },
+  { name: "Atlassian",  domain: "atlassian.com" },
+];
 
 const oldWay = [
   "Scroll 40 browser tabs looking for roles that might fit",
@@ -70,16 +89,16 @@ export default async function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 bg-white/10 text-blue-300 text-xs font-medium px-3 py-1.5 rounded-full mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] inline-block" />
-                Now in beta — applyOS is live
+                Scans hundreds of ATS pages · zero AI cost for discovery
               </div>
 
               <div className="hero-hed mb-6">
-                <p className="font-heading font-semibold text-gray-400 text-2xl md:text-3xl mb-1 leading-snug">Your job search,</p>
-                <h1 className="font-heading font-extrabold text-white text-5xl md:text-6xl xl:text-7xl leading-[1.02] tracking-tight">Systematized.</h1>
+                <p className="font-heading font-semibold text-gray-400 text-2xl md:text-3xl mb-1 leading-snug">Every role that fits,</p>
+                <h1 className="font-heading font-extrabold text-white text-5xl md:text-6xl xl:text-7xl leading-[1.02] tracking-tight">Found for you.</h1>
               </div>
 
               <p className="hero-sub text-gray-400 text-lg leading-relaxed mb-10 max-w-md">
-                Score every role against your North Star. Generate tailored CVs. Track your pipeline. Surface the right stories for every interview.
+                ApplyOS scans your target companies' job boards daily and surfaces roles that match your preferences — scored against your North Star, salary range, and seniority. No more tab-juggling.
               </p>
 
               <div className="hero-cta">
@@ -99,7 +118,7 @@ export default async function LandingPage() {
               </div>
             </div>
 
-            {/* Right: Pipeline mockup */}
+            {/* Right: Scan/discovery mockup */}
             <div className="hero-terminal">
               <div className="bg-white rounded-2xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
                 {/* Browser chrome */}
@@ -109,37 +128,38 @@ export default async function LandingPage() {
                     <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
                     <div className="w-3 h-3 rounded-full bg-[#28C840]" />
                   </div>
-                  <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-gray-400 border border-gray-200 text-center mx-2">applyos.app/pipeline</div>
+                  <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-gray-400 border border-gray-200 text-center mx-2">applyos.app/scan</div>
                 </div>
-                {/* App header */}
+                {/* Scan header */}
                 <div className="px-5 pt-4 pb-3 flex items-center justify-between border-b border-gray-100">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Active Pipeline</p>
-                    <p className="text-xs text-gray-400 mt-0.5">4 roles tracked · sorted by score</p>
+                    <p className="text-sm font-semibold text-gray-900">Relevant Jobs</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Scanning 18 companies · updated 2 min ago</p>
                   </div>
-                  <button className="text-xs bg-[#3B5BDB] text-white px-3 py-1.5 rounded-lg font-medium">+ Add role</button>
+                  <button className="text-xs bg-[#3B5BDB] text-white px-3 py-1.5 rounded-lg font-medium">Scan now</button>
                 </div>
-                {/* Score legend */}
-                <div className="px-5 py-2 flex items-center gap-3 border-b border-gray-50 bg-gray-50/50 text-[10px]">
-                  <span className="text-gray-400 font-medium">Score:</span>
-                  <span className="bg-green-50 text-green-700 border border-green-200 px-1.5 py-0.5 rounded font-semibold">4.5+ apply</span>
-                  <span className="bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded font-semibold">4.0+ good</span>
-                  <span className="bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded font-semibold">3.5 decent</span>
+                {/* Preference chips */}
+                <div className="px-5 py-2.5 bg-blue-50/60 border-b border-blue-100 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] text-blue-400 font-medium mr-0.5">Filters:</span>
+                  {["Product Manager", "$150k+", "Remote / SF", "Series B+"].map(tag => (
+                    <span key={tag} className="text-[10px] font-semibold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">{tag}</span>
+                  ))}
                 </div>
-                {/* Job cards */}
+                {/* Scan result cards */}
                 <div className="p-3 space-y-2">
-                  {mockJobs.map((job, i) => (
+                  {scanJobs.map((job, i) => (
                     <div key={i} className="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-gray-100 hover:border-gray-200 transition-all">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${job.iconBg}`}>{job.initials}</div>
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${job.bg}`}>{job.initials}</div>
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-gray-900 truncate">{job.company}</p>
                           <p className="text-xs text-gray-400 truncate">{job.title}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-4 flex-shrink-0">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${job.scoreBg}`}>{job.score}</span>
-                        <span className={`text-xs px-2 py-0.5 rounded-lg ${job.statusBg}`}>{job.status}</span>
+                        <span className="text-[10px] text-gray-300">{job.portal}</span>
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${job.sc}`}>{job.score}</span>
+                        <span className="text-xs text-gray-400 hidden sm:inline">{job.salary}</span>
                       </div>
                     </div>
                   ))}
@@ -157,9 +177,15 @@ export default async function LandingPage() {
           Used by people targeting roles at
         </p>
         <div className="overflow-hidden">
-          <div className="marquee-track flex w-max">
-            {[...companies, ...companies].map((c, i) => (
-              <span key={i} className="text-base font-bold text-gray-400 hover:text-gray-700 transition-colors tracking-tight whitespace-nowrap mx-12">{c}</span>
+          <div className="marquee-track flex items-center w-max">
+            {[...companyLogos, ...companyLogos].map((co, i) => (
+              <img
+                key={i}
+                src={`https://www.google.com/s2/favicons?domain=${co.domain}&sz=128`}
+                alt={co.name}
+                title={co.name}
+                className="logo-strip-item h-8 w-8 mx-10 shrink-0 rounded-lg object-contain"
+              />
             ))}
           </div>
         </div>

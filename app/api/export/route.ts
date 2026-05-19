@@ -1,9 +1,9 @@
-import { getMasterResume } from '@/lib/store';
+import { getMasterResume, getResumeHasDocx } from '@/lib/store';
+import { supabase } from '@/lib/supabase';
 import { BorderStyle, Document, ExternalHyperlink, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
-import fs from 'fs';
-import path from 'path';
 
-const DOCX_SOURCE = path.join(process.cwd(), 'data', 'resume.docx');
+const DOCX_BUCKET = 'resumes';
+const DOCX_STORAGE_PATH = 'master.docx';
 
 function parseInlineRuns(text: string): (TextRun | ExternalHyperlink)[] {
   const result: (TextRun | ExternalHyperlink)[] = [];
@@ -54,19 +54,21 @@ export async function POST(req: Request) {
   const body = await req.json() as { content?: string; filename?: string };
   const filename = body.filename ?? 'resume.docx';
 
-  // If no explicit content was passed and the original .docx is on disk, serve it directly
-  // to preserve all original formatting.
-  if (!body.content && fs.existsSync(DOCX_SOURCE)) {
-    const buffer = Buffer.from(fs.readFileSync(DOCX_SOURCE));
-    return new Response(buffer, {
-      headers: {
-        'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'Content-Disposition': `attachment; filename="${filename}"`,
-      },
-    });
+  // If no explicit content was passed and the original .docx exists in Storage, serve it directly.
+  if (!body.content && await getResumeHasDocx()) {
+    const { data } = await supabase.storage.from(DOCX_BUCKET).download(DOCX_STORAGE_PATH);
+    if (data) {
+      const buffer = Buffer.from(await data.arrayBuffer());
+      return new Response(buffer, {
+        headers: {
+          'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
+    }
   }
 
-  const md = body.content ?? getMasterResume();
+  const md = body.content ?? await getMasterResume();
   const doc = new Document({ sections: [{ properties: {}, children: mdToDocxChildren(md) }] });
   const buffer = Buffer.from(await Packer.toBuffer(doc));
 
