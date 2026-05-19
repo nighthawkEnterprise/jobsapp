@@ -276,7 +276,7 @@ export async function scanPortal(portal: Portal): Promise<ScanResult> {
 }
 
 export async function scanAllPortals(): Promise<ScanResult[]> {
-  const portals = getPortals();
+  const portals = await getPortals();
   return Promise.all(portals.map(scanPortal));
 }
 
