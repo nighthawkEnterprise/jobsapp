@@ -69,7 +69,7 @@ export default function JobDetailPage() {
         <DetailsTab job={job} />
       </div>
       <div className={activeTab === 'tailor' ? 'block' : 'hidden'}>
-        <TailorTab jobId={job.id} />
+        <TailorTab jobId={job.id} job={{ title: job.title, company: job.company }} />
       </div>
       <div className={activeTab === 'prep' ? 'block' : 'hidden'}>
         <PrepTab jobId={job.id} />

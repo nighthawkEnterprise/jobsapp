@@ -68,6 +68,7 @@ export interface ScoredDiscovery {
   alreadyTracked: boolean;
   salary?: { min?: number; max?: number; currency?: string };
   postedAt?: string;
+  dismissed?: boolean;
 }
 
 export interface ScanCache {
@@ -83,6 +84,7 @@ const RESUME_FILE = path.join(DATA_DIR, 'resume.md');
 const JOBS_FILE = path.join(DATA_DIR, 'jobs.json');
 const SCAN_CACHE_FILE = path.join(DATA_DIR, 'scan-cache.json');
 const PROFILE_FILE = path.join(DATA_DIR, '_profile.md');
+const DISMISSED_FILE = path.join(DATA_DIR, 'dismissed.json');
 
 // Ensure data dir exists
 if (!fs.existsSync(DATA_DIR)) {
@@ -199,4 +201,22 @@ export function getScanCache(): ScanCache | null {
 
 export function saveScanCache(cache: ScanCache) {
   fs.writeFileSync(SCAN_CACHE_FILE, JSON.stringify(cache, null, 2));
+}
+
+// --- Dismissed URLs ---
+export function getDismissedUrls(): Set<string> {
+  if (!fs.existsSync(DISMISSED_FILE)) return new Set();
+  return new Set(JSON.parse(fs.readFileSync(DISMISSED_FILE, 'utf8')) as string[]);
+}
+
+export function addDismissedUrl(url: string) {
+  const urls = getDismissedUrls();
+  urls.add(url);
+  fs.writeFileSync(DISMISSED_FILE, JSON.stringify([...urls], null, 2));
+}
+
+export function removeDismissedUrl(url: string) {
+  const urls = getDismissedUrls();
+  urls.delete(url);
+  fs.writeFileSync(DISMISSED_FILE, JSON.stringify([...urls], null, 2));
 }

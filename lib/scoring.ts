@@ -63,8 +63,10 @@ export async function scoreJobWithLLM(
       messages: [{ role: 'user', content: SCORING_PROMPT(resume, profile, job) }],
     });
     const text = message.content[0].type === 'text' ? message.content[0].text : '';
-    return JSON.parse(text) as JobDimensions;
-  } catch {
+    const cleaned = text.replace(/^```(?:json)?\s*/m, '').replace(/\s*```$/m, '').trim();
+    return JSON.parse(cleaned) as JobDimensions;
+  } catch (err) {
+    console.error('[scoring] LLM scoring failed:', err);
     return fallbackDimensions(job);
   }
 }

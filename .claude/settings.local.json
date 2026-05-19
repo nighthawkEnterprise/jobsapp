@@ -31,7 +31,17 @@
       "Bash(Select-Object LastWriteTime)",
       "Bash(Get-Item \"C:\\\\Users\\\\nithi\\\\Documents\\\\projects\\\\jobapps\\\\output\\\\*.md\")",
       "Bash(Sort-Object LastWriteTime)",
-      "Bash(Select-Object Name, LastWriteTime)"
+      "Bash(Select-Object Name, LastWriteTime)",
+      "Bash(powershell -Command \"\\(Get-Content WEBSITE_PROMPT.md\\) -replace 'Job Pilot', 'applyOS' | Set-Content WEBSITE_PROMPT.md -Encoding utf8\")",
+      "WebFetch(domain:applyforme.me)",
+      "PowerShell(cmd /c \"dir /a C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\")",
+      "PowerShell(findstr *)",
+      "PowerShell(cmd /c \"dir /s /b /a:d C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\\\\jobsapp\")",
+      "PowerShell(cmd /c \"dir /a C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\\\\jobsapp\")",
+      "PowerShell(cmd /c \"dir /s /b /a:d C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\")",
+      "PowerShell(cmd /c \"dir C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\\\\competitive_analysis\")",
+      "PowerShell(cmd /c \"dir /s /b C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\\\\public\")",
+      "PowerShell(Copy-Item *)"
     ]
   }
 }

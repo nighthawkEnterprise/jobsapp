@@ -92,6 +92,35 @@ function Scorecard({ d }: { d: Dimensions }) {
 export default function DetailsTab({ job }: { job: any }) {
   const [notes, setNotes] = useState(job.notes || '');
   const [savingNotes, setSavingNotes] = useState(false);
+  const [fetchingJD, setFetchingJD] = useState(false);
+  const [fetchJDError, setFetchJDError] = useState<string | null>(null);
+
+  const handleRefetchJD = async () => {
+    setFetchingJD(true);
+    setFetchJDError(null);
+    try {
+      const res = await fetch('/api/fetch-jd', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: job.sourceUrl }),
+      });
+      const data = await res.json() as { description?: string; unsupported?: boolean };
+      if (data.description) {
+        await fetch('/api/jobs', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: job.id, updates: { content: data.description } }),
+        });
+        window.location.reload();
+      } else {
+        setFetchJDError(data.unsupported ? 'This job site isn\'t supported for automatic fetching.' : 'Could not retrieve a job description from this URL.');
+      }
+    } catch {
+      setFetchJDError('Request failed.');
+    } finally {
+      setFetchingJD(false);
+    }
+  };
 
   const saveNotes = async () => {
     setSavingNotes(true);
@@ -115,12 +144,22 @@ export default function DetailsTab({ job }: { job: any }) {
           </div>
         ) : (
           <div className="bg-white border border-dashed border-gray-200 rounded-xl p-8 text-center text-gray-400">
-            <p className="font-medium text-gray-500 mb-1">Fetching job description…</p>
-            <p className="text-sm">This usually takes a few seconds after adding. Refresh the page to check.</p>
+            <p className="font-medium text-gray-500 mb-1">Job description not loaded</p>
+            <p className="text-sm mb-4">This usually takes a few seconds after adding. Refresh the page to check.</p>
             {job.sourceUrl && (
-              <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" className="inline-block mt-3 text-sm text-blue-600 hover:underline">
-                View on job site ↗
-              </a>
+              <div className="flex flex-col items-center gap-2">
+                <button
+                  onClick={handleRefetchJD}
+                  disabled={fetchingJD}
+                  className="px-4 py-2 bg-gray-900 text-white text-sm font-semibold rounded-lg hover:bg-black disabled:opacity-50 transition-colors"
+                >
+                  {fetchingJD ? 'Fetching…' : 'Fetch Job Description'}
+                </button>
+                {fetchJDError && <p className="text-xs text-red-500">{fetchJDError}</p>}
+                <a href={job.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                  View on job site ↗
+                </a>
+              </div>
             )}
           </div>
         )}

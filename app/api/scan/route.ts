@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getPortals, savePortals, scanPortal, scanAllPortals } from '@/lib/scanner';
-import { getPreferences, getJobs, getScanCache, saveScanCache } from '@/lib/store';
+import { getPreferences, getJobs, getScanCache, saveScanCache, getDismissedUrls } from '@/lib/store';
 import type { Portal, ScannedJob } from '@/lib/scanner';
 import type { ScoredDiscovery, ScanCache, Preferences } from '@/lib/store';
 
@@ -126,6 +126,7 @@ export async function POST(req: Request) {
   if (body.action === 'discover') {
     const prefs = getPreferences();
     const existingUrls = new Set(getJobs().map(j => j.sourceUrl));
+    const dismissedUrls = getDismissedUrls();
     const excludedSet = new Set(prefs.companiesToExclude.map(c => c.toLowerCase()));
     const portals = getPortals();
     const encoder = new TextEncoder();
@@ -156,6 +157,7 @@ export async function POST(req: Request) {
               company: job.company, title: job.title, url: job.url,
               location: job.location, score, scoreReasons: reasons,
               alreadyTracked: existingUrls.has(job.url),
+              dismissed: dismissedUrls.has(job.url),
               salary: job.salary, postedAt: job.postedAt,
             };
             allDiscoveries.push(discovery);

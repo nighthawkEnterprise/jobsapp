@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# personal data — managed on server, not committed
+/data/*.json
+/data/*.md
+/data/*.docx
+/output/

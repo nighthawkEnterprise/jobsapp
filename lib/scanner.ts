@@ -52,6 +52,8 @@ function detectPlatform(url: string): Platform {
   if (url.includes('teamtailor.com')) return 'teamtailor';
   if (url.includes('myworkdayjobs.com')) return 'workday';
   if (url.includes('workable.com')) return 'workable';
+  // Greenhouse on a custom domain uses gh_jid as a query param
+  try { if (new URL(url).searchParams.has('gh_jid')) return 'greenhouse'; } catch {}
   return 'unknown';
 }
 
@@ -264,10 +266,21 @@ function stripHtml(html: string): string {
 }
 
 async function fetchGreenhouseDescription(jobUrl: string): Promise<string> {
-  // URL shape: https://job-boards.greenhouse.io/{slug}/jobs/{id}
-  const parts = new URL(jobUrl).pathname.split('/').filter(Boolean);
-  const id = parts[parts.length - 1];
-  const slug = parts[0];
+  const parsed = new URL(jobUrl);
+  let id: string;
+  let slug: string;
+
+  if (parsed.searchParams.has('gh_jid')) {
+    // Custom domain URL: https://company.com/careers/...?gh_jid=12345
+    id = parsed.searchParams.get('gh_jid')!;
+    slug = parsed.hostname.replace(/^www\./, '').split('.')[0];
+  } else {
+    // Standard URL: https://job-boards.greenhouse.io/{slug}/jobs/{id}
+    const parts = parsed.pathname.split('/').filter(Boolean);
+    id = parts[parts.length - 1];
+    slug = parts[0];
+  }
+
   const res = await fetch(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs/${id}`);
   if (!res.ok) return '';
   const data = await res.json() as { content?: string };
@@ -281,10 +294,37 @@ async function fetchLeverDescription(jobUrl: string): Promise<string> {
   const slug = parts[0];
   const res = await fetch(`https://api.lever.co/v0/postings/${slug}/${postingId}`);
   if (!res.ok) return '';
-  const data = await res.json() as { descriptionPlain?: string; description?: string; lists?: Array<{ text: string; content: string }> };
-  if (data.descriptionPlain) return data.descriptionPlain;
-  const sections = (data.lists ?? []).map(l => `${l.text}\n${l.content}`).join('\n\n');
-  return stripHtml((data.description ?? '') + '\n\n' + sections);
+  const data = await res.json() as {
+    openingPlain?: string;
+    descriptionPlain?: string;
+    descriptionBodyPlain?: string;
+    description?: string;
+    additionalPlain?: string;
+    lists?: Array<{ text: string; content: string }>;
+  };
+
+  const sections: string[] = [];
+
+  // Company/role opening (prefer openingPlain; fall back to descriptionPlain)
+  const intro = data.openingPlain || data.descriptionPlain;
+  if (intro) sections.push(intro);
+
+  // Main role-specific description (separate from the generic company intro)
+  if (data.descriptionBodyPlain) {
+    sections.push(data.descriptionBodyPlain);
+  } else if (data.description) {
+    sections.push(stripHtml(data.description));
+  }
+
+  // Structured sections: responsibilities, requirements, benefits, etc.
+  for (const list of data.lists ?? []) {
+    sections.push(`${list.text}\n${stripHtml(list.content)}`);
+  }
+
+  // Compensation and additional info
+  if (data.additionalPlain) sections.push(data.additionalPlain);
+
+  return sections.filter(Boolean).join('\n\n');
 }
 
 async function fetchAshbyDescription(jobUrl: string): Promise<string> {

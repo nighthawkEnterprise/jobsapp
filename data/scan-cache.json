@@ -1,44 +1,6 @@
 {
-  "scannedAt": "2026-05-18T19:38:40.123Z",
+  "scannedAt": "2026-05-19T03:38:36.290Z",
   "discoveries": [
-    {
-      "company": "1Password",
-      "title": "Staff Product Manager, Identity & Access Management",
-      "url": "https://jobs.ashbyhq.com/1password/26af8030-5e7b-4bd3-9535-7ec7df3f3e87",
-      "location": "Remote (United States | Canada)",
-      "score": 4.8,
-      "scoreReasons": [
-        "Title matches preferred role \"staff product manager\" (+1.0)",
-        "Title mentions domain of interest \"identity\" (+0.3)",
-        "Location \"Remote (United States | Canada)\" matches preference \"Remote\" (+0.5)"
-      ],
-      "alreadyTracked": false,
-      "salary": {
-        "min": 172000,
-        "max": 249000,
-        "currency": "USD"
-      },
-      "postedAt": "2026-04-06T17:58:53.826+00:00"
-    },
-    {
-      "company": "Vanta",
-      "title": "Staff Product Manager, Identity Platform",
-      "url": "https://jobs.ashbyhq.com/vanta/6f1a9062-4e8f-4cae-8fe4-ba84e7f092e1",
-      "location": "Remote U.S.",
-      "score": 4.8,
-      "scoreReasons": [
-        "Title matches preferred role \"staff product manager\" (+1.0)",
-        "Title mentions domain of interest \"identity\" (+0.3)",
-        "Location \"Remote U.S.\" matches preference \"Remote\" (+0.5)"
-      ],
-      "alreadyTracked": false,
-      "salary": {
-        "min": 243000,
-        "max": 286000,
-        "currency": "USD"
-      },
-      "postedAt": "2026-02-25T20:49:44.120+00:00"
-    },
     {
       "company": "JumpCloud",
       "title": "Senior Product Manager, Identity - United States",
@@ -50,7 +12,7 @@
         "Title mentions domain of interest \"identity\" (+0.3)",
         "Location \"Atlanta, GA - Remote\" matches preference \"Remote\" (+0.5)"
       ],
-      "alreadyTracked": false,
+      "alreadyTracked": true,
       "postedAt": "2026-04-27T22:44:12.979Z"
     },
     {
@@ -66,6 +28,62 @@
       ],
       "alreadyTracked": false,
       "postedAt": "2026-02-25T23:23:10.861Z"
+    },
+    {
+      "company": "Vanta",
+      "title": "Staff Product Manager, Identity Platform",
+      "url": "https://jobs.ashbyhq.com/vanta/6f1a9062-4e8f-4cae-8fe4-ba84e7f092e1",
+      "location": "Remote U.S.",
+      "score": 4.8,
+      "scoreReasons": [
+        "Title matches preferred role \"staff product manager\" (+1.0)",
+        "Title mentions domain of interest \"identity\" (+0.3)",
+        "Location \"Remote U.S.\" matches preference \"Remote\" (+0.5)"
+      ],
+      "alreadyTracked": true,
+      "salary": {
+        "min": 243000,
+        "max": 286000,
+        "currency": "USD"
+      },
+      "postedAt": "2026-02-25T20:49:44.120+00:00"
+    },
+    {
+      "company": "1Password",
+      "title": "Staff Product Manager, Identity & Access Management",
+      "url": "https://jobs.ashbyhq.com/1password/26af8030-5e7b-4bd3-9535-7ec7df3f3e87",
+      "location": "Remote (United States | Canada)",
+      "score": 4.8,
+      "scoreReasons": [
+        "Title matches preferred role \"staff product manager\" (+1.0)",
+        "Title mentions domain of interest \"identity\" (+0.3)",
+        "Location \"Remote (United States | Canada)\" matches preference \"Remote\" (+0.5)"
+      ],
+      "alreadyTracked": true,
+      "salary": {
+        "min": 172000,
+        "max": 249000,
+        "currency": "USD"
+      },
+      "postedAt": "2026-04-06T17:58:53.826+00:00"
+    },
+    {
+      "company": "Pinecone",
+      "title": "Staff/Principal Product Manager, Database",
+      "url": "https://jobs.ashbyhq.com/pinecone/7261adcb-026d-4552-8f89-7a46156c40c5",
+      "location": "US Remote",
+      "score": 4.5,
+      "scoreReasons": [
+        "Title matches preferred role \"principal product manager\" (+1.0)",
+        "Location \"US Remote\" matches preference \"Remote\" (+0.5)"
+      ],
+      "alreadyTracked": false,
+      "salary": {
+        "min": 220000,
+        "max": 300000,
+        "currency": "USD"
+      },
+      "postedAt": "2026-05-05T19:11:25.234+00:00"
     },
     {
       "company": "GitLab",
@@ -107,22 +125,35 @@
       "postedAt": "2026-05-07T16:56:55-04:00"
     },
     {
-      "company": "Pinecone",
-      "title": "Staff/Principal Product Manager, Database",
-      "url": "https://jobs.ashbyhq.com/pinecone/7261adcb-026d-4552-8f89-7a46156c40c5",
-      "location": "US Remote",
+      "company": "JumpCloud",
+      "title": "Staff Product Manager, SSO - India",
+      "url": "https://jobs.lever.co/jumpcloud/769b4e02-ca3b-4dfc-8033-5bd2f16d46c0",
+      "location": "Bangalore, India - Remote",
       "score": 4.5,
       "scoreReasons": [
-        "Title matches preferred role \"principal product manager\" (+1.0)",
-        "Location \"US Remote\" matches preference \"Remote\" (+0.5)"
+        "Title matches preferred role \"staff product manager\" (+1.0)",
+        "Location \"Bangalore, India - Remote\" matches preference \"Remote\" (+0.5)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-04-15T21:48:51.029Z"
+    },
+    {
+      "company": "Render",
+      "title": "Staff Product Manager, Platform & Infrastructure",
+      "url": "https://jobs.ashbyhq.com/render/d5f62097-29f5-4078-ad24-3b604380c1c0",
+      "location": "Remote: United States",
+      "score": 4.5,
+      "scoreReasons": [
+        "Title matches preferred role \"staff product manager\" (+1.0)",
+        "Location \"Remote: United States\" matches preference \"Remote\" (+0.5)"
       ],
       "alreadyTracked": false,
       "salary": {
-        "min": 220000,
+        "min": 218000,
         "max": 300000,
         "currency": "USD"
       },
-      "postedAt": "2026-05-05T19:11:25.234+00:00"
+      "postedAt": "2026-04-22T20:08:56.512+00:00"
     },
     {
       "company": "Vanta",
@@ -179,24 +210,6 @@
       "postedAt": "2026-05-05T20:37:40.171+00:00"
     },
     {
-      "company": "Render",
-      "title": "Staff Product Manager, Platform & Infrastructure",
-      "url": "https://jobs.ashbyhq.com/render/d5f62097-29f5-4078-ad24-3b604380c1c0",
-      "location": "Remote: United States",
-      "score": 4.5,
-      "scoreReasons": [
-        "Title matches preferred role \"staff product manager\" (+1.0)",
-        "Location \"Remote: United States\" matches preference \"Remote\" (+0.5)"
-      ],
-      "alreadyTracked": false,
-      "salary": {
-        "min": 218000,
-        "max": 300000,
-        "currency": "USD"
-      },
-      "postedAt": "2026-04-22T20:08:56.512+00:00"
-    },
-    {
       "company": "Databricks",
       "title": "Staff Product Manager, AI Platform",
       "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=8427940002",
@@ -232,7 +245,7 @@
         "Title matches preferred role \"staff product manager\" (+1.0)",
         "Location \"Seattle, Washington\" matches preference \"Seattle\" (+0.5)"
       ],
-      "alreadyTracked": true,
+      "alreadyTracked": false,
       "postedAt": "2026-04-09T16:51:09-04:00"
     },
     {
@@ -249,17 +262,16 @@
       "postedAt": "2026-04-09T16:51:27-04:00"
     },
     {
-      "company": "JumpCloud",
-      "title": "Staff Product Manager, SSO - India",
-      "url": "https://jobs.lever.co/jumpcloud/769b4e02-ca3b-4dfc-8033-5bd2f16d46c0",
-      "location": "Bangalore, India - Remote",
-      "score": 4.5,
+      "company": "Salesforce",
+      "title": "Senior Product Manager, FinOps",
+      "url": "https://salesforce.wd12.myworkdayjobs.com/job/California---San-Francisco/Senior-Product-Manager--FinOps_JR341931",
+      "location": "",
+      "score": 4.1,
       "scoreReasons": [
-        "Title matches preferred role \"staff product manager\" (+1.0)",
-        "Location \"Bangalore, India - Remote\" matches preference \"Remote\" (+0.5)"
+        "Title matches preferred role \"senior product manager\" (+1.0)",
+        "Location not listed — benefit of the doubt (+0.1)"
       ],
-      "alreadyTracked": false,
-      "postedAt": "2026-04-15T21:48:51.029Z"
+      "alreadyTracked": false
     },
     {
       "company": "Salesforce",
@@ -310,6 +322,24 @@
       ],
       "alreadyTracked": false,
       "postedAt": "2026-03-30T14:08:05-04:00"
+    },
+    {
+      "company": "Render",
+      "title": "Product Manager, Security, Trust & Governance ",
+      "url": "https://jobs.ashbyhq.com/render/a537929c-d3b2-4289-a6aa-33dca9003c6a",
+      "location": "Remote: United States",
+      "score": 4,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"Remote: United States\" matches preference \"Remote\" (+0.5)"
+      ],
+      "alreadyTracked": false,
+      "salary": {
+        "min": 195000,
+        "max": 268000,
+        "currency": "USD"
+      },
+      "postedAt": "2026-04-21T16:58:03.910+00:00"
     },
     {
       "company": "Anthropic",
@@ -374,22 +404,69 @@
       "postedAt": "2026-03-20T21:47:59.827+00:00"
     },
     {
-      "company": "Render",
-      "title": "Product Manager, Security, Trust & Governance ",
-      "url": "https://jobs.ashbyhq.com/render/a537929c-d3b2-4289-a6aa-33dca9003c6a",
-      "location": "Remote: United States",
+      "company": "Datadog",
+      "title": "Senior Product Manager - AI & Data Security",
+      "url": "https://careers.datadoghq.com/detail/7808839/?gh_jid=7808839",
+      "location": "New York, New York, USA",
       "score": 4,
       "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"Remote: United States\" matches preference \"Remote\" (+0.5)"
+        "Title matches preferred role \"senior product manager\" (+1.0)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
       ],
       "alreadyTracked": false,
-      "salary": {
-        "min": 195000,
-        "max": 268000,
-        "currency": "USD"
-      },
-      "postedAt": "2026-04-21T16:58:03.910+00:00"
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Senior Product Manager - Integrations & Ecosystem",
+      "url": "https://careers.datadoghq.com/detail/7723988/?gh_jid=7723988",
+      "location": "New York, New York, USA",
+      "score": 4,
+      "scoreReasons": [
+        "Title matches preferred role \"senior product manager\" (+1.0)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Senior Product Manager - Network Path",
+      "url": "https://careers.datadoghq.com/detail/7763117/?gh_jid=7763117",
+      "location": "New York, New York, USA",
+      "score": 4,
+      "scoreReasons": [
+        "Title matches preferred role \"senior product manager\" (+1.0)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Senior Product Manager - Notebooks",
+      "url": "https://careers.datadoghq.com/detail/7560326/?gh_jid=7560326",
+      "location": "New York, New York, USA",
+      "score": 4,
+      "scoreReasons": [
+        "Title matches preferred role \"senior product manager\" (+1.0)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T09:16:31-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Senior Product Manager - Serverless",
+      "url": "https://careers.datadoghq.com/detail/7905006/?gh_jid=7905006",
+      "location": "Boston, Massachusetts, USA; New York, New York, USA",
+      "score": 4,
+      "scoreReasons": [
+        "Title matches preferred role \"senior product manager\" (+1.0)",
+        "Location \"Boston, Massachusetts, USA; New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
     },
     {
       "company": "Databricks",
@@ -472,12 +549,12 @@
     {
       "company": "Databricks",
       "title": "Staff Product Manager",
-      "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=7649411002",
-      "location": "Berlin, Germany",
+      "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=7649409002",
+      "location": "Amsterdam, Netherlands",
       "score": 4,
       "scoreReasons": [
         "Title matches preferred role \"staff product manager\" (+1.0)",
-        "Location \"Berlin, Germany\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+        "Location \"Amsterdam, Netherlands\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
       ],
       "alreadyTracked": false,
       "postedAt": "2026-04-09T16:51:11-04:00"
@@ -485,12 +562,12 @@
     {
       "company": "Databricks",
       "title": "Staff Product Manager",
-      "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=7649409002",
-      "location": "Amsterdam, Netherlands",
+      "url": "https://databricks.com/company/careers/open-positions/job?gh_jid=7649411002",
+      "location": "Berlin, Germany",
       "score": 4,
       "scoreReasons": [
         "Title matches preferred role \"staff product manager\" (+1.0)",
-        "Location \"Amsterdam, Netherlands\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+        "Location \"Berlin, Germany\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
       ],
       "alreadyTracked": false,
       "postedAt": "2026-04-09T16:51:11-04:00"
@@ -562,65 +639,14 @@
     },
     {
       "company": "Datadog",
-      "title": "Senior Product Manager - AI & Data Security",
-      "url": "https://careers.datadoghq.com/detail/7808839/?gh_jid=7808839",
+      "title": "Product Manager II - Identity Security",
+      "url": "https://careers.datadoghq.com/detail/7776413/?gh_jid=7776413",
       "location": "New York, New York, USA",
-      "score": 4,
+      "score": 3.8,
       "scoreReasons": [
-        "Title matches preferred role \"senior product manager\" (+1.0)",
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Title mentions domain of interest \"identity\" (+0.3)",
         "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Senior Product Manager - Integrations & Ecosystem",
-      "url": "https://careers.datadoghq.com/detail/7723988/?gh_jid=7723988",
-      "location": "New York, New York, USA",
-      "score": 4,
-      "scoreReasons": [
-        "Title matches preferred role \"senior product manager\" (+1.0)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Senior Product Manager - Network Path",
-      "url": "https://careers.datadoghq.com/detail/7763117/?gh_jid=7763117",
-      "location": "New York, New York, USA",
-      "score": 4,
-      "scoreReasons": [
-        "Title matches preferred role \"senior product manager\" (+1.0)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Senior Product Manager - Notebooks",
-      "url": "https://careers.datadoghq.com/detail/7560326/?gh_jid=7560326",
-      "location": "New York, New York, USA",
-      "score": 4,
-      "scoreReasons": [
-        "Title matches preferred role \"senior product manager\" (+1.0)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T09:16:31-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Senior Product Manager - Serverless",
-      "url": "https://careers.datadoghq.com/detail/7905006/?gh_jid=7905006",
-      "location": "Boston, Massachusetts, USA; New York, New York, USA",
-      "score": 4,
-      "scoreReasons": [
-        "Title matches preferred role \"senior product manager\" (+1.0)",
-        "Location \"Boston, Massachusetts, USA; New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
       ],
       "alreadyTracked": false,
       "postedAt": "2026-05-15T08:44:57-04:00"
@@ -645,23 +671,9 @@
       "postedAt": "2026-02-20T00:48:06.880+00:00"
     },
     {
-      "company": "Datadog",
-      "title": "Product Manager II - Identity Security",
-      "url": "https://careers.datadoghq.com/detail/7776413/?gh_jid=7776413",
-      "location": "New York, New York, USA",
-      "score": 3.8,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Title mentions domain of interest \"identity\" (+0.3)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
       "company": "Salesforce",
-      "title": "Product Manager, Pricing & Product Operations",
-      "url": "https://salesforce.wd12.myworkdayjobs.com/job/California---San-Francisco/Product-Manager--Pricing---Product-Operations_JR336914-1",
+      "title": "Associate Product Manager, MuleSoft",
+      "url": "https://salesforce.wd12.myworkdayjobs.com/job/California---San-Francisco/Associate-Product-Manager_JR342622",
       "location": "",
       "score": 3.6,
       "scoreReasons": [
@@ -828,35 +840,17 @@
       "postedAt": "2026-04-29T11:07:28.934+00:00"
     },
     {
-      "company": "Fireworks AI",
-      "title": "Forward Deployed Product Manager",
-      "url": "https://job-boards.greenhouse.io/fireworksai/jobs/4008626009",
-      "location": "San Mateo, CA",
+      "company": "Weaviate",
+      "title": "Product Manager, Database",
+      "url": "https://jobs.ashbyhq.com/weaviate/c4c18609-c956-4a33-9a73-ad1d7680de6b",
+      "location": "Europe",
       "score": 3.5,
       "scoreReasons": [
         "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"San Mateo, CA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+        "Location \"Europe\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
       ],
       "alreadyTracked": false,
-      "postedAt": "2026-05-12T18:17:11-04:00"
-    },
-    {
-      "company": "WorkOS",
-      "title": "Product Manager",
-      "url": "https://jobs.ashbyhq.com/workos/5550ddd5-c3eb-459a-aa4d-8b1216346d88",
-      "location": "United States & Canada",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"United States & Canada\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "salary": {
-        "min": 175000,
-        "max": 250000,
-        "currency": "USD"
-      },
-      "postedAt": "2026-04-13T18:16:38.917+00:00"
+      "postedAt": "2026-04-29T18:49:43.309+00:00"
     },
     {
       "company": "Vercel",
@@ -872,17 +866,30 @@
       "postedAt": "2026-05-14T13:27:30-04:00"
     },
     {
-      "company": "Weaviate",
-      "title": "Product Manager, Database",
-      "url": "https://jobs.ashbyhq.com/weaviate/c4c18609-c956-4a33-9a73-ad1d7680de6b",
-      "location": "Europe",
+      "company": "Fireworks AI",
+      "title": "Forward Deployed Product Manager",
+      "url": "https://job-boards.greenhouse.io/fireworksai/jobs/4008626009",
+      "location": "San Mateo, CA",
       "score": 3.5,
       "scoreReasons": [
         "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"Europe\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+        "Location \"San Mateo, CA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
       ],
       "alreadyTracked": false,
-      "postedAt": "2026-04-29T18:49:43.309+00:00"
+      "postedAt": "2026-05-12T18:17:11-04:00"
+    },
+    {
+      "company": "Cloudflare",
+      "title": "Product Manager Intern (Summer 2026)",
+      "url": "https://boards.greenhouse.io/cloudflare/jobs/7362113?gh_jid=7362113",
+      "location": "In-Office",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"In-Office\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-04-21T15:53:17-04:00"
     },
     {
       "company": "LlamaIndex",
@@ -901,6 +908,89 @@
         "currency": "USD"
       },
       "postedAt": "2025-10-13T17:46:05.210+00:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Group Product Manager - Containers",
+      "url": "https://careers.datadoghq.com/detail/7654981/?gh_jid=7654981",
+      "location": "New York, New York, USA",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Group Product Manager - Threat Detection and Incident Response (Cloud SIEM)",
+      "url": "https://careers.datadoghq.com/detail/7608826/?gh_jid=7608826",
+      "location": "New York, New York, USA",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Product Manager II - Custom Metrics",
+      "url": "https://careers.datadoghq.com/detail/7704689/?gh_jid=7704689",
+      "location": "New York, New York, USA",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Product Manager II - Model Lab",
+      "url": "https://careers.datadoghq.com/detail/7144556/?gh_jid=7144556",
+      "location": "New York, New York, USA",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "Datadog",
+      "title": "Product Manager II - Risk-Based Alerting (SIEM)",
+      "url": "https://careers.datadoghq.com/detail/7800765/?gh_jid=7800765",
+      "location": "New York, New York, USA",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-05-15T08:44:57-04:00"
+    },
+    {
+      "company": "LangChain",
+      "title": "Product Manager, LangSmith",
+      "url": "https://jobs.ashbyhq.com/langchain/27af5f96-b287-4bcc-8679-f96686dc7c8d",
+      "location": "New York, NY",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"New York, NY\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "salary": {
+        "min": 180000,
+        "max": 215000,
+        "currency": "USD"
+      },
+      "postedAt": "2025-11-24T19:55:46.884+00:00"
     },
     {
       "company": "Databricks",
@@ -1033,6 +1123,89 @@
       "postedAt": "2026-04-09T16:51:25-04:00"
     },
     {
+      "company": "WorkOS",
+      "title": "Product Manager",
+      "url": "https://jobs.ashbyhq.com/workos/5550ddd5-c3eb-459a-aa4d-8b1216346d88",
+      "location": "United States & Canada",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"United States & Canada\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "salary": {
+        "min": 175000,
+        "max": 250000,
+        "currency": "USD"
+      },
+      "postedAt": "2026-04-13T18:16:38.917+00:00"
+    },
+    {
+      "company": "Cohere",
+      "title": "Product Manager, Safety Research",
+      "url": "https://jobs.ashbyhq.com/cohere/a8122632-cc3b-4a1a-bd78-4b4b9466cb38",
+      "location": "United States",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"United States\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-03-11T15:42:20.888+00:00"
+    },
+    {
+      "company": "Cohere",
+      "title": "Product Manager,  Native Experience & Growth",
+      "url": "https://jobs.ashbyhq.com/cohere/d9d2740b-8869-462d-85df-21c1941bc13d",
+      "location": "United States",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"United States\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-03-11T15:45:29.713+00:00"
+    },
+    {
+      "company": "Cohere",
+      "title": "Product Manager,  Platform Experience & Developer Product",
+      "url": "https://jobs.ashbyhq.com/cohere/fe2e2971-e2c0-43fd-9ab1-187571776a5d",
+      "location": "Toronto",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"Toronto\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-03-12T19:14:37.181+00:00"
+    },
+    {
+      "company": "Cohere",
+      "title": "Product Manager, Public Sector & Defence",
+      "url": "https://jobs.ashbyhq.com/cohere/2a7f1fad-05ff-4260-af36-556d1d694775",
+      "location": "Canada",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"Canada\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-03-18T12:48:04.057+00:00"
+    },
+    {
+      "company": "Cohere",
+      "title": "Product Manager, Agent Harness & Modelling",
+      "url": "https://jobs.ashbyhq.com/cohere/1d1b300d-254b-48c4-958f-99c6b907f295",
+      "location": "Toronto",
+      "score": 3.5,
+      "scoreReasons": [
+        "Title contains role keyword \"product manager\" (+0.5)",
+        "Location \"Toronto\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
+      ],
+      "alreadyTracked": false,
+      "postedAt": "2026-03-18T12:51:38.273+00:00"
+    },
+    {
       "company": "Baseten",
       "title": "Product Manager - Core Product",
       "url": "https://jobs.ashbyhq.com/baseten/3027e0bc-731f-4fef-b081-2031590766fd",
@@ -1049,24 +1222,6 @@
         "currency": "USD"
       },
       "postedAt": "2026-04-02T18:57:48.605+00:00"
-    },
-    {
-      "company": "LangChain",
-      "title": "Product Manager, LangSmith",
-      "url": "https://jobs.ashbyhq.com/langchain/27af5f96-b287-4bcc-8679-f96686dc7c8d",
-      "location": "New York, NY",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"New York, NY\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "salary": {
-        "min": 180000,
-        "max": 215000,
-        "currency": "USD"
-      },
-      "postedAt": "2025-11-24T19:55:46.884+00:00"
     },
     {
       "company": "Mistral AI",
@@ -1145,19 +1300,6 @@
       ],
       "alreadyTracked": false,
       "postedAt": "2026-02-09T18:03:57.134Z"
-    },
-    {
-      "company": "Cloudflare",
-      "title": "Product Manager Intern (Summer 2026)",
-      "url": "https://boards.greenhouse.io/cloudflare/jobs/7362113?gh_jid=7362113",
-      "location": "In-Office",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"In-Office\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-04-21T15:53:17-04:00"
     },
     {
       "company": "OpenAI",
@@ -1459,139 +1601,13 @@
         "currency": "USD"
       },
       "postedAt": "2026-05-14T18:39:08.909+00:00"
-    },
-    {
-      "company": "Cohere",
-      "title": "Product Manager, Safety Research",
-      "url": "https://jobs.ashbyhq.com/cohere/a8122632-cc3b-4a1a-bd78-4b4b9466cb38",
-      "location": "United States",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"United States\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-03-11T15:42:20.888+00:00"
-    },
-    {
-      "company": "Cohere",
-      "title": "Product Manager,  Native Experience & Growth",
-      "url": "https://jobs.ashbyhq.com/cohere/d9d2740b-8869-462d-85df-21c1941bc13d",
-      "location": "United States",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"United States\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-03-11T15:45:29.713+00:00"
-    },
-    {
-      "company": "Cohere",
-      "title": "Product Manager,  Platform Experience & Developer Product",
-      "url": "https://jobs.ashbyhq.com/cohere/fe2e2971-e2c0-43fd-9ab1-187571776a5d",
-      "location": "Toronto",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"Toronto\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-03-12T19:14:37.181+00:00"
-    },
-    {
-      "company": "Cohere",
-      "title": "Product Manager, Public Sector & Defence",
-      "url": "https://jobs.ashbyhq.com/cohere/2a7f1fad-05ff-4260-af36-556d1d694775",
-      "location": "Canada",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"Canada\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-03-18T12:48:04.057+00:00"
-    },
-    {
-      "company": "Cohere",
-      "title": "Product Manager, Agent Harness & Modelling",
-      "url": "https://jobs.ashbyhq.com/cohere/1d1b300d-254b-48c4-958f-99c6b907f295",
-      "location": "Toronto",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"Toronto\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-03-18T12:51:38.273+00:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Group Product Manager - Containers",
-      "url": "https://careers.datadoghq.com/detail/7654981/?gh_jid=7654981",
-      "location": "New York, New York, USA",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Group Product Manager - Threat Detection and Incident Response (Cloud SIEM)",
-      "url": "https://careers.datadoghq.com/detail/7608826/?gh_jid=7608826",
-      "location": "New York, New York, USA",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Product Manager II - Custom Metrics",
-      "url": "https://careers.datadoghq.com/detail/7704689/?gh_jid=7704689",
-      "location": "New York, New York, USA",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Product Manager II - Model Lab",
-      "url": "https://careers.datadoghq.com/detail/7144556/?gh_jid=7144556",
-      "location": "New York, New York, USA",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
-    },
-    {
-      "company": "Datadog",
-      "title": "Product Manager II - Risk-Based Alerting (SIEM)",
-      "url": "https://careers.datadoghq.com/detail/7800765/?gh_jid=7800765",
-      "location": "New York, New York, USA",
-      "score": 3.5,
-      "scoreReasons": [
-        "Title contains role keyword \"product manager\" (+0.5)",
-        "Location \"New York, New York, USA\" doesn't match your preferences (Seattle, Remote, San Franciso) (±0)"
-      ],
-      "alreadyTracked": false,
-      "postedAt": "2026-05-15T08:44:57-04:00"
     }
   ],
   "errors": [
+    {
+      "company": "Replicate",
+      "error": "Ashby API 404"
+    },
     {
       "company": "Snyk",
       "error": "Greenhouse API 404"
@@ -1599,10 +1615,6 @@
     {
       "company": "Retool",
       "error": "Greenhouse API 404"
-    },
-    {
-      "company": "Replicate",
-      "error": "Ashby API 404"
     }
   ]
 }

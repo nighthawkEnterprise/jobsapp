@@ -1,6 +1,13 @@
 import './globals.css';
 import { auth0 } from "@/lib/auth0";
 import { Bricolage_Grotesque, Outfit } from 'next/font/google';
+import Image from 'next/image';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'ApplyOS',
+  description: 'Your job search, systematized. Score roles A–F, generate tailored CVs, track your pipeline, and prep for every interview — one system, end to end.',
+};
 
 const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -26,8 +33,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto flex items-center h-14 px-6 md:px-12">
 
-            <a href="/" className="font-heading font-semibold text-gray-900 mr-10 hover:text-[#3B5BDB] transition-colors">
-              Job Pilot
+            <a href="/" className="mr-10 flex-shrink-0">
+              <Image src="/apply_os_logo.png" alt="ApplyOS" width={200} height={54} className="h-11 w-auto" priority />
             </a>
 
             <div className="flex gap-6 text-sm text-gray-500">
