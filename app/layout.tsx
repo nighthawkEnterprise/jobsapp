@@ -3,6 +3,8 @@ import { auth0 } from "@/lib/auth0";
 import { Bricolage_Grotesque, Outfit } from 'next/font/google';
 import type { Metadata } from 'next';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
+import { TokenUsageWidget } from '@/components/TokenUsageWidget';
+import { NavLinks, NavLinksGuest } from '@/components/NavLinks';
 
 export const metadata: Metadata = {
   title: 'ApplyOS',
@@ -31,44 +33,28 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className={`${bricolage.variable} ${outfit.variable} bg-gray-50 text-gray-900 min-h-screen flex flex-col`}>
 
         <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
-          <div className="max-w-7xl mx-auto flex items-center h-14 px-6 md:px-12">
+          <div className="max-w-7xl mx-auto flex items-center h-16 px-6 md:px-12">
 
-            <a href="/" className="mr-10 flex-shrink-0 font-heading text-xl font-extrabold tracking-tight leading-none select-none">
-              <span className="text-gray-900">Apply</span><span className="text-[#3B5BDB]">OS</span>
+            {/* Logo */}
+            <a href="/" className="mr-10 flex-shrink-0 flex items-center gap-2 select-none">
+              <div className="w-6 h-6 rounded-md bg-[#3B5BDB] flex items-center justify-center flex-shrink-0">
+                <svg width="12" height="12" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="1" y="1" width="5" height="5" rx="1" fill="white" fillOpacity="0.9"/>
+                  <rect x="8" y="1" width="5" height="5" rx="1" fill="white" fillOpacity="0.5"/>
+                  <rect x="1" y="8" width="5" height="5" rx="1" fill="white" fillOpacity="0.5"/>
+                  <rect x="8" y="8" width="5" height="5" rx="1" fill="white" fillOpacity="0.9"/>
+                </svg>
+              </div>
+              <span className="font-heading text-lg font-extrabold tracking-tight leading-none">
+                <span className="text-gray-900">Apply</span><span className="text-[#3B5BDB]">OS</span>
+              </span>
             </a>
 
-            <div className="flex gap-6 text-sm text-gray-500">
-              {session && (
-                <>
-                  <a href="/dashboard"     className="hover:text-gray-900 transition-colors">Pipeline</a>
-                  <a href="/relevant-jobs" className="hover:text-gray-900 transition-colors">Scan</a>
-                  <a href="/resumes"       className="hover:text-gray-900 transition-colors">Resumes</a>
-                  <a href="/stories"       className="hover:text-gray-900 transition-colors">Stories</a>
-                  <a href="/settings"      className="hover:text-gray-900 transition-colors">Settings</a>
-                </>
-              )}
-            </div>
-
-            <div className="ml-auto flex items-center gap-5">
-              {session ? (
-                <>
-                  <a href="/export"      className="text-xs text-gray-400 hover:text-gray-700 transition-colors hidden md:block">Export</a>
-                  <a href="/profile"     className="text-xs text-gray-500 hover:text-gray-800 transition-colors truncate max-w-[180px]">{session.user.email}</a>
-                  <a href="/auth/logout" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">Logout</a>
-                </>
-              ) : (
-                <>
-                  {process.env.NODE_ENV === 'development' && (
-                    <a href="/api/dev-login?returnTo=/dashboard" className="text-xs font-mono text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded hover:bg-amber-100 transition-colors">
-                      Dev login
-                    </a>
-                  )}
-                  <a href="/auth/login?returnTo=/dashboard" className="text-sm font-medium text-[#3B5BDB] hover:text-[#3451c7] transition-colors">
-                    Sign in
-                  </a>
-                </>
-              )}
-            </div>
+            {session ? (
+              <NavLinks email={session.user.email ?? ''} />
+            ) : (
+              <NavLinksGuest />
+            )}
 
           </div>
         </nav>
@@ -78,6 +64,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </main>
 
         <FeedbackWidget />
+        <TokenUsageWidget />
 
       </body>
     </html>

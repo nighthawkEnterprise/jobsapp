@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { Job, JobDimensions } from './store';
+import { recordUsage } from './usage';
 
 const client = new Anthropic();
 
@@ -62,6 +63,7 @@ export async function scoreJobWithLLM(
       max_tokens: 1024,
       messages: [{ role: 'user', content: SCORING_PROMPT(resume, profile, job) }],
     });
+    void recordUsage('score', message.usage.input_tokens, message.usage.output_tokens);
     const text = message.content[0].type === 'text' ? message.content[0].text : '';
     const cleaned = text.replace(/^```(?:json)?\s*/m, '').replace(/\s*```$/m, '').trim();
     return JSON.parse(cleaned) as JobDimensions;

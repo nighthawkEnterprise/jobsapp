@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { Job, Story } from './store';
+import { recordUsage } from './usage';
 
 const client = new Anthropic();
 
@@ -70,6 +71,7 @@ export async function tailorResumeWithLLM(
     messages: [{ role: 'user', content: buildPrompt(resume, profile, stories, job) }],
   });
 
+  void recordUsage('tailor', message.usage.input_tokens, message.usage.output_tokens);
   const raw = message.content[0].type === 'text' ? message.content[0].text : '';
   // Strip markdown fences Claude sometimes adds despite instructions
   const cleaned = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```$/m, '').trim();

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getMasterResume } from '@/lib/store';
 import Anthropic from '@anthropic-ai/sdk';
+import { recordUsage } from '@/lib/usage';
 
 const client = new Anthropic();
 
@@ -26,6 +27,7 @@ ${truncated}`,
     ],
   });
 
+  void recordUsage('other', message.usage.input_tokens, message.usage.output_tokens);
   try {
     const text = message.content[0].type === 'text' ? message.content[0].text.trim() : '[]';
     const jsonMatch = text.match(/\[[\s\S]*\]/);

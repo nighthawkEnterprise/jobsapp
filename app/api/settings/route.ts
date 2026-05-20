@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPreferences, savePreferences, getMasterResume, saveMasterResume, getProfile, saveProfile } from '@/lib/store';
+import { getPreferences, savePreferences, getMasterResume, saveMasterResume, getProfile, saveProfile, defaultPreferences } from '@/lib/store';
 
 export async function GET() {
   const [preferences, resume, profile] = await Promise.all([
@@ -8,6 +8,19 @@ export async function GET() {
     getProfile(),
   ]);
   return NextResponse.json({ preferences, resume, profile });
+}
+
+export async function DELETE() {
+  try {
+    await Promise.all([
+      savePreferences(defaultPreferences),
+      saveMasterResume(''),
+      saveProfile(''),
+    ]);
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {

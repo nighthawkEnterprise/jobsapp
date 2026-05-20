@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Upload, FileText, Calendar, ChevronRight, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { Skeleton, SkeletonResumeCard } from '@/components/Skeleton';
 
 export default function ResumesPage() {
   const [masterResume, setMasterResume] = useState('');
@@ -85,7 +86,28 @@ export default function ResumesPage() {
 
   const showDocxPreview = viewMode === 'visual' && activeResume === 'master' && !!masterHtml;
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading resumes...</div>;
+  if (loading) return (
+    <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-8">
+      <div className="md:w-1/3 space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-36" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+          <div className="p-4 bg-gray-50 border-b border-gray-100">
+            <Skeleton className="h-4 w-28" />
+          </div>
+          <SkeletonResumeCard />
+          <div className="p-4">
+            <Skeleton className="h-20 w-full rounded-lg" />
+          </div>
+        </div>
+      </div>
+      <div className="md:w-2/3">
+        <Skeleton className="h-[800px] w-full rounded-xl" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row gap-8">

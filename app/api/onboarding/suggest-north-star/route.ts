@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getMasterResume } from '@/lib/store';
 import Anthropic from '@anthropic-ai/sdk';
+import { recordUsage } from '@/lib/usage';
 
 const client = new Anthropic();
 
@@ -40,6 +41,7 @@ Return only the North Star text, no preamble.`,
     ],
   });
 
+  void recordUsage('other', message.usage.input_tokens, message.usage.output_tokens);
   const text = message.content[0].type === 'text' ? message.content[0].text.trim() : '';
   return NextResponse.json({ northStar: text });
 }

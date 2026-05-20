@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, KeyboardEvent } from 'react';
-import { Plus, Trash2, Star, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { Plus, Trash2, Star, X, ChevronDown, ChevronUp, Sparkles, Loader2 } from 'lucide-react';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -209,6 +209,37 @@ function ArchetypeCard({
   onDelete: () => void;
 }) {
   const [expanded, setExpanded] = useState(true);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const lastNameRef = useRef('');
+
+  // Auto-suggest companies when the archetype name changes (debounced)
+  useEffect(() => {
+    const name = archetype.name.trim();
+    if (name.length < 4 || name === lastNameRef.current) return;
+    const t = setTimeout(async () => {
+      lastNameRef.current = name;
+      setLoadingSuggestions(true);
+      try {
+        const res = await fetch('/api/companies/suggest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ domains: [name] }),
+        });
+        const data = await res.json() as { companies: string[] };
+        setSuggestions(data.companies ?? []);
+      } finally {
+        setLoadingSuggestions(false);
+      }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [archetype.name]);
+
+  const addSuggestion = (c: string) => {
+    if (!archetype.companies.includes(c)) onChange({ companies: [...archetype.companies, c] });
+  };
+
+  const available = suggestions.filter(s => !archetype.companies.includes(s));
 
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -259,6 +290,35 @@ function ArchetypeCard({
               onChange={companies => onChange({ companies })}
               placeholder="Company name, press Enter to add"
             />
+
+            {/* Suggestions */}
+            {(loadingSuggestions || available.length > 0) && (
+              <div className="mt-2.5">
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Sparkles className="w-3 h-3 text-purple-400" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                    Suggested for "{archetype.name}"
+                  </span>
+                  {loadingSuggestions && <Loader2 className="w-3 h-3 animate-spin text-gray-300" />}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {loadingSuggestions && !available.length
+                    ? Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i} className="h-6 w-16 bg-gray-100 rounded-full animate-pulse" />
+                      ))
+                    : available.map(c => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => addSuggestion(c)}
+                          className="flex items-center gap-1 text-xs font-medium bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 px-2 py-0.5 rounded-full transition-colors"
+                        >
+                          <Plus className="w-3 h-3" />{c}
+                        </button>
+                      ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div>

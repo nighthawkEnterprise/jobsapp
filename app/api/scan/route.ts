@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getPortals, addPortal, deletePortal, scanPortal, scanAllPortals } from '@/lib/scanner';
+import { getPortals, addPortal, deletePortal, scanPortal, scanAllPortals, seedAllPortalsFromDirectory } from '@/lib/scanner';
 import { getPreferences, getJobs, getScanCache, saveScanCache, getDismissedUrls } from '@/lib/store';
 import type { Portal, ScannedJob } from '@/lib/scanner';
 import type { ScoredDiscovery, ScanCache, Preferences } from '@/lib/store';
@@ -31,12 +31,22 @@ function prefKeywords(prefs: Preferences): Array<{ full: string; core: string }>
   });
 }
 
+// Common role base phrases used to avoid false positives in word-set matching
+const ROLE_BASE_PHRASES = ['product manager', 'program manager', 'engineering manager', 'general manager'];
+
 function isRelevantTitle(title: string, prefs: Preferences): boolean {
   if (prefs.jobTitles.length === 0) return true;
   const t = expandTitle(title);
-  return prefKeywords(prefs).some(({ full, core }) =>
-    t.includes(full) || (core.length > 3 && t.includes(core))
-  );
+  const tWords = new Set(t.split(/\W+/).filter(Boolean));
+  return prefKeywords(prefs).some(({ full, core }) => {
+    if (t.includes(full) || (core.length > 3 && t.includes(core))) return true;
+    // Word-set match: all words of the configured title appear in the candidate,
+    // AND the same base role phrase appears in both (prevents "Data Science Manager"
+    // from matching "AI Product Manager" just because both contain those words).
+    const prefWords = full.split(/\W+/).filter(Boolean);
+    if (!prefWords.every(w => tWords.has(w))) return false;
+    return ROLE_BASE_PHRASES.some(phrase => full.includes(phrase) && t.includes(phrase));
+  });
 }
 
 function scoreScanResult(job: ScannedJob, prefs: Preferences): { score: number; reasons: string[] } {
@@ -44,6 +54,12 @@ function scoreScanResult(job: ScannedJob, prefs: Preferences): { score: number; 
   const reasons: string[] = [];
   const expandedTitle = expandTitle(job.title);
   const keywords = prefKeywords(prefs);
+
+  const targetSet = new Set(prefs.targetCompanies.map(c => c.toLowerCase()));
+  if (targetSet.has(job.company.toLowerCase())) {
+    score += 1.0;
+    reasons.push(`"${job.company}" is one of your target companies (+1.0)`);
+  }
 
   const matchedFull = keywords.find(({ full }) => expandedTitle.includes(full));
   const matchedCore = !matchedFull && keywords.find(({ core }) => core.length > 3 && expandedTitle.includes(core));
@@ -113,36 +129,68 @@ export async function POST(req: Request) {
   }
 
   if (body.action === 'discover') {
-    const [prefs, jobs, dismissedUrls, portals] = await Promise.all([
+    const [prefs, jobs, dismissedUrls, portals, oldCache] = await Promise.all([
       getPreferences(),
       getJobs(),
       getDismissedUrls(),
       getPortals(),
+      getScanCache(),
     ]);
     const existingUrls = new Set(jobs.map(j => j.sourceUrl));
     const excludedSet = new Set(prefs.companiesToExclude.map(c => c.toLowerCase()));
     const encoder = new TextEncoder();
 
+    // Companies that already 404'd in the previous scan — second failure = auto-prune
+    const prevFailed404 = new Set(
+      (oldCache?.errors ?? [])
+        .filter(e => e.error.includes('404'))
+        .map(e => e.company)
+    );
+
     const allDiscoveries: ScoredDiscovery[] = [];
     const allErrors: Array<{ company: string; error: string }> = [];
+    const seenUrls = new Set<string>();
 
     const stream = new ReadableStream({
       async start(controller) {
         const send = (msg: object) =>
           controller.enqueue(encoder.encode(JSON.stringify(msg) + '\n'));
 
-        await Promise.all(portals.map(async portal => {
+        let effectivePortals = portals;
+        if (portals.length === 0) {
+          const seededCount = await seedAllPortalsFromDirectory();
+          if (seededCount > 0) {
+            effectivePortals = await getPortals();
+            send({ type: 'portals-seeded', count: seededCount });
+          }
+        }
+
+        await Promise.all(effectivePortals.map(async portal => {
           const result = await scanPortal(portal);
 
           if (result.error) {
-            allErrors.push({ company: result.company, error: result.error });
-            send({ type: 'error', company: result.company, error: result.error });
+            const is404 = result.error.includes('404');
+            if (is404) {
+              if (prevFailed404.has(result.company)) {
+                // Second consecutive 404 — silently prune this stale portal
+                deletePortal(result.company).catch(() => {});
+              } else {
+                // First 404 — track internally for next scan, but don't show to user
+                allErrors.push({ company: result.company, error: result.error });
+              }
+            } else {
+              // Real error (network, auth, etc.) — surface it
+              allErrors.push({ company: result.company, error: result.error });
+              send({ type: 'error', company: result.company, error: result.error });
+            }
             return;
           }
           if (excludedSet.has(result.company.toLowerCase())) return;
 
           for (const job of result.jobs) {
             if (!isRelevantTitle(job.title, prefs)) continue;
+            if (seenUrls.has(job.url)) continue;
+            seenUrls.add(job.url);
             const { score, reasons } = scoreScanResult(job, prefs);
             const discovery: ScoredDiscovery = {
               company: job.company, title: job.title, url: job.url,

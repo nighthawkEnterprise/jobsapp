@@ -97,3 +97,18 @@ create table feedback (
 );
 
 -- Storage: go to Storage → New bucket → name it "resumes", set to private
+
+create table if not exists token_usage (
+  id integer primary key default 1,
+  tailor_input bigint default 0,
+  tailor_output bigint default 0,
+  tailor_calls integer default 0,
+  score_input bigint default 0,
+  score_output bigint default 0,
+  score_calls integer default 0,
+  other_input bigint default 0,
+  other_output bigint default 0,
+  other_calls integer default 0,
+  updated_at timestamptz default now()
+);
+insert into token_usage (id) values (1) on conflict do nothing;

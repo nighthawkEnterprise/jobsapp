@@ -65,6 +65,24 @@ export async function deletePortal(company: string): Promise<void> {
   await supabase.from('portals').delete().eq('company', company);
 }
 
+export async function seedAllPortalsFromDirectory(): Promise<number> {
+  const { data } = await supabase
+    .from('company_directory')
+    .select('name, careers_url');
+
+  if (!data || data.length === 0) return 0;
+
+  const rows = data.map(r => ({ company: r.name as string, careers_url: r.careers_url as string }));
+
+  // Batch upsert in chunks to stay within Supabase request limits
+  const CHUNK = 100;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    await supabase.from('portals').upsert(rows.slice(i, i + CHUNK));
+  }
+
+  return rows.length;
+}
+
 function detectPlatform(url: string): Platform {
   if (url.includes('greenhouse.io')) return 'greenhouse';
   if (url.includes('ashbyhq.com')) return 'ashby';
@@ -79,21 +97,36 @@ function detectPlatform(url: string): Platform {
 }
 
 function extractPathSlug(url: string): string {
+  // Use first non-empty path segment — the company slug is always first in ATS board URLs.
+  // Last-segment logic silently breaks when URLs end in /jobs or /postings.
   const parts = new URL(url).pathname.split('/').filter(Boolean);
-  return parts[parts.length - 1] ?? '';
+  return parts[0] ?? '';
+}
+
+function extractGreenhouseSlug(url: string): string {
+  const parsed = new URL(url);
+  const host = parsed.hostname;
+  // Company-subdomain format: notion.greenhouse.io — slug is the first subdomain label.
+  if (host.endsWith('.greenhouse.io') &&
+      host !== 'boards.greenhouse.io' &&
+      host !== 'job-boards.greenhouse.io') {
+    return host.split('.')[0];
+  }
+  return extractPathSlug(url);
 }
 
 async function scanGreenhouse(company: string, url: string): Promise<ScannedJob[]> {
-  const slug = extractPathSlug(url);
-  const res = await fetch(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs`);
+  const slug = extractGreenhouseSlug(url);
+  const res = await fetch(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs?content=true`);
   if (!res.ok) throw new Error(`Greenhouse API ${res.status}`);
-  const data = await res.json() as { jobs: Array<{ title: string; absolute_url: string; location?: { name?: string }; updated_at?: string }> };
+  const data = await res.json() as { jobs: Array<{ title: string; absolute_url: string; location?: { name?: string }; updated_at?: string; content?: string }> };
   return (data.jobs ?? []).map(j => ({
     company,
     title: j.title,
     url: j.absolute_url,
     location: j.location?.name ?? '',
     postedAt: j.updated_at,
+    salary: j.content ? parseSalaryText(stripHtml(j.content)) : undefined,
   }));
 }
 
@@ -170,14 +203,29 @@ async function scanLever(company: string, url: string): Promise<ScannedJob[]> {
   const slug = extractPathSlug(url);
   const res = await fetch(`https://api.lever.co/v0/postings/${slug}`);
   if (!res.ok) throw new Error(`Lever API ${res.status}`);
-  const data = await res.json() as Array<{ text: string; hostedUrl: string; applyUrl?: string; categories?: { location?: string }; createdAt?: number }>;
-  return data.map(j => ({
-    company,
-    title: j.text,
-    url: j.hostedUrl || j.applyUrl || '',
-    location: j.categories?.location ?? '',
-    postedAt: j.createdAt ? new Date(j.createdAt).toISOString() : undefined,
-  }));
+  type LeverPosting = {
+    text: string; hostedUrl: string; applyUrl?: string;
+    categories?: { location?: string }; createdAt?: number;
+    salaryRange?: { min?: number; max?: number; currency?: string };
+    additional?: string;
+  };
+  const data = await res.json() as LeverPosting[];
+  return data.map(j => {
+    let salary: JobSalary | undefined;
+    if (j.salaryRange?.min || j.salaryRange?.max) {
+      salary = { min: j.salaryRange!.min, max: j.salaryRange!.max, currency: j.salaryRange!.currency ?? 'USD' };
+    } else if (j.additional) {
+      salary = parseSalaryText(stripHtml(j.additional));
+    }
+    return {
+      company,
+      title: j.text,
+      url: j.hostedUrl || j.applyUrl || '',
+      location: j.categories?.location ?? '',
+      postedAt: j.createdAt ? new Date(j.createdAt).toISOString() : undefined,
+      salary,
+    };
+  });
 }
 
 async function scanBambooHR(company: string, url: string): Promise<ScannedJob[]> {
@@ -283,7 +331,12 @@ export async function scanAllPortals(): Promise<ScanResult[]> {
 // --- Per-job description fetching ---
 
 function stripHtml(html: string): string {
-  return html.replace(/<[^>]+>/g, ' ').replace(/&[a-z]+;/gi, ' ').replace(/\s+/g, ' ').trim();
+  // Decode entity-encoded angle brackets before stripping tags so that
+  // Greenhouse-style responses (&lt;div&gt;) are handled correctly.
+  const decoded = html
+    .replace(/&lt;/gi, '<').replace(/&gt;/gi, '>')
+    .replace(/&amp;/gi, '&').replace(/&quot;/gi, '"').replace(/&#39;/gi, "'");
+  return decoded.replace(/<[^>]+>/g, ' ').replace(/&[a-z0-9#]+;/gi, ' ').replace(/\s+/g, ' ').trim();
 }
 
 async function fetchGreenhouseDescription(jobUrl: string): Promise<string> {
@@ -291,12 +344,14 @@ async function fetchGreenhouseDescription(jobUrl: string): Promise<string> {
   let id: string;
   let slug: string;
 
-  if (parsed.searchParams.has('gh_jid')) {
+  if (parsed.searchParams.has('gh_jid') && !parsed.hostname.includes('greenhouse.io')) {
     // Custom domain URL: https://company.com/careers/...?gh_jid=12345
+    // The slug is derived from the company hostname, not the path.
     id = parsed.searchParams.get('gh_jid')!;
     slug = parsed.hostname.replace(/^www\./, '').split('.')[0];
   } else {
-    // Standard URL: https://job-boards.greenhouse.io/{slug}/jobs/{id}
+    // Standard Greenhouse URL: https://job-boards.greenhouse.io/{slug}/jobs/{id}
+    // gh_jid may be present as a redundant param but the path is authoritative.
     const parts = parsed.pathname.split('/').filter(Boolean);
     id = parts[parts.length - 1];
     slug = parts[0];

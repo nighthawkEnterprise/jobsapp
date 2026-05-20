@@ -82,45 +82,83 @@ export default async function LandingPage() {
     <div className="-mt-8 -mb-8">
 
       {/* ════════ HERO */}
-      <section className="bg-[#1C1F2E] px-6 md:px-12 pt-20 pb-24">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 xl:gap-20 items-center">
+      <section className="bg-[#1C1F2E] px-6 md:px-12 pt-28 pb-32 lg:pt-32 lg:pb-40 relative overflow-hidden">
+        {/* Subtle grid texture */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0)',
+          backgroundSize: '40px 40px'
+        }} />
+        {/* Blue glow upper-right */}
+        <div className="absolute -top-40 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: 'radial-gradient(circle, rgba(59,91,219,0.12) 0%, transparent 70%)' }} />
+
+        <div className="max-w-7xl mx-auto relative">
+          <div className="grid lg:grid-cols-2 gap-16 xl:gap-20 items-center">
 
             {/* Left: Copy */}
             <div>
-              <div className="inline-flex items-center gap-2 bg-white/10 text-blue-300 text-xs font-medium px-3 py-1.5 rounded-full mb-8">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] inline-block" />
-                Greenhouse · Ashby · Lever · zero LLM cost for discovery
+              <div className="inline-flex items-center gap-2 bg-white/[0.08] border border-white/10 text-blue-300 text-xs font-semibold px-4 py-2 rounded-full mb-8 backdrop-blur-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] animate-pulse inline-block" />
+                Greenhouse · Ashby · Lever — zero LLM cost for discovery
               </div>
 
-              <div className="hero-hed mb-6">
-                <p className="font-heading font-semibold text-gray-400 text-2xl md:text-3xl mb-1 leading-snug">The job search</p>
-                <h1 className="font-heading font-extrabold text-white text-5xl md:text-6xl xl:text-7xl leading-[1.02] tracking-tight">Operating System.</h1>
+              <div className="hero-hed mb-10">
+                <p className="font-heading font-semibold text-gray-400 text-2xl lg:text-3xl xl:text-3xl mb-2 leading-snug">The job search</p>
+                <h1 className="font-heading font-extrabold text-white text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl leading-[1.02] tracking-tight">
+                  Operating<br />System.
+                </h1>
               </div>
 
-              <p className="hero-sub text-gray-400 text-lg leading-relaxed mb-10 max-w-md">
-                500,000+ live roles, scored and ranked before you read them. Tailored CVs from your real proof points. One pipeline from first click to offer.
+              <p className="hero-sub text-gray-300 text-lg xl:text-xl leading-relaxed mb-14 max-w-lg">
+                Every PM role at your target companies — scored 1–5 across four dimensions before you read them. Tailored CVs from your real proof points. One pipeline, first click to offer.
               </p>
 
               <div className="hero-cta">
                 {session ? (
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <a href="/dashboard" className="inline-flex items-center gap-2 bg-[#3B5BDB] text-white px-6 py-3.5 rounded-xl text-sm font-semibold hover:bg-[#3451c7] transition-colors shadow-lg shadow-blue-900/40">
+                  <div className="flex items-center gap-5 flex-wrap">
+                    <a href="/dashboard" className="inline-flex items-center gap-2.5 bg-[#3B5BDB] text-white px-7 py-4 rounded-xl text-sm font-bold hover:bg-[#3451c7] transition-all shadow-lg shadow-blue-900/50 hover:shadow-blue-900/70 hover:-translate-y-px">
                       Go to dashboard <ArrowRight className="w-4 h-4" />
                     </a>
-                    <a href="#how-it-works" className="text-sm text-gray-400 hover:text-white transition-colors">See how it works</a>
+                    <a href="#how-it-works" className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1">
+                      See how it works <ArrowRight className="w-3.5 h-3.5 opacity-60" />
+                    </a>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-5">
                     <WaitlistForm source="hero" variant="dark" />
-                    <a href="#how-it-works" className="block text-sm text-gray-500 hover:text-gray-300 transition-colors">See how it works →</a>
+                    <a href="#how-it-works" className="flex items-center gap-1.5 text-sm font-medium text-gray-300 hover:text-white transition-colors">
+                      See how it works <ArrowRight className="w-3.5 h-3.5 opacity-70" />
+                    </a>
                   </div>
                 )}
+              </div>
+
+              {/* Trust line */}
+              <div className="mt-10 flex items-center gap-3">
+                <div className="flex -space-x-2">
+                  {['bg-violet-500','bg-blue-500','bg-teal-500','bg-rose-500'].map((c,i) => (
+                    <div key={i} className={`w-7 h-7 rounded-full border-2 border-[#1C1F2E] ${c} flex items-center justify-center text-[9px] font-bold text-white`}>
+                      {['J','K','M','A'][i]}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500">PMs at Stripe, Google, Linear, and more actively searching</p>
               </div>
             </div>
 
             {/* Right: Animated scan demo */}
-            <div className="hero-terminal">
+            <div className="hero-terminal relative hidden lg:block">
+              {/* Multi-layer glow */}
+              <div className="absolute pointer-events-none"
+                style={{ inset: '-40px', background: 'radial-gradient(ellipse at 50% 55%, rgba(59,91,219,0.45) 0%, rgba(59,91,219,0.1) 45%, transparent 70%)', filter: 'blur(32px)' }} />
+              <div className="absolute pointer-events-none"
+                style={{ inset: '-10px', background: 'radial-gradient(ellipse at 50% 40%, rgba(120,140,255,0.15) 0%, transparent 60%)', filter: 'blur(16px)' }} />
+              <div className="relative">
+                <HeroScanDemo />
+              </div>
+            </div>
+            {/* Mobile: no glow */}
+            <div className="hero-terminal lg:hidden">
               <HeroScanDemo />
             </div>
 
@@ -129,20 +167,22 @@ export default async function LandingPage() {
       </section>
 
       {/* ════════ COMPANY STRIP */}
-      <section className="bg-white border-b border-gray-100 py-10 overflow-hidden">
-        <p className="text-xs font-semibold text-gray-400 tracking-widest uppercase text-center mb-7 px-6">
-          Used by people targeting roles at
+      <section className="bg-white border-b border-gray-100 py-8 overflow-hidden">
+        <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase text-center mb-6 px-6">
+          Used by PMs targeting roles at
         </p>
-        <div className="overflow-hidden">
-          <div className="marquee-track flex items-center w-max">
+        <div className="overflow-hidden relative">
+          {/* Fade edges */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+          <div className="marquee-track flex items-center w-max gap-3">
             {[...companyLogos, ...companyLogos].map((co, i) => (
-              <img
+              <span
                 key={i}
-                src={`https://www.google.com/s2/favicons?domain=${co.domain}&sz=128`}
-                alt={co.name}
-                title={co.name}
-                className="logo-strip-item h-8 w-8 mx-10 shrink-0 rounded-lg object-contain"
-              />
+                className="logo-strip-item text-xs font-semibold text-gray-500 bg-gray-50 border border-gray-100 px-4 py-2 rounded-full shrink-0 whitespace-nowrap"
+              >
+                {co.name}
+              </span>
             ))}
           </div>
         </div>

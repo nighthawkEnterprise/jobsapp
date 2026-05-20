@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { SkeletonStoryCard, Skeleton } from '@/components/Skeleton';
 
 export default function StoriesPage() {
   const [stories, setStories] = useState<any[]>([]);
@@ -54,7 +55,24 @@ export default function StoriesPage() {
     });
   };
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading stories...</div>;
+  if (loading) return (
+    <div className="max-w-6xl mx-auto px-6">
+      <div className="flex justify-between items-center mb-8">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-4 w-72" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <SkeletonStoryCard />
+          <SkeletonStoryCard />
+          <SkeletonStoryCard />
+        </div>
+        <Skeleton className="h-96 rounded-xl" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-6xl mx-auto px-6">

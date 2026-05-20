@@ -304,6 +304,39 @@ export default function OnboardingPage() {
   const handleFinish = async () => {
     setSaving(true);
     try {
+      const allDealbreakers = nsCustomDealbreaker.trim()
+        ? [...nsDealbreakers, nsCustomDealbreaker.trim()]
+        : nsDealbreakers;
+
+      // Build structured profile in NorthStarEditor markdown format so Settings
+      // can parse "Who I Am", "Target Archetypes", and "Compensation Targets".
+      const lines: string[] = ['# Career Profile — North Star Archetypes', ''];
+
+      lines.push('## Who I Am', '', northStar.trim(), '');
+
+      lines.push('## Target Archetypes', '');
+      if (nsStage || nsDomains.length > 0 || nsPriorities.length > 0) {
+        const archetypeName =
+          [nsStage, ...nsDomains.slice(0, 2)].filter(Boolean).join(' / ') || 'Primary Target';
+        lines.push(`### Archetype 1 — ${archetypeName} ${'⭐'.repeat(3)}`);
+        lines.push(`**Companies:** ${targetCompanies.slice(0, 5).join(', ')}`, '');
+        lines.push('**What makes a role a perfect fit:**');
+        nsPriorities.forEach(p => lines.push(`- ${p}`));
+        lines.push('');
+        lines.push('**What I bring:** ');
+        lines.push('', '---', '');
+      }
+
+      lines.push('## Anti-targets (roles that would be a step down or misalignment)');
+      allDealbreakers.forEach(d => lines.push(`- ${d}`));
+      lines.push('');
+
+      lines.push('## Compensation Targets');
+      if (salaryFloor > 0) lines.push(`- Base: $${salaryFloor.toLocaleString()}+`);
+      lines.push('');
+
+      const structuredProfile = lines.join('\n');
+
       const res = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -318,7 +351,7 @@ export default function OnboardingPage() {
             roleType: '',
             workStyle: workStyles.join(', '),
           },
-          profile: northStar,
+          profile: structuredProfile,
         }),
       });
       if (!res.ok) throw new Error(await res.text());

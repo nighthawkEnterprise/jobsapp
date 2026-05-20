@@ -1,19 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Briefcase, FileText, MessageSquare } from 'lucide-react';
 
 import DetailsTab from '@/components/job-tabs/details/DetailsTab';
 import TailorTab from '@/components/job-tabs/tailor/TailorTab';
 import PrepTab from '@/components/job-tabs/prep/PrepTab';
+import { Skeleton, SkeletonJobDetailHeader } from '@/components/Skeleton';
 
 export default function JobDetailPage() {
   const { id } = useParams();
+  const searchParams = useSearchParams();
   const [job, setJob] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'details' | 'tailor' | 'prep'>('details');
+  const initialTab = (searchParams.get('tab') as 'details' | 'tailor' | 'prep') ?? 'details';
+  const [activeTab, setActiveTab] = useState<'details' | 'tailor' | 'prep'>(initialTab);
 
   useEffect(() => {
     fetch('/api/jobs').then(res => res.json()).then(data => {
@@ -23,7 +26,22 @@ export default function JobDetailPage() {
     });
   }, [id]);
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading job details...</div>;
+  if (loading) return (
+    <div className="max-w-6xl mx-auto px-6">
+      <Skeleton className="h-4 w-32 mb-6" />
+      <SkeletonJobDetailHeader />
+      <div className="flex gap-2 border-b border-gray-100 mb-8">
+        {[0, 1, 2].map(i => <Skeleton key={i} className="h-8 w-32 mb-1 rounded-none rounded-t-lg" />)}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-3">
+          <Skeleton className="h-4 w-48" />
+          <Skeleton className="h-64 w-full" />
+        </div>
+        <Skeleton className="h-48 w-full" />
+      </div>
+    </div>
+  );
   if (!job) return <div className="p-8 text-center text-gray-500">Job not found</div>;
 
   return (

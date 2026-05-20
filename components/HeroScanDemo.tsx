@@ -141,25 +141,25 @@ export function HeroScanDemo() {
   const isScanning = phase === 'scanning';
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
+    <div className="bg-white rounded-2xl overflow-hidden shadow-[0_48px_120px_rgba(0,0,0,0.7),0_16px_48px_rgba(59,91,219,0.25),0_0_0_1px_rgba(255,255,255,0.08)]">
 
       {/* ── Browser chrome ── */}
-      <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b border-gray-100">
+      <div className="flex items-center gap-3 px-4 py-3.5 bg-gray-50 border-b border-gray-100">
         <div className="flex gap-1.5">
           <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
           <div className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
           <div className="w-3 h-3 rounded-full bg-[#28C840]" />
         </div>
-        <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-gray-400 border border-gray-200 text-center mx-2 transition-all duration-500">
+        <div className="flex-1 bg-white rounded-md px-3 py-1.5 text-xs text-gray-400 border border-gray-200 text-center mx-2 transition-all duration-500 font-mono">
           {URL[phase]}
         </div>
       </div>
 
       {/* ── Step indicator ── */}
-      <div className="px-3 py-2 border-b border-gray-100 flex items-center">
+      <div className="px-4 py-2.5 border-b border-gray-100 flex items-center">
         {STEPS.map((step, i) => (
           <div key={step.label} className="flex items-center flex-1 last:flex-none">
-            <div className={`flex items-center gap-1 transition-all duration-300 ${
+            <div className={`flex items-center gap-1.5 transition-all duration-300 ${
               i === stepIdx ? 'text-[#3B5BDB]' : i < stepIdx ? 'text-green-500' : 'text-gray-300'
             }`}>
               <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold border flex-shrink-0 transition-all duration-300 ${
@@ -172,74 +172,75 @@ export function HeroScanDemo() {
               <span className="text-[10px] font-semibold">{step.label}</span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`flex-1 h-px mx-1.5 transition-all duration-500 ${i < stepIdx ? 'bg-green-300' : 'bg-gray-100'}`} />
+              <div className={`flex-1 h-px mx-2 transition-all duration-500 ${i < stepIdx ? 'bg-green-300' : 'bg-gray-100'}`} />
             )}
           </div>
         ))}
       </div>
 
       {/* ── Phase content ── */}
-      <div className="h-[348px] overflow-hidden">
+      <div className="h-[480px] overflow-hidden">
 
         {/* ════ SCAN ════ */}
         {(phase === 'scanning' || phase === 'revealing' || phase === 'jobs') && (
           <div className="flex flex-col h-full">
-            <div className="px-5 pt-3.5 pb-3 flex items-center justify-between border-b border-gray-100 flex-shrink-0">
+            <div className="px-5 pt-4 pb-3.5 flex items-center justify-between border-b border-gray-100 flex-shrink-0">
               <div>
-                <p className="text-sm font-semibold text-gray-900">Relevant Jobs</p>
+                <p className="text-sm font-bold text-gray-900">Relevant Jobs</p>
                 <p className="text-xs text-gray-400 mt-0.5 flex items-center gap-1.5">
                   {isScanning
                     ? <><span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block" /> Scanning {SCANNED[Math.min(checked, SCANNED.length - 1)]}…</>
-                    : <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" /> {SCAN_JOBS.length} new matches · 2 duplicates skipped</>
+                    : <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" /> {SCAN_JOBS.length} PM roles matched · 2 duplicates skipped</>
                   }
                 </p>
               </div>
-              <button className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${isScanning ? 'bg-gray-100 text-gray-400' : 'bg-[#3B5BDB] text-white'}`}>
+              <button className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${isScanning ? 'bg-gray-100 text-gray-400' : 'bg-[#3B5BDB] text-white shadow-sm'}`}>
                 {isScanning ? 'Scanning…' : 'Scan now'}
               </button>
             </div>
 
             {isScanning && (
-              <div className="px-5 py-2.5 border-b border-gray-100 flex-shrink-0">
-                <div className="flex justify-between mb-1.5">
-                  <span className="text-[10px] text-gray-400">Scanning ATS portals</span>
-                  <span className="text-[10px] text-gray-500 font-medium">{scanPct}%</span>
+              <div className="px-5 py-3 border-b border-gray-100 flex-shrink-0">
+                <div className="flex justify-between mb-2">
+                  <span className="text-[10px] text-gray-500 font-semibold">Scanning ATS portals</span>
+                  <span className="text-[10px] text-[#3B5BDB] font-bold">{scanPct}%</span>
                 </div>
-                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                  <div className="h-full bg-[#3B5BDB] rounded-full transition-all duration-75" style={{ width: `${scanPct}%` }} />
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#3B5BDB] rounded-full transition-all duration-75 shadow-sm shadow-blue-200" style={{ width: `${scanPct}%` }} />
                 </div>
-                <div className="mt-2 flex flex-wrap gap-1 min-h-[18px]">
+                <div className="mt-3 flex flex-wrap gap-1.5 min-h-[24px]">
                   {SCANNED.slice(0, checked).map((c, i) => (
-                    <span key={i} className="text-[9px] bg-green-50 text-green-600 border border-green-200 px-1.5 py-0.5 rounded font-medium">{c} ✓</span>
+                    <span key={i} className="text-[9px] bg-green-50 text-green-600 border border-green-200 px-2 py-0.5 rounded-full font-semibold">✓ {c}</span>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="flex-1 p-3 space-y-2 overflow-hidden">
+            <div className="flex-1 px-4 py-3 space-y-2 overflow-hidden">
               {isScanning ? (
-                <div className="flex flex-col items-center justify-center h-full gap-2">
-                  <div className="w-5 h-5 border-2 border-[#3B5BDB] border-t-transparent rounded-full animate-spin" />
+                <div className="flex flex-col items-center justify-center h-full gap-3">
+                  <div className="w-6 h-6 border-2 border-[#3B5BDB] border-t-transparent rounded-full animate-spin" />
                   <p className="text-xs text-gray-400">Scanning job boards…</p>
                 </div>
               ) : SCAN_JOBS.slice(0, visibleJobs).map((job, i) => (
                 <div key={job.company}
-                  className={`flex items-center justify-between px-4 py-2.5 rounded-xl border transition-all duration-300 ${
-                    phase === 'jobs' && i === 0 ? 'border-[#3B5BDB] bg-blue-50/40 ring-1 ring-[#3B5BDB]/20' : 'border-gray-100 bg-white'
+                  className={`flex items-center justify-between px-4 py-3 rounded-xl border transition-all duration-300 ${
+                    phase === 'jobs' && i === 0 ? 'border-[#3B5BDB] bg-blue-50/40 ring-1 ring-[#3B5BDB]/20 shadow-sm' : 'border-gray-100 bg-white hover:border-gray-200'
                   }`}
                   style={{ animation: 'heroCardIn 0.3s ease-out both' }}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${job.bg}`}>{job.initials}</div>
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${job.bg}`}>{job.initials}</div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{job.company}</p>
                       <p className="text-xs text-gray-400 truncate">{job.title}</p>
+                      <p className="text-[10px] text-emerald-600 font-semibold mt-0.5">{job.salary}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 ml-3 flex-shrink-0">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${job.sc}`}>{job.score}</span>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-lg border ${job.sc}`}>{job.score}</span>
                     {phase === 'jobs' && i === 0 && (
-                      <span className="text-[10px] font-semibold bg-[#3B5BDB] text-white px-2 py-0.5 rounded-lg" style={{ animation: 'heroCardIn 0.3s ease-out 0.15s both' }}>
+                      <span className="text-[10px] font-bold bg-[#3B5BDB] text-white px-2.5 py-1 rounded-lg shadow-sm" style={{ animation: 'heroCardIn 0.3s ease-out 0.15s both' }}>
                         + Track
                       </span>
                     )}
@@ -255,33 +256,38 @@ export function HeroScanDemo() {
           <div className="flex flex-col h-full" style={{ animation: 'heroCardIn 0.38s ease-out both' }}>
             <div className="px-5 pt-3.5 pb-3 border-b border-gray-100 flex-shrink-0">
               <p className="text-sm font-semibold text-gray-900">Pipeline</p>
-              <p className="text-xs text-gray-400 mt-0.5">Added to pipeline · just now</p>
+              <p className="text-xs text-gray-400 mt-0.5">1 role tracked · just now</p>
             </div>
             <div className="flex-1 px-5 py-4 flex flex-col gap-4">
-              <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-xl">
-                <div className="w-9 h-9 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0">St</div>
-                <div className="min-w-0">
+              <div className="flex items-center gap-3 p-3.5 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div className="w-10 h-10 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0">St</div>
+                <div className="min-w-0 flex-grow">
                   <p className="text-sm font-semibold text-gray-900">Stripe — PM, Payments Core</p>
-                  <p className="text-xs text-gray-400">$180–220k · Greenhouse · Remote</p>
+                  <p className="text-xs text-gray-400 mt-0.5">$180–220k · Greenhouse · Remote</p>
                 </div>
-                <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-lg bg-green-50 text-green-700 border border-green-200 flex-shrink-0">4.9</span>
+                <span className="ml-auto text-sm font-black px-2.5 py-1 rounded-xl bg-green-50 text-green-700 border border-green-200 flex-shrink-0">4.9</span>
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 font-medium mb-2 uppercase tracking-wide">Status</p>
+                <p className="text-[10px] text-gray-400 font-bold mb-2 uppercase tracking-widest">Application stage</p>
                 <div className="flex gap-1">
                   {PIPELINE_STAGES.map((stage, i) => (
-                    <div key={stage} className={`flex-1 text-center text-[9px] font-semibold py-1.5 rounded-lg transition-all duration-500 ${
-                      i < pipelineIdx ? 'bg-blue-50 text-blue-400'
-                      : i === pipelineIdx ? 'bg-[#3B5BDB] text-white shadow-sm'
+                    <div key={stage} className={`flex-1 text-center text-[9px] font-bold py-2 rounded-lg transition-all duration-500 ${
+                      i < pipelineIdx ? 'bg-blue-50 text-blue-500'
+                      : i === pipelineIdx ? 'bg-[#3B5BDB] text-white shadow-md shadow-blue-200'
                       : 'bg-gray-50 text-gray-300'
                     }`}>{stage}</div>
                   ))}
                 </div>
               </div>
+              <div className="flex gap-3 text-[10px] font-semibold">
+                {[['CV Match','4/5','bg-green-50 text-green-700 border-green-200'],['North Star','5/5','bg-green-50 text-green-700 border-green-200'],['Comp','5/5','bg-green-50 text-green-700 border-green-200'],['Culture','4/5','bg-green-50 text-green-700 border-green-200']].map(([l,s,c]) => (
+                  <span key={l} className={`px-2 py-1 rounded-lg border flex-1 text-center ${c}`}>{l}<br/><strong>{s}</strong></span>
+                ))}
+              </div>
               <div className="flex-1 bg-gray-50 rounded-xl p-3.5 border border-gray-100 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Follow-up</p>
-                  <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Due in 5 days</span>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Notes</p>
+                  <span className="text-[10px] font-semibold text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">Follow-up in 5 days</span>
                 </div>
                 <p className="text-xs text-gray-600 leading-relaxed">Applied via Greenhouse. Strong match for API redesign story. Follow up with recruiter by May 23.</p>
               </div>

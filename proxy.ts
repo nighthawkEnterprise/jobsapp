@@ -1,6 +1,5 @@
 import { auth0 } from "@/lib/auth0";
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const PROTECTED = [
   '/dashboard',
@@ -17,34 +16,7 @@ const PROTECTED = [
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Handle logout locally — clears cookies then does Auth0 SSO logout so both
-  // the app session and the Auth0 session are terminated.
-  if (pathname === '/auth/logout') {
-    const clearCookies = (response: NextResponse) => {
-      response.cookies.delete('appSession');
-      for (let i = 0; i < 5; i++) response.cookies.delete(`appSession.${i}`);
-      response.cookies.delete('mock_auth_session');
-      return response;
-    };
-
-    // Mock dev sessions don't have an Auth0 SSO session to terminate.
-    if (request.cookies.has('mock_auth_session')) {
-      return clearCookies(NextResponse.redirect(new URL('/', request.url)));
-    }
-
-    const domain   = process.env.AUTH0_DOMAIN ?? '';
-    const clientId = process.env.AUTH0_CLIENT_ID ?? '';
-    const baseUrl  = process.env.APP_BASE_URL ?? new URL('/', request.url).href;
-    if (!domain) {
-      return clearCookies(NextResponse.redirect(new URL('/', request.url)));
-    }
-
-    const auth0LogoutUrl =
-      `https://${domain}/v2/logout?client_id=${clientId}&returnTo=${encodeURIComponent(baseUrl)}`;
-    return clearCookies(NextResponse.redirect(auth0LogoutUrl));
-  }
-
-  // Always let Auth0 handle its own routes first
+  // Always let Auth0 handle its own routes first (login, callback, logout, profile)
   const authResponse = await auth0.middleware(request);
   if (pathname.startsWith('/auth/') || pathname.startsWith('/api/auth/')) {
     return authResponse;
@@ -56,13 +28,13 @@ export async function proxy(request: NextRequest) {
   );
   if (!isProtected) return authResponse;
 
-  // Dev mode: mock cookie stands in for a real session
+  // SDK default cookie is __session (chunked as __session.0, __session.1, …)
   const isDev = process.env.NODE_ENV === 'development';
   const allCookieNames = [...request.cookies.getAll().map(c => c.name)];
   if (isDev) console.log('[proxy] cookies on', pathname, ':', allCookieNames);
   const hasSession = isDev
-    ? request.cookies.has('mock_auth_session') || request.cookies.has('appSession') || request.cookies.has('appSession.0')
-    : request.cookies.has('appSession') || request.cookies.has('appSession.0');
+    ? request.cookies.has('mock_auth_session') || request.cookies.has('__session') || request.cookies.has('__session.0')
+    : request.cookies.has('__session') || request.cookies.has('__session.0');
 
   if (!hasSession) {
     const loginUrl = new URL('/auth/login', request.url);

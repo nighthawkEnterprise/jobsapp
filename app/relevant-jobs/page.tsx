@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Target, RefreshCw, ExternalLink, Plus, Check, AlertCircle, ChevronDown, ChevronUp, EyeOff, RotateCcw, Search, X, Trash2 } from 'lucide-react';
+import { Target, RefreshCw, ExternalLink, Plus, Check, ChevronDown, ChevronUp, EyeOff, RotateCcw, Search, X, Trash2 } from 'lucide-react';
 import { Toast } from '@/components/Toast';
+import { Skeleton } from '@/components/Skeleton';
 import type { Portal } from '@/lib/scanner';
 
 interface CompanyEntry { name: string; slug: string; ats: string; careers_url: string; }
@@ -40,8 +41,8 @@ function timeAgo(iso: string): string {
 function relativeDate(iso?: string): string | null {
   if (!iso) return null;
   const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
-  if (days === 0) return 'today';
-  if (days === 1) return 'yesterday';
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
   if (days < 7) return `${days}d ago`;
   if (days < 30) return `${Math.floor(days / 7)}w ago`;
   if (days < 365) return `${Math.floor(days / 30)}mo ago`;
@@ -57,209 +58,49 @@ function formatSalary(salary?: JobSalary): string | null {
   return null;
 }
 
-function platformFromUrl(url: string): string {
-  if (url.includes('greenhouse.io')) return 'greenhouse';
-  if (url.includes('ashbyhq.com'))   return 'ashby';
-  if (url.includes('lever.co'))      return 'lever';
-  return 'other';
+function getJobTags(job: Discovery): string[] {
+  const tags: string[] = [];
+  for (const reason of job.scoreReasons) {
+    const m = reason.match(/domain of interest "([^"]+)"/i);
+    if (m) tags.push(m[1]);
+  }
+  if (job.location?.toLowerCase().includes('remote') && !tags.includes('Remote')) {
+    tags.push('Remote');
+  }
+  return tags.slice(0, 4);
 }
 
-function scoreColor(score: number) {
-  if (score >= 4.5) return { bg: 'bg-green-50 border-green-200', text: 'text-green-700', ring: 'hover:ring-green-300' };
-  if (score >= 4.0) return { bg: 'bg-blue-50 border-blue-100',   text: 'text-blue-600',  ring: 'hover:ring-blue-300' };
-  if (score >= 3.5) return { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', ring: 'hover:ring-amber-300' };
-  return             { bg: 'bg-red-50 border-red-200',           text: 'text-red-600',   ring: 'hover:ring-red-300' };
+function scoreStyle(score: number): { bg: string; text: string; border: string } {
+  if (score >= 4.5) return { bg: 'bg-green-50',  text: 'text-green-700',  border: 'border-green-200' };
+  if (score >= 4.0) return { bg: 'bg-blue-50',   text: 'text-blue-700',   border: 'border-blue-200' };
+  if (score >= 3.5) return { bg: 'bg-amber-50',  text: 'text-amber-700',  border: 'border-amber-200' };
+  return               { bg: 'bg-red-50',    text: 'text-red-600',    border: 'border-red-200' };
 }
 
-function JobCard({
-  job,
-  onAdd,
-  isAdding,
-  onDismiss,
-  isDismissing,
-  onRestore,
-  isRestoring,
-}: {
-  job: Discovery;
-  onAdd: (job: Discovery) => void;
-  isAdding: boolean;
-  onDismiss?: (job: Discovery) => void;
-  isDismissing?: boolean;
-  onRestore?: (job: Discovery) => void;
-  isRestoring?: boolean;
-}) {
-  const [showReasons, setShowReasons] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const [description, setDescription] = useState<string | null>(null);
-  const [loadingDesc, setLoadingDesc] = useState(false);
-  const canFetchJD = platformFromUrl(job.url) !== 'other';
-
-  const toggleDescription = async () => {
-    if (!expanded && description === null) {
-      setLoadingDesc(true);
-      try {
-        const res = await fetch('/api/fetch-jd', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ url: job.url }),
-        });
-        const data = await res.json() as { description: string; unsupported: boolean };
-        if (data.description) {
-          setDescription(data.description);
-        } else if (data.unsupported) {
-          setLoadingDesc(false);
-          window.open(job.url, '_blank', 'noopener,noreferrer');
-          return;
-        } else {
-          setDescription('(Could not load description — the job page may require login or the URL may have changed.)');
-        }
-      } catch {
-        setDescription('(Failed to load description — check your connection.)');
-      } finally {
-        setLoadingDesc(false);
-      }
-    }
-    setExpanded(v => !v);
-  };
-
-  const { bg, text, ring } = scoreColor(job.score);
-  const pay = formatSalary(job.salary);
-  const posted = relativeDate(job.postedAt);
-
+function CompanyAvatar({ name }: { name: string }) {
+  const palettes = [
+    'bg-blue-100 text-blue-700',
+    'bg-violet-100 text-violet-700',
+    'bg-teal-100 text-teal-700',
+    'bg-orange-100 text-orange-700',
+    'bg-rose-100 text-rose-700',
+    'bg-indigo-100 text-indigo-700',
+    'bg-emerald-100 text-emerald-700',
+    'bg-amber-100 text-amber-700',
+  ];
+  const idx = name.charCodeAt(0) % palettes.length;
   return (
-    <div className={`bg-white border rounded-xl ${job.alreadyTracked ? 'opacity-50' : 'shadow-sm hover:shadow-md transition-shadow'}`}>
-      {/* Main row */}
-      <div className="px-5 py-4 flex items-center gap-4">
-
-        {/* Clickable score badge */}
-        <button
-          onClick={() => setShowReasons(v => !v)}
-          title="Click to see score breakdown"
-          className={`flex-none flex flex-col items-center justify-center h-14 w-14 rounded-lg border transition-all ring-2 ring-transparent ${bg} ${ring} ${showReasons ? 'ring-opacity-100' : 'ring-opacity-0'}`}
-        >
-          <div className={`text-lg font-black leading-none ${text}`}>{job.score.toFixed(1)}</div>
-          <div className="text-[8px] font-bold uppercase tracking-wider text-gray-400 mt-0.5">/ 5</div>
-        </button>
-
-        {/* Title + meta */}
-        <div className="flex-grow min-w-0">
-          <div className="font-semibold text-gray-900 truncate">{job.title}</div>
-          <div className="flex items-center gap-2 flex-wrap mt-0.5">
-            <span className="text-sm text-gray-500">
-              {job.company}{job.location ? <> &middot; {job.location}</> : null}
-            </span>
-            {pay && (
-              <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
-                {pay}
-              </span>
-            )}
-            {posted && (
-              <span className="text-xs text-gray-400">{posted}</span>
-            )}
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex-none flex items-center gap-1.5">
-          <button
-            onClick={canFetchJD ? toggleDescription : () => window.open(job.url, '_blank', 'noopener,noreferrer')}
-            className="p-2 text-gray-400 hover:text-gray-700 transition-colors"
-            title={canFetchJD ? (expanded ? 'Hide description' : 'Show description') : 'Open on job site'}
-          >
-            {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          <a
-            href={job.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2 text-gray-400 hover:text-gray-700 transition-colors"
-            title="Open job posting"
-          >
-            <ExternalLink className="w-4 h-4" />
-          </a>
-          {onDismiss && (
-            <button
-              onClick={() => onDismiss(job)}
-              disabled={isDismissing}
-              className="p-2 text-gray-300 hover:text-gray-500 disabled:opacity-50 transition-colors"
-              title="Not interested"
-            >
-              <EyeOff className="w-4 h-4" />
-            </button>
-          )}
-          {onRestore && (
-            <button
-              onClick={() => onRestore(job)}
-              disabled={isRestoring}
-              className="flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 border border-gray-200 px-3 py-1.5 rounded-lg disabled:opacity-50 transition-all"
-              title="Restore to relevant jobs"
-            >
-              <RotateCcw className="w-3 h-3" />
-              {isRestoring ? 'Restoring…' : 'Restore'}
-            </button>
-          )}
-          {job.alreadyTracked ? (
-            <span className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg">
-              <Check className="w-3 h-3" /> Tracked
-            </span>
-          ) : (
-            <button
-              onClick={() => onAdd(job)}
-              disabled={isAdding}
-              className="flex items-center gap-1.5 text-xs font-semibold bg-blue-600 text-white px-3 py-1.5 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all"
-            >
-              <Plus className="w-3 h-3" />
-              {isAdding ? 'Adding…' : 'Add to Pipeline'}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Score reasons panel */}
-      {showReasons && (
-        <div className="px-5 pb-4 border-t border-gray-50">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-3 mb-2">
-            Discover Score Breakdown
-            <span className="ml-1 normal-case font-normal text-gray-300">(rule-based — add JD for full LLM analysis)</span>
-          </p>
-          {job.scoreReasons.length > 0 ? (
-            <ul className="space-y-1">
-              {job.scoreReasons.map((r, i) => (
-                <li key={i} className="text-xs text-gray-500 flex items-start gap-1.5">
-                  <span className="text-gray-300 mt-0.5">•</span>
-                  {r}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-xs text-gray-400">No scoring detail available.</p>
-          )}
-        </div>
-      )}
-
-      {/* Description panel */}
-      {expanded && (
-        <div className="px-5 pb-5 border-t border-gray-100">
-          {loadingDesc ? (
-            <div className="pt-4 text-xs text-gray-400 flex items-center gap-2">
-              <RefreshCw className="w-3 h-3 animate-spin" /> Loading description…
-            </div>
-          ) : (
-            <p className="pt-4 text-sm text-gray-700 leading-relaxed whitespace-pre-line">
-              {description}
-            </p>
-          )}
-        </div>
-      )}
+    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-none ${palettes[idx]}`}>
+      {name.slice(0, 2).toUpperCase()}
     </div>
   );
 }
 
 function FilterSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">{label}</p>
-      <div className="space-y-1">{children}</div>
+    <div className="mb-5">
+      <p className="text-xs font-semibold text-gray-500 mb-2">{label}</p>
+      <div className="space-y-2">{children}</div>
     </div>
   );
 }
@@ -267,10 +108,10 @@ function FilterSection({ label, children }: { label: string; children: React.Rea
 function RadioOption({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick} className="flex items-center gap-2.5 w-full text-left group">
-      <span className={`w-3.5 h-3.5 rounded-full border-2 flex-none transition-colors ${
-        active ? 'border-blue-500 bg-blue-500' : 'border-gray-300 group-hover:border-gray-400'
+      <span className={`w-4 h-4 rounded-full border-2 flex-none flex items-center justify-center transition-colors ${
+        active ? 'border-[#3B5BDB] bg-[#3B5BDB]' : 'border-gray-300 group-hover:border-gray-400'
       }`}>
-        {active && <span className="block w-1 h-1 rounded-full bg-white mx-auto mt-[2px]" />}
+        {active && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
       </span>
       <span className={`text-sm transition-colors ${active ? 'text-gray-900 font-semibold' : 'text-gray-500 group-hover:text-gray-700'}`}>
         {label}
@@ -282,11 +123,11 @@ function RadioOption({ label, active, onClick }: { label: string; active: boolea
 function CheckOption({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
     <button onClick={() => onChange(!checked)} className="flex items-center gap-2.5 w-full text-left group">
-      <span className={`w-3.5 h-3.5 rounded border-2 flex-none flex items-center justify-center transition-colors ${
-        checked ? 'border-blue-500 bg-blue-500' : 'border-gray-300 group-hover:border-gray-400'
+      <span className={`w-4 h-4 rounded border-2 flex-none flex items-center justify-center transition-colors ${
+        checked ? 'border-[#3B5BDB] bg-[#3B5BDB]' : 'border-gray-300 group-hover:border-gray-400'
       }`}>
         {checked && (
-          <svg className="w-2 h-2 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         )}
@@ -298,13 +139,176 @@ function CheckOption({ label, checked, onChange }: { label: string; checked: boo
   );
 }
 
+function JobCard({
+  job, onAdd, isAdding, onDismiss, isDismissing, onRestore, isRestoring,
+}: {
+  job: Discovery;
+  onAdd: (job: Discovery) => void;
+  isAdding: boolean;
+  onDismiss?: (job: Discovery) => void;
+  isDismissing?: boolean;
+  onRestore?: (job: Discovery) => void;
+  isRestoring?: boolean;
+}) {
+  const [showReasons, setShowReasons] = useState(false);
+  const tags = getJobTags(job);
+  const pay = formatSalary(job.salary);
+  const posted = relativeDate(job.postedAt);
+  const { bg, text, border } = scoreStyle(job.score);
+
+  return (
+    <div className={`bg-white border rounded-2xl overflow-hidden transition-all ${
+      job.alreadyTracked
+        ? 'border-gray-100 opacity-70'
+        : 'border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300'
+    }`}>
+      {/* Main body */}
+      <div className="p-5">
+        <div className="flex gap-4 items-start">
+
+          {/* Score badge */}
+          <div className={`w-16 h-16 rounded-xl flex-none flex flex-col items-center justify-center border-2 ${bg} ${border}`}>
+            <span className={`text-2xl font-black leading-none ${text}`}>{job.score.toFixed(1)}</span>
+            <span className="text-[9px] text-gray-400 font-medium mt-0.5">/ 5</span>
+          </div>
+
+          {/* Info */}
+          <div className="flex-grow min-w-0">
+            <div className="flex items-start gap-2.5">
+              <CompanyAvatar name={job.company} />
+              <h3 className="font-bold text-gray-900 text-[15px] leading-snug">{job.title}</h3>
+            </div>
+            <div className="flex items-center gap-1.5 mt-1.5 pl-[42px] text-sm flex-wrap">
+              <span className="font-medium text-gray-700">{job.company}</span>
+              {job.location && (
+                <>
+                  <span className="text-gray-300">·</span>
+                  <span className="text-gray-500">{job.location}</span>
+                </>
+              )}
+              {pay && (
+                <>
+                  <span className="text-gray-300">·</span>
+                  <span className="text-emerald-600 font-semibold">{pay}</span>
+                </>
+              )}
+            </div>
+            {tags.length > 0 && (
+              <div className="flex gap-1.5 mt-2 pl-[42px] flex-wrap">
+                {tags.map(tag => (
+                  <span key={tag} className="px-2.5 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full font-medium">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Right column: time + dismiss */}
+          <div className="flex-none flex flex-col items-end gap-1.5">
+            {posted && <span className="text-xs text-gray-400 whitespace-nowrap">{posted}</span>}
+            <div className="flex items-center gap-0.5">
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 text-gray-300 hover:text-gray-600 rounded-lg hover:bg-gray-50 transition-colors"
+                title="Open on job site"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              {onDismiss && (
+                <button
+                  onClick={() => onDismiss(job)}
+                  disabled={isDismissing}
+                  className="p-1.5 text-gray-300 hover:text-gray-500 disabled:opacity-50 rounded-lg hover:bg-gray-50 transition-colors"
+                  title="Not interested"
+                >
+                  <EyeOff className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Score reasons */}
+      {showReasons && (
+        <div className="px-5 pb-4 bg-gray-50 border-t border-gray-100">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider pt-3 mb-2">
+            Score breakdown
+            <span className="ml-1 normal-case font-normal text-gray-300">(rule-based · AI analysis runs after you add to pipeline)</span>
+          </p>
+          {job.scoreReasons.length > 0 ? (
+            <ul className="space-y-1">
+              {job.scoreReasons.map((r, i) => (
+                <li key={i} className="text-xs text-gray-500 flex items-start gap-1.5">
+                  <span className="text-gray-300 mt-0.5 flex-none">·</span>
+                  {r}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-xs text-gray-400">No scoring detail available.</p>
+          )}
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between">
+        <button
+          onClick={() => setShowReasons(v => !v)}
+          className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          {showReasons ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          Score breakdown
+        </button>
+
+        <div className="flex items-center gap-2">
+          {onRestore && (
+            <button
+              onClick={() => onRestore(job)}
+              disabled={isRestoring}
+              className="flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg disabled:opacity-50 transition-all"
+            >
+              <RotateCcw className="w-3 h-3" />
+              {isRestoring ? 'Restoring…' : 'Restore'}
+            </button>
+          )}
+          <a
+            href={job.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            View Original
+          </a>
+          {job.alreadyTracked ? (
+            <span className="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 border border-green-200 px-3 py-1.5 rounded-lg">
+              <Check className="w-3 h-3" /> In Pipeline
+            </span>
+          ) : (
+            <button
+              onClick={() => onAdd(job)}
+              disabled={isAdding}
+              className="flex items-center gap-1.5 text-sm font-semibold bg-[#1C1F2E] text-white px-4 py-2 rounded-lg hover:bg-black disabled:opacity-50 transition-all shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              {isAdding ? 'Adding…' : 'Add to Pipeline'}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function RelevantJobsPage() {
   const [cache, setCache] = useState<ScanCache | null>(null);
   const [scanning, setScanning] = useState(false);
   const [adding, setAdding] = useState<Set<string>>(new Set());
   const [dismissing, setDismissing] = useState<Set<string>>(new Set());
   const [restoring, setRestoring] = useState<Set<string>>(new Set());
-  const [showErrors, setShowErrors] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'relevant' | 'not-interested'>('relevant');
 
@@ -312,11 +316,15 @@ export default function RelevantJobsPage() {
   const [search, setSearch] = useState('');
   const [minScore, setMinScore] = useState(0);
   const [minSalary, setMinSalary] = useState(0);
-  const [postedWithin, setPostedWithin] = useState(0);
   const [remoteOnly, setRemoteOnly] = useState(false);
-  const [hideTracked, setHideTracked] = useState(false);
+  const [myLocationsOnly, setMyLocationsOnly] = useState(false);
+  const [prefLocations, setPrefLocations] = useState<string[]>([]);
+
+  // Pagination
+  const [visibleCount, setVisibleCount] = useState(20);
 
   // Portal management
+  const [pageLoading, setPageLoading] = useState(true);
   const [portals, setPortals] = useState<Portal[]>([]);
   const [portalQuery, setPortalQuery] = useState('');
   const [portalResults, setPortalResults] = useState<CompanyEntry[]>([]);
@@ -383,20 +391,25 @@ export default function RelevantJobsPage() {
   };
 
   useEffect(() => {
-    loadPortals();
-    fetch('/api/scan?cache=true')
+    Promise.all([
+      fetch('/api/scan').then(r => r.json()).then(setPortals),
+      fetch('/api/scan?cache=true').then(r => r.json()).then(data => { if (data) setCache(data); }),
+    ]).finally(() => setPageLoading(false));
+    fetch('/api/settings')
       .then(res => res.json())
-      .then(data => { if (data) setCache(data); });
+      .then(data => { if (data?.preferences?.locationPreferences?.length) setPrefLocations(data.preferences.locationPreferences); });
   }, []);
 
   type StreamMsg =
     | { type: 'job'; job: Discovery }
     | { type: 'error'; company: string; error: string }
-    | { type: 'done'; scannedAt: string };
+    | { type: 'done'; scannedAt: string }
+    | { type: 'portals-seeded'; count: number };
 
   const runScan = async () => {
     setScanning(true);
     setActiveTab('relevant');
+    setVisibleCount(20);
     setCache({ scannedAt: new Date().toISOString(), discoveries: [], errors: [] });
     try {
       const res = await fetch('/api/scan', {
@@ -417,7 +430,9 @@ export default function RelevantJobsPage() {
           if (!line.trim()) continue;
           try {
             const msg = JSON.parse(line) as StreamMsg;
-            if (msg.type === 'job') {
+            if (msg.type === 'portals-seeded') {
+              loadPortals();
+            } else if (msg.type === 'job') {
               setCache(prev => {
                 if (!prev) return prev;
                 const discoveries = [...prev.discoveries];
@@ -495,18 +510,19 @@ export default function RelevantJobsPage() {
   const dismissedJobs = allDiscoveries.filter(j => j.dismissed);
 
   const filtered = relevantJobs.filter(job => {
-    if (hideTracked && job.alreadyTracked) return false;
     if (job.score < minScore) return false;
     if (minSalary > 0) {
       const top = job.salary?.max ?? job.salary?.min ?? 0;
       if (top < minSalary) return false;
     }
-    if (postedWithin > 0) {
-      if (!job.postedAt) return false;
-      const days = (Date.now() - new Date(job.postedAt).getTime()) / 86400000;
-      if (days > postedWithin) return false;
-    }
     if (remoteOnly && !job.location?.toLowerCase().includes('remote')) return false;
+    if (myLocationsOnly && job.location && prefLocations.length > 0) {
+      const loc = job.location.toLowerCase();
+      const matches = prefLocations.some(p =>
+        loc.includes(p.toLowerCase()) || (p.toLowerCase() === 'remote' && loc.includes('remote'))
+      );
+      if (!matches) return false;
+    }
     if (search) {
       const q = search.toLowerCase();
       if (!job.title.toLowerCase().includes(q) && !job.company.toLowerCase().includes(q)) return false;
@@ -514,137 +530,177 @@ export default function RelevantJobsPage() {
     return true;
   });
 
-  const hasActiveFilters = search || minScore > 0 || minSalary > 0 || postedWithin > 0 || remoteOnly || hideTracked;
-
+  const hasActiveFilters = search || minScore > 0 || minSalary > 0 || remoteOnly || myLocationsOnly;
   const clearFilters = () => {
-    setSearch('');
-    setMinScore(0);
-    setMinSalary(0);
-    setPostedWithin(0);
-    setRemoteOnly(false);
-    setHideTracked(false);
+    setSearch(''); setMinScore(0); setMinSalary(0); setRemoteOnly(false); setMyLocationsOnly(false);
   };
+
+  const visibleFiltered = filtered.slice(0, visibleCount);
+
+  // Companies visible in current results (for highlighting in sidebar)
+  const visibleCompanies = new Set(filtered.map(j => j.company));
+
+  if (pageLoading) return (
+    <div className="max-w-7xl mx-auto px-6">
+      <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-6">
+        <div className="flex items-center gap-4">
+          <Skeleton className="w-16 h-16 rounded-2xl" />
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+        </div>
+        <Skeleton className="h-10 w-28 rounded-xl" />
+      </div>
+      <div className="flex gap-8">
+        <div className="w-60 flex-none space-y-4">
+          <Skeleton className="h-9 w-full rounded-lg" />
+          {[0,1,2,3,4].map(i => <Skeleton key={i} className="h-4 w-full" />)}
+        </div>
+        <div className="flex-1 space-y-3">
+          {[0,1,2,3,4].map(i => (
+            <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 flex gap-4">
+              <Skeleton className="w-16 h-16 rounded-xl flex-none" />
+              <div className="flex-grow space-y-2">
+                <div className="flex items-center gap-2">
+                  <Skeleton className="w-8 h-8 rounded-lg flex-none" />
+                  <Skeleton className="h-4 w-56" />
+                </div>
+                <Skeleton className="h-3 w-40 ml-10" />
+                <Skeleton className="h-5 w-24 ml-10 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-6">
-      {/* Header */}
-      <div className="mb-8 flex items-start justify-between border-b border-gray-200 pb-6">
+      {/* ── Header ── */}
+      <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-5">
         <div className="flex items-center gap-4">
-          <div className="bg-blue-100 text-blue-600 p-4 rounded-2xl">
-            <Target className="w-8 h-8" />
+          <div className="bg-blue-50 text-[#3B5BDB] p-3.5 rounded-2xl">
+            <Target className="w-7 h-7" />
           </div>
           <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 mb-1">Discover Jobs</h1>
+            <h1 className="text-3xl font-extrabold text-gray-900 leading-tight">
+              Discover <span className="text-[#3B5BDB]">Jobs</span>
+            </h1>
             {cache ? (
-              <p className="text-gray-500 text-sm">
-                Last scanned {timeAgo(cache.scannedAt)} &middot; {relevantJobs.length} roles across target companies
-                {cache.errors.length > 0 && (
-                  <button onClick={() => setShowErrors(v => !v)} className="ml-2 text-amber-600 hover:underline">
-                    {cache.errors.length} portals errored
-                  </button>
-                )}
+              <p className="text-gray-500 text-sm mt-0.5">
+                Last scanned {timeAgo(cache.scannedAt)}
+                {' · '}
+                <span className="font-medium text-gray-700">{relevantJobs.length} roles</span>
+                {' across target companies'}
               </p>
             ) : (
-              <p className="text-gray-500 text-sm">Scan 40 target companies for PM roles</p>
+              <p className="text-gray-500 text-sm mt-0.5">Scan your target companies for PM roles</p>
             )}
           </div>
         </div>
         <button
           onClick={runScan}
           disabled={scanning}
-          className="flex items-center gap-2 bg-gray-900 text-white px-5 py-2.5 rounded-lg font-semibold text-sm hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all shrink-0"
+          className="flex items-center gap-2 bg-[#1C1F2E] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
         >
           <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-          {scanning ? 'Scanning...' : cache ? 'Refresh' : 'Scan now'}
+          {scanning ? 'Scanning…' : cache ? 'Refresh' : 'Scan now'}
         </button>
       </div>
 
       <div className="flex gap-8 items-start">
         {/* ── Sidebar ── */}
-        <aside className="w-56 flex-none sticky top-24 space-y-6">
+        <aside className="w-60 flex-none sticky top-24 space-y-6">
 
-          {/* Filters — only on relevant tab */}
-          {activeTab === 'relevant' && (
-            <>
-              <div>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Search title or company…"
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-300"
-                />
-              </div>
+          {/* Advanced Filters */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-4">Advanced Filters</p>
 
-              <div className="h-px bg-gray-100" />
-
-              <FilterSection label="Min Score">
-                <RadioOption label="Any"  active={minScore === 0}   onClick={() => setMinScore(0)} />
-                <RadioOption label="3.5+" active={minScore === 3.5} onClick={() => setMinScore(3.5)} />
-                <RadioOption label="4.0+" active={minScore === 4.0} onClick={() => setMinScore(4.0)} />
-                <RadioOption label="4.5+" active={minScore === 4.5} onClick={() => setMinScore(4.5)} />
-              </FilterSection>
-
-              <div className="h-px bg-gray-100" />
-
-              <FilterSection label="Salary">
-                <RadioOption label="Any"    active={minSalary === 0}      onClick={() => setMinSalary(0)} />
-                <RadioOption label="$150k+" active={minSalary === 150000} onClick={() => setMinSalary(150000)} />
-                <RadioOption label="$200k+" active={minSalary === 200000} onClick={() => setMinSalary(200000)} />
-                <RadioOption label="$250k+" active={minSalary === 250000} onClick={() => setMinSalary(250000)} />
-              </FilterSection>
-
-              <div className="h-px bg-gray-100" />
-
-              <FilterSection label="Posted">
-                <RadioOption label="Any time"   active={postedWithin === 0}  onClick={() => setPostedWithin(0)} />
-                <RadioOption label="This week"  active={postedWithin === 7}  onClick={() => setPostedWithin(7)} />
-                <RadioOption label="This month" active={postedWithin === 30} onClick={() => setPostedWithin(30)} />
-              </FilterSection>
-
-              <div className="h-px bg-gray-100" />
-
-              <FilterSection label="Options">
-                <CheckOption label="Remote only"  checked={remoteOnly}  onChange={setRemoteOnly} />
-                <CheckOption label="Hide tracked" checked={hideTracked} onChange={setHideTracked} />
-              </FilterSection>
-
-              {hasActiveFilters && (
-                <button onClick={clearFilters} className="text-xs text-blue-500 hover:text-blue-700 font-medium">
-                  Clear all filters
+            {/* Search */}
+            <div className="relative mb-5">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search title or company…"
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400"
+              />
+              {search && (
+                <button onClick={() => setSearch('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
+            </div>
 
-              <div className="h-px bg-gray-100" />
-            </>
-          )}
+            <FilterSection label="Min Score">
+              <RadioOption label="Any"  active={minScore === 0}   onClick={() => setMinScore(0)} />
+              <RadioOption label="3.5+" active={minScore === 3.5} onClick={() => setMinScore(3.5)} />
+              <RadioOption label="4.0+" active={minScore === 4.0} onClick={() => setMinScore(4.0)} />
+              <RadioOption label="4.5+" active={minScore === 4.5} onClick={() => setMinScore(4.5)} />
+            </FilterSection>
 
-          {/* ── Portal management ── */}
-          <div className="space-y-3">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+            <FilterSection label="Salary">
+              <RadioOption label="Any"    active={minSalary === 0}      onClick={() => setMinSalary(0)} />
+              <RadioOption label="$150k+" active={minSalary === 150000} onClick={() => setMinSalary(150000)} />
+              <RadioOption label="$200k+" active={minSalary === 200000} onClick={() => setMinSalary(200000)} />
+              <RadioOption label="$250k+" active={minSalary === 250000} onClick={() => setMinSalary(250000)} />
+            </FilterSection>
+
+            <div className="space-y-2">
+              <CheckOption label="Remote only"     checked={remoteOnly}      onChange={setRemoteOnly} />
+              {prefLocations.length > 0 && (
+                <CheckOption label="My locations only" checked={myLocationsOnly} onChange={setMyLocationsOnly} />
+              )}
+            </div>
+
+            {hasActiveFilters && (
+              <button onClick={clearFilters} className="mt-4 text-xs text-[#3B5BDB] hover:text-blue-700 font-medium">
+                Clear filters
+              </button>
+            )}
+          </div>
+
+          <div className="h-px bg-gray-100" />
+
+          {/* Watching list */}
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
               Watching ({portals.length})
             </p>
 
-            {/* Current portals */}
+            {/* Portal list */}
             {portals.length > 0 && (
-              <div className="space-y-1">
-                {portals.map(p => (
-                  <div key={p.company} className="flex items-center justify-between group py-0.5">
-                    <span className="text-sm text-gray-700 truncate">{p.company}</span>
-                    <button
-                      onClick={() => removePortal(p.company)}
-                      disabled={removingPortal === p.company}
-                      className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all disabled:opacity-50 flex-none ml-1"
+              <div className="space-y-0.5 max-h-64 overflow-y-auto -mx-2">
+                {portals.map(p => {
+                  const active = visibleCompanies.has(p.company);
+                  return (
+                    <div
+                      key={p.company}
+                      className={`flex items-center justify-between group px-2 py-1.5 rounded-lg transition-colors ${
+                        active ? 'bg-blue-50' : 'hover:bg-gray-50'
+                      }`}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
+                      <span className={`text-sm truncate ${active ? 'text-[#3B5BDB] font-semibold' : 'text-gray-600'}`}>
+                        {p.company}
+                      </span>
+                      <button
+                        onClick={() => removePortal(p.company)}
+                        disabled={removingPortal === p.company}
+                        className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all disabled:opacity-50 flex-none ml-1"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            {/* Company search */}
-            <div className="relative">
+            {/* Add company */}
+            <div className="relative mt-3">
               <div className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white focus-within:ring-2 focus-within:ring-blue-200 focus-within:border-blue-400 transition-all">
                 <Search className="w-3.5 h-3.5 text-gray-400 flex-none" />
                 <input
@@ -652,7 +708,7 @@ export default function RelevantJobsPage() {
                   value={portalQuery}
                   onChange={e => handlePortalSearch(e.target.value)}
                   placeholder="Find a company…"
-                  className="flex-1 text-sm outline-none placeholder-gray-400 min-w-0"
+                  className="flex-1 text-sm outline-none placeholder-gray-400 min-w-0 bg-transparent"
                 />
                 {portalQuery && (
                   <button onClick={() => { setPortalQuery(''); setPortalResults([]); }} className="text-gray-300 hover:text-gray-500">
@@ -660,8 +716,6 @@ export default function RelevantJobsPage() {
                   </button>
                 )}
               </div>
-
-              {/* Search results dropdown */}
               {portalResults.length > 0 && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden">
                   {portalResults.map(entry => {
@@ -691,16 +745,14 @@ export default function RelevantJobsPage() {
               )}
             </div>
 
-            {/* Custom URL toggle */}
             <button
               onClick={() => setShowCustomAdd(v => !v)}
-              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              className="mt-2 text-xs text-gray-400 hover:text-gray-600 transition-colors"
             >
               {showCustomAdd ? '− Cancel' : '+ Custom URL'}
             </button>
-
             {showCustomAdd && (
-              <div className="space-y-2">
+              <div className="space-y-2 mt-2">
                 <input value={customCompany} onChange={e => setCustomCompany(e.target.value)}
                   placeholder="Company name"
                   className="w-full text-sm border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-200 placeholder-gray-400" />
@@ -715,22 +767,28 @@ export default function RelevantJobsPage() {
               </div>
             )}
           </div>
-
         </aside>
 
         {/* ── Main content ── */}
         <div className="flex-1 min-w-0">
-          {/* Error details */}
-          {showErrors && cache && cache.errors.length > 0 && (
-            <div className="mb-4 bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-amber-800 font-semibold text-sm mb-2">
-                <AlertCircle className="w-4 h-4" /> Portals that errored
-              </div>
-              <ul className="text-xs text-amber-700 space-y-1">
-                {cache.errors.map(e => (
-                  <li key={e.company}><span className="font-medium">{e.company}:</span> {e.error}</li>
-                ))}
-              </ul>
+
+          {/* Streaming banner */}
+          {scanning && (
+            <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700">
+              <RefreshCw className="w-4 h-4 animate-spin flex-none" />
+              <span>Scanning job boards… results appearing as they come in</span>
+              {cache && cache.discoveries.length > 0 && (
+                <span className="ml-auto font-semibold">{cache.discoveries.length} found so far</span>
+              )}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!cache && !scanning && (
+            <div className="p-16 border border-dashed rounded-2xl text-center text-gray-400 bg-white">
+              <Target className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+              <p className="font-semibold text-gray-500">No scan results yet</p>
+              <p className="text-sm mt-1">Click &ldquo;Scan now&rdquo; to check all target companies for PM roles.</p>
             </div>
           )}
 
@@ -738,10 +796,10 @@ export default function RelevantJobsPage() {
           {cache && (
             <div className="flex items-center gap-1 mb-4 border-b border-gray-200">
               <button
-                onClick={() => setActiveTab('relevant')}
+                onClick={() => { setActiveTab('relevant'); setVisibleCount(20); }}
                 className={`px-4 py-2.5 text-sm font-semibold transition-colors border-b-2 -mb-px ${
                   activeTab === 'relevant'
-                    ? 'border-blue-600 text-blue-600'
+                    ? 'border-[#3B5BDB] text-[#3B5BDB]'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -749,7 +807,7 @@ export default function RelevantJobsPage() {
                 <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
                   activeTab === 'relevant' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
                 }`}>
-                  {relevantJobs.length}
+                  {filtered.length}
                 </span>
               </button>
               <button
@@ -772,41 +830,18 @@ export default function RelevantJobsPage() {
             </div>
           )}
 
-          {/* Empty state (no scan yet) */}
-          {!cache && !scanning && (
-            <div className="p-16 border border-dashed rounded-xl text-center text-gray-400 bg-white">
-              <Target className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-              <p className="font-medium text-gray-500">No scan results yet</p>
-              <p className="text-sm mt-1">Click &ldquo;Scan now&rdquo; to check all target companies for PM roles.</p>
-            </div>
-          )}
-
-          {/* Streaming banner */}
-          {scanning && (
-            <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-sm text-blue-700">
-              <RefreshCw className="w-4 h-4 animate-spin flex-none" />
-              <span>Scanning job boards&hellip; results appearing as they come in</span>
-              {cache && cache.discoveries.length > 0 && (
-                <span className="ml-auto font-semibold">{cache.discoveries.length} found so far</span>
-              )}
-            </div>
-          )}
-
           {/* Relevant tab */}
           {cache && activeTab === 'relevant' && (
             <>
-              <p className="text-xs text-gray-400 mb-3">
-                {filtered.length} of {relevantJobs.length} jobs
-              </p>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {!scanning && filtered.length === 0 && (
-                  <div className="p-8 border border-dashed rounded-xl text-center text-gray-400 bg-white">
+                  <div className="p-10 border border-dashed rounded-2xl text-center text-gray-400 bg-white">
                     {hasActiveFilters
-                      ? 'No jobs match your current filters.'
-                      : 'All PM roles from target companies are already in your pipeline.'}
+                      ? 'No jobs match your current filters — try relaxing the score or salary threshold.'
+                      : 'All relevant PM roles are already in your pipeline.'}
                   </div>
                 )}
-                {filtered.map(job => (
+                {visibleFiltered.map(job => (
                   <JobCard
                     key={job.url}
                     job={job}
@@ -817,6 +852,19 @@ export default function RelevantJobsPage() {
                   />
                 ))}
               </div>
+
+              {/* Load More */}
+              {filtered.length > visibleCount && (
+                <div className="mt-6 flex justify-center">
+                  <button
+                    onClick={() => setVisibleCount(n => n + 20)}
+                    className="px-8 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-gray-300 hover:bg-white bg-gray-50 transition-all"
+                  >
+                    Load More Jobs
+                    <span className="ml-2 text-gray-400 font-normal">({filtered.length - visibleCount} remaining)</span>
+                  </button>
+                </div>
+              )}
             </>
           )}
 
@@ -824,15 +872,15 @@ export default function RelevantJobsPage() {
           {cache && activeTab === 'not-interested' && (
             <>
               {dismissedJobs.length === 0 ? (
-                <div className="p-12 border border-dashed rounded-xl text-center text-gray-400 bg-white">
+                <div className="p-12 border border-dashed rounded-2xl text-center text-gray-400 bg-white">
                   <EyeOff className="w-8 h-8 mx-auto mb-3 text-gray-300" />
-                  <p className="font-medium text-gray-500">No dismissed jobs</p>
+                  <p className="font-semibold text-gray-500">No dismissed jobs</p>
                   <p className="text-sm mt-1">
                     Click the <EyeOff className="w-3 h-3 inline" /> icon on any job to mark it as not interested.
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {dismissedJobs.map(job => (
                     <JobCard
                       key={job.url}
