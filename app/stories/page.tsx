@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { SkeletonStoryCard, Skeleton } from '@/components/Skeleton';
+import { useOnboardingGuard } from '@/hooks/useOnboardingGuard';
 
 export default function StoriesPage() {
+  useOnboardingGuard();
   const [stories, setStories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   

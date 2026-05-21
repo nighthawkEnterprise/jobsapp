@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Plus, Sparkles, Loader2, Check, Shield, FileText, Target, BarChart2, Star } from 'lucide-react';
 import { NorthStarEditor } from '@/components/NorthStarEditor';
 import { Skeleton, SkeletonFormSection } from '@/components/Skeleton';
+import { useOnboardingGuard } from '@/hooks/useOnboardingGuard';
 
 const LOCATION_PRESETS = [
   'San Francisco', 'New York', 'Austin', 'Seattle',
@@ -302,6 +303,7 @@ const NAV_ITEMS = [
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function SettingsPage() {
+  useOnboardingGuard();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -399,7 +401,7 @@ export default function SettingsPage() {
       <div className="flex items-center justify-between py-8 mb-2 border-b border-gray-100">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900">Setup Profile</h1>
-          <p className="text-sm text-gray-500 mt-1">Configure your target criteria and base resume material</p>
+          <p className="text-sm text-gray-500 mt-0.5">Configure your target criteria and base resume material</p>
         </div>
         <button
           onClick={handleSave}
@@ -422,7 +424,7 @@ export default function SettingsPage() {
       <div className="grid grid-cols-[220px_1fr] gap-8 items-start pt-6">
 
         {/* Sidebar */}
-        <aside className="sticky top-6 space-y-4">
+        <aside className="sticky top-24 space-y-4">
 
           {/* Progress */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
@@ -487,14 +489,14 @@ export default function SettingsPage() {
         <main className="space-y-6 min-w-0">
 
           {/* Career Profile */}
-          <section id="career-profile" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6 scroll-mt-6">
+          <section id="career-profile" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-7 scroll-mt-28">
             <div className="pb-4 border-b border-gray-50">
-              <h2 className="text-xs font-extrabold text-gray-900 uppercase tracking-widest">Target Career Profile</h2>
-              <p className="text-sm text-gray-500 mt-1">The roles and criteria you're actively targeting</p>
+              <h2 className="text-base font-bold text-gray-900">Target Career Profile</h2>
+              <p className="text-sm text-gray-500 mt-0.5">The roles and criteria you're actively targeting</p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Job Titles</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Job Titles</label>
               <TagInput
                 tags={jobTitles}
                 onChange={setJobTitles}
@@ -503,7 +505,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Min Salary</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Min Salary</label>
               <div className="relative max-w-[200px]">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium select-none">$</span>
                 <input
@@ -517,20 +519,20 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Preferred Locations</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Preferred Locations</label>
               <LocationChips locations={locationPrefs} onChange={setLocationPrefs} />
             </div>
           </section>
 
           {/* Market Preferences */}
-          <section id="market-preferences" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-6 scroll-mt-6">
+          <section id="market-preferences" className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-7 scroll-mt-28">
             <div className="pb-4 border-b border-gray-50">
-              <h2 className="text-xs font-extrabold text-gray-900 uppercase tracking-widest">Market Preferences</h2>
-              <p className="text-sm text-gray-500 mt-1">Industries, companies, and organizations you care about</p>
+              <h2 className="text-base font-bold text-gray-900">Market Preferences</h2>
+              <p className="text-sm text-gray-500 mt-0.5">Industries, companies, and organizations you care about</p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Domains of Interest</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Domains of Interest</label>
               <TagInput
                 tags={domains}
                 onChange={setDomains}
@@ -539,7 +541,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">Prioritized Companies</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Prioritized Companies</label>
               <p className="text-xs text-gray-400 mb-4">
                 Adds a score bonus during scanning.{domains.length > 0 && (
                   <span className="text-violet-600"> Suggestions auto-update as you change your domains.</span>
@@ -549,7 +551,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">Exclude Companies</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Exclude Companies</label>
               <p className="text-xs text-gray-400 mb-3">Skipped during scanning entirely</p>
               <div className="flex flex-wrap gap-2">
                 {excludedCompanies.map(c => (
@@ -566,23 +568,23 @@ export default function SettingsPage() {
           </section>
 
           {/* North Star */}
-          <section id="north-star" className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm scroll-mt-6">
+          <section id="north-star" className="rounded-2xl overflow-hidden border border-gray-100 shadow-sm scroll-mt-28">
             <div className="bg-gradient-to-r from-[#0D1B3E] to-[#162550] px-6 py-5">
               <h2 className="text-xs font-extrabold text-white uppercase tracking-widest">The North Star</h2>
               <p className="text-sm text-blue-200/60 mt-1">Your career narrative, target archetypes, and anti-targets</p>
             </div>
-            <div className="bg-white p-6">
+            <div className="bg-white p-8">
               <NorthStarEditor value={profile} onChange={setProfile} />
             </div>
           </section>
 
           {/* Resume */}
-          <section id="resume" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden scroll-mt-6">
-            <div className="px-6 py-5 border-b border-gray-50">
-              <h2 className="text-xs font-extrabold text-gray-900 uppercase tracking-widest">Master Resume</h2>
-              <p className="text-sm text-gray-500 mt-1">Your base resume in Markdown. Used for CV tailoring and role scoring.</p>
+          <section id="resume" className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden scroll-mt-28">
+            <div className="px-8 py-6 border-b border-gray-50">
+              <h2 className="text-base font-bold text-gray-900">Master Resume</h2>
+              <p className="text-sm text-gray-500 mt-0.5">Your base resume in Markdown. Used for CV tailoring and role scoring.</p>
             </div>
-            <div className="p-6">
+            <div className="p-8">
               <textarea
                 value={resume}
                 onChange={e => setResume(e.target.value)}

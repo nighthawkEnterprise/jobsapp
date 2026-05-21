@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { FileText } from 'lucide-react';
+import { useOnboardingGuard } from '@/hooks/useOnboardingGuard';
 
 export default function ExportPage() {
+  useOnboardingGuard();
   const [exporting, setExporting] = useState(false);
 
   const handleExport = async () => {

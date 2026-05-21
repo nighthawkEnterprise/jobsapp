@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
+import { auth0 } from '@/lib/auth0';
 import { getJobs, getStories } from '@/lib/store';
 import { mockLLM } from '@/lib/llm';
 
 export async function POST(req: Request) {
+  const session = await auth0.getSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = session.user.sub as string;
+
   const { jobId } = await req.json();
-  const [jobs, stories] = await Promise.all([getJobs(), getStories()]);
+  const [jobs, stories] = await Promise.all([getJobs(userId), getStories(userId)]);
   const job = jobs.find(j => j.id === jobId);
 
   if (!job) return NextResponse.json({ error: 'Job not found' }, { status: 404 });
@@ -12,14 +17,10 @@ export async function POST(req: Request) {
 
   try {
     const rawRankings = await mockLLM.prepInterview(job.content, stories.length);
-    
-    // Map the returned mock indices to actual stories if we have enough of them
+
     const populated = rawRankings.map(rs => {
-       const story = stories[Math.min(rs.storyIndex, stories.length - 1)];
-       return {
-         story,
-         reasoning: rs.reasoning
-       };
+      const story = stories[Math.min(rs.storyIndex, stories.length - 1)];
+      return { story, reasoning: rs.reasoning };
     }).filter(item => item.story !== undefined);
 
     return NextResponse.json(populated);

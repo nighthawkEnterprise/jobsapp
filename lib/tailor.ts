@@ -64,6 +64,7 @@ export async function tailorResumeWithLLM(
   resume: string,
   profile: string,
   stories: Story[],
+  userId: string,
 ): Promise<TailorResult> {
   const message = await client.messages.create({
     model: 'claude-sonnet-4-6',
@@ -71,7 +72,7 @@ export async function tailorResumeWithLLM(
     messages: [{ role: 'user', content: buildPrompt(resume, profile, stories, job) }],
   });
 
-  void recordUsage('tailor', message.usage.input_tokens, message.usage.output_tokens);
+  void recordUsage(userId, 'tailor', message.usage.input_tokens, message.usage.output_tokens);
   const raw = message.content[0].type === 'text' ? message.content[0].text : '';
   // Strip markdown fences Claude sometimes adds despite instructions
   const cleaned = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```$/m, '').trim();

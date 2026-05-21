@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { auth0 } from '@/lib/auth0';
 import { getMasterResume } from '@/lib/store';
 import Anthropic from '@anthropic-ai/sdk';
 import { recordUsage } from '@/lib/usage';
@@ -6,7 +7,11 @@ import { recordUsage } from '@/lib/usage';
 const client = new Anthropic();
 
 export async function POST() {
-  const resume = await getMasterResume();
+  const session = await auth0.getSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = session.user.sub as string;
+
+  const resume = await getMasterResume(userId);
   if (!resume || resume.trim().length < 50) {
     return NextResponse.json({ suggestions: [] });
   }
@@ -27,7 +32,7 @@ ${truncated}`,
     ],
   });
 
-  void recordUsage('other', message.usage.input_tokens, message.usage.output_tokens);
+  void recordUsage(userId, 'other', message.usage.input_tokens, message.usage.output_tokens);
   try {
     const text = message.content[0].type === 'text' ? message.content[0].text.trim() : '[]';
     const jsonMatch = text.match(/\[[\s\S]*\]/);

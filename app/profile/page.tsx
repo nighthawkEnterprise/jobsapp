@@ -1,7 +1,8 @@
 import { auth0 } from "@/lib/auth0";
+import { redirect } from "next/navigation";
 import { LogIn, Settings, FileText, BookOpen, Briefcase, Target, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react";
 import ResetProfileButton from "./ResetProfileButton";
-import { getPreferences, getJobs, getStories, getMasterResume, getScanCache, getTailoredResumes } from "@/lib/store";
+import { getPreferences, getJobs, getStories, getMasterResume, getScanCache, getTailoredResumes, getProfile } from "@/lib/store";
 
 function getInitials(email: string): string {
   const name = email.split('@')[0];
@@ -64,13 +65,18 @@ export default async function ProfilePage() {
   }
 
   const { user } = session;
+  const userId = user.sub as string;
+
+  const profile = await getProfile(userId);
+  if (!profile?.trim()) redirect('/onboarding');
+
   const [prefs, jobs, stories, resume, scanCache, tailoredResumes] = await Promise.all([
-    getPreferences(),
-    getJobs(),
-    getStories(),
-    getMasterResume(),
-    getScanCache(),
-    getTailoredResumes(),
+    getPreferences(userId),
+    getJobs(userId),
+    getStories(userId),
+    getMasterResume(userId),
+    getScanCache(userId),
+    getTailoredResumes(userId),
   ]);
 
   const activeJobs = jobs.filter(j => !['rejected', 'withdrawn'].includes(j.status));

@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import { Upload, FileText, Calendar, ChevronRight, Download } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Skeleton, SkeletonResumeCard } from '@/components/Skeleton';
+import { useOnboardingGuard } from '@/hooks/useOnboardingGuard';
 
 export default function ResumesPage() {
+  useOnboardingGuard();
   const [masterResume, setMasterResume] = useState('');
   const [hasDocx, setHasDocx] = useState(false);
   const [masterHtml, setMasterHtml] = useState<string | null>(null);

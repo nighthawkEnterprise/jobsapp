@@ -1,9 +1,14 @@
+import { auth0 } from '@/lib/auth0';
 import { getMasterResume, getResumeHasDocx } from '@/lib/store';
 import { supabase } from '@/lib/supabase';
 import { BorderStyle, Document, ExternalHyperlink, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
+import { NextResponse } from 'next/server';
 
 const DOCX_BUCKET = 'resumes';
-const DOCX_STORAGE_PATH = 'master.docx';
+
+function docxPath(userId: string) {
+  return `${userId}/master.docx`;
+}
 
 function parseInlineRuns(text: string): (TextRun | ExternalHyperlink)[] {
   const result: (TextRun | ExternalHyperlink)[] = [];
@@ -51,12 +56,15 @@ function mdToDocxChildren(md: string): Paragraph[] {
 }
 
 export async function POST(req: Request) {
+  const session = await auth0.getSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = session.user.sub as string;
+
   const body = await req.json() as { content?: string; filename?: string };
   const filename = body.filename ?? 'resume.docx';
 
-  // If no explicit content was passed and the original .docx exists in Storage, serve it directly.
-  if (!body.content && await getResumeHasDocx()) {
-    const { data } = await supabase.storage.from(DOCX_BUCKET).download(DOCX_STORAGE_PATH);
+  if (!body.content && await getResumeHasDocx(userId)) {
+    const { data } = await supabase.storage.from(DOCX_BUCKET).download(docxPath(userId));
     if (data) {
       const buffer = Buffer.from(await data.arrayBuffer());
       return new Response(buffer, {
@@ -68,7 +76,7 @@ export async function POST(req: Request) {
     }
   }
 
-  const md = body.content ?? await getMasterResume();
+  const md = body.content ?? await getMasterResume(userId);
   const doc = new Document({ sections: [{ properties: {}, children: mdToDocxChildren(md) }] });
   const buffer = Buffer.from(await Packer.toBuffer(doc));
 

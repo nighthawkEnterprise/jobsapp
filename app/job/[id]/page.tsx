@@ -9,8 +9,10 @@ import DetailsTab from '@/components/job-tabs/details/DetailsTab';
 import TailorTab from '@/components/job-tabs/tailor/TailorTab';
 import PrepTab from '@/components/job-tabs/prep/PrepTab';
 import { Skeleton, SkeletonJobDetailHeader } from '@/components/Skeleton';
+import { useOnboardingGuard } from '@/hooks/useOnboardingGuard';
 
 export default function JobDetailPage() {
+  useOnboardingGuard();
   const { id } = useParams();
   const searchParams = useSearchParams();
   const [job, setJob] = useState<any>(null);

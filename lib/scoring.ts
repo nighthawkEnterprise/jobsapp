@@ -56,6 +56,7 @@ export async function scoreJobWithLLM(
   job: Job,
   resume: string,
   profile: string,
+  userId: string,
 ): Promise<JobDimensions> {
   try {
     const message = await client.messages.create({
@@ -63,7 +64,7 @@ export async function scoreJobWithLLM(
       max_tokens: 1024,
       messages: [{ role: 'user', content: SCORING_PROMPT(resume, profile, job) }],
     });
-    void recordUsage('score', message.usage.input_tokens, message.usage.output_tokens);
+    void recordUsage(userId, 'score', message.usage.input_tokens, message.usage.output_tokens);
     const text = message.content[0].type === 'text' ? message.content[0].text : '';
     const cleaned = text.replace(/^```(?:json)?\s*/m, '').replace(/\s*```$/m, '').trim();
     return JSON.parse(cleaned) as JobDimensions;

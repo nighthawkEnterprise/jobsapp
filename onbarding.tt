@@ -1,0 +1,323 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>ApplyOS - Executive Workbench</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Hanken+Grotesk:wght@600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "surface": "#f8f9ff",
+                "tertiary-fixed-dim": "#ffb59b",
+                "surface-container-low": "#eef4ff",
+                "outline": "#737685",
+                "surface-variant": "#d1e4ff",
+                "on-primary-fixed": "#001848",
+                "on-tertiary-container": "#ffc6b2",
+                "tertiary-fixed": "#ffdbcf",
+                "surface-dim": "#c4dcfd",
+                "on-primary-fixed-variant": "#0040a2",
+                "on-primary-container": "#c4d2ff",
+                "surface-container": "#e4efff",
+                "on-tertiary-fixed-variant": "#812800",
+                "secondary-fixed-dim": "#aec9e7",
+                "on-primary": "#ffffff",
+                "secondary": "#46617b",
+                "inverse-surface": "#19324b",
+                "on-surface": "#011d35",
+                "error-container": "#ffdad6",
+                "surface-container-lowest": "#ffffff",
+                "primary-fixed": "#dae2ff",
+                "error": "#ba1a1a",
+                "secondary-container": "#c4e0fe",
+                "on-secondary-container": "#48637d",
+                "outline-variant": "#c3c6d6",
+                "on-secondary": "#ffffff",
+                "inverse-primary": "#b2c5ff",
+                "on-error": "#ffffff",
+                "on-surface-variant": "#434654",
+                "surface-bright": "#f8f9ff",
+                "on-error-container": "#93000a",
+                "background": "#f8f9ff",
+                "on-tertiary": "#ffffff",
+                "inverse-on-surface": "#e9f1ff",
+                "on-secondary-fixed": "#001d32",
+                "surface-tint": "#0c56d0",
+                "secondary-fixed": "#cee5ff",
+                "on-background": "#011d35",
+                "surface-container-highest": "#d1e4ff",
+                "surface-container-high": "#dbe9ff",
+                "primary": "#003d9b",
+                "primary-container": "#0052cc",
+                "primary-fixed-dim": "#b2c5ff",
+                "tertiary-container": "#a33500",
+                "on-tertiary-fixed": "#380d00",
+                "tertiary": "#7b2600",
+                "on-secondary-fixed-variant": "#2e4962"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "gutter": "24px",
+                "container-max": "1440px",
+                "margin-desktop": "40px",
+                "base": "8px",
+                "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                "body-md": ["Inter"],
+                "headline-lg": ["Hanken Grotesk"],
+                "body-sm": ["Inter"],
+                "headline-xl": ["Hanken Grotesk"],
+                "body-lg": ["Inter"],
+                "headline-lg-mobile": ["Hanken Grotesk"],
+                "label-md": ["JetBrains Mono"],
+                "headline-md": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .drag-active {
+            border-color: #0052cc !important;
+            background-color: #f0f7ff !important;
+        }
+        .executive-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid #f1f5f9;
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface antialiased overflow-hidden">
+<!-- Top Navigation Shell -->
+<header class="flex justify-between items-center w-full h-16 px-margin-desktop sticky top-0 z-50 ml-64 bg-surface-container-lowest dark:bg-inverse-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+
+
+
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">notifications</button>
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">settings</button>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-xl font-label-md text-label-md font-bold hover:bg-primary-container transition-all">Save &amp; Exit</button>
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center overflow-hidden">
+<img alt="Executive User Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBT4bDNOX_18qodZv6F_cdbnVXHgG3yYWW_5k2Hs_Qhn--G3LlDsQW41V3L1IR_UHpX486T5flM869jvMOzAwHAGGoQ0v1jf-YWGImMGbZPBbboOfP810xkyF-yFMIACm45_TYKJdOEqLvKqUcFNJ6lANjJ_Qp6pEqkaU7wz_EZgLNjSTs5zbzPuOXYktciYW85jreztgAIq2sqX5a7lRnZQ77Mau9C76acpYl0qnkflynF-_qqCZKfG3ijVbcPG6ItwmoRplU1kA">
+</div>
+</div>
+</header>
+<!-- Side Navigation Shell -->
+<aside class="w-64 h-screen fixed left-0 top-0 flex flex-col h-full border-r border-outline-variant bg-surface-container-lowest dark:bg-inverse-surface shadow-sm z-[60]">
+<div class="p-8 pb-12">
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-inverse-primary">ApplyOS</h1>
+<p class="font-body-md text-body-sm text-outline mt-1">Executive Workbench</p>
+</div>
+<nav class="flex-1 px-4 space-y-2">
+<div class="flex items-center gap-4 px-4 py-3 text-primary dark:text-inverse-primary font-bold border-r-2 border-primary bg-surface-container-low transition-all">
+<span class="material-symbols-outlined">description</span>
+<span class="font-body-md text-body-md">Resume</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">tune</span>
+<span class="font-body-md text-body-md">Preferences</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-body-md text-body-md">North Star</span>
+</div>
+<div class="flex items-center gap-4 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">domain</span>
+<span class="font-body-md text-body-md">Companies</span>
+</div>
+</nav>
+<div class="p-6 border-t border-outline-variant"><nav class="mb-6 space-y-1"><a href="#" class="flex items-center gap-4 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors rounded-lg group"><span class="material-symbols-outlined text-[20px]">help_outline</span><span class="font-body-md text-body-sm">Support</span></a><a href="#" class="flex items-center gap-4 px-4 py-3 text-secondary dark:text-secondary-fixed-dim hover:bg-surface-container-low transition-colors rounded-lg group"><span class="material-symbols-outlined text-[20px]">live_help</span><span class="font-body-md text-body-sm">Help Center</span></a></nav>
+
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-64 p-margin-desktop bg-surface min-h-[calc(100vh-64px)]">
+<div class="max-w-6xl mx-auto">
+<!-- Bento Grid Header & Progress -->
+<div class="grid grid-cols-12 gap-gutter mb-12 items-end">
+<div class="col-span-8">
+<span class="font-label-md text-label-md text-primary tracking-widest uppercase mb-4 block">Onboarding Stage 01</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface">Executive Profile Ingestion</h2>
+<p class="font-body-lg text-body-lg text-outline mt-4 max-w-2xl">
+                        The foundation of your ApplyOS workbench starts with your career history. Our AI models will parse your background to identify key strategic wins and core competencies.
+                    </p>
+</div>
+<div class="col-span-4 flex flex-col items-end">
+<div class="flex gap-2 mb-4">
+<div class="w-8 h-1 bg-primary rounded-full"></div>
+<div class="w-8 h-1 bg-outline-variant rounded-full"></div>
+<div class="w-8 h-1 bg-outline-variant rounded-full"></div>
+<div class="w-8 h-1 bg-outline-variant rounded-full"></div>
+</div>
+<span class="font-label-md text-label-md text-outline">Step 1 of 4: Profile &amp; Resume</span>
+</div>
+</div>
+<!-- Main Interactive Area -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Upload Center -->
+<div class="col-span-7 space-y-gutter">
+<div class="bg-surface-container-lowest rounded-xl executive-shadow border border-outline-variant overflow-hidden">
+<div class="border-b border-outline-variant px-gutter py-4 flex justify-between items-center bg-surface-bright">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">cloud_upload</span>
+                                Upload Center
+                            </h3>
+<div class="flex p-1 bg-surface-container rounded-lg">
+<button class="px-4 py-1.5 rounded-md text-body-sm font-medium bg-white shadow-sm text-primary transition-all" id="tab-file">Upload File</button>
+<button class="px-4 py-1.5 rounded-md text-body-sm font-medium text-outline hover:text-on-surface transition-all" id="tab-text">Paste Text</button>
+</div>
+</div>
+<div class="p-gutter">
+<!-- Drag & Drop Zone -->
+<div class="border-2 border-dashed border-outline-variant rounded-xl p-12 flex flex-col items-center justify-center transition-all cursor-pointer hover:border-primary group" id="file-drop-zone">
+<div class="w-16 h-16 rounded-full bg-primary-fixed flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-primary" style="font-variation-settings: 'FILL' 1;">file_upload</span>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface mb-2">Drop your resume here</h4>
+<p class="text-body-md text-outline text-center mb-8">
+                                    Supports PDF, DOCX, and Markdown formats. <br>
+<span class="text-secondary font-medium">Maximum file size 10MB</span>
+</p>
+<button class="px-8 py-3 bg-white border border-outline-variant rounded-full font-label-md text-label-md text-on-surface hover:bg-surface-container-low transition-colors">
+                                    Browse Files
+                                </button>
+</div>
+<!-- Paste Text Zone (Hidden) -->
+<div class="hidden" id="text-paste-zone">
+<textarea class="w-full h-[320px] p-6 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary/15 focus:border-primary font-body-md text-body-md" placeholder="Paste your resume or professional bio text here..."></textarea>
+</div>
+</div>
+</div>
+<!-- Guidance Card -->
+<div class="bg-primary-container/10 border border-primary/20 rounded-xl p-6 flex gap-4">
+<span class="material-symbols-outlined text-primary">info</span>
+<div>
+<h5 class="font-body-md font-bold text-primary mb-1">Executive Tip</h5>
+<p class="text-body-sm text-on-secondary-container">Provide your most recent resume for accurate skill mapping. Our parsing engine identifies over 400+ executive leadership competencies.</p>
+</div>
+</div>
+</div>
+<!-- Preview Area -->
+<div class="col-span-5">
+<div class="bg-surface-container-lowest rounded-xl executive-shadow border border-outline-variant h-full flex flex-col">
+<div class="border-b border-outline-variant px-gutter py-4 bg-surface-bright">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">visibility</span>
+                                Parsed Content
+                            </h3>
+</div>
+<div class="flex-1 p-gutter flex flex-col items-center justify-center text-center opacity-60">
+<div class="space-y-4 max-w-[280px]">
+<div class="flex justify-center">
+<div class="relative">
+<span class="material-symbols-outlined text-6xl text-outline-variant">description</span>
+<div class="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-surface-container flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-body-sm text-outline">hourglass_empty</span>
+</div>
+</div>
+</div>
+<h4 class="font-headline-md text-headline-md text-outline">Awaiting Ingestion</h4>
+<p class="text-body-sm text-outline">Once you upload your document, we'll display the structural preview here for your verification.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Action Bar -->
+<div class="mt-gutter flex justify-between items-center bg-white p-6 rounded-xl executive-shadow border border-outline-variant">
+<div class="flex items-center gap-3 text-outline">
+<span class="material-symbols-outlined text-body-md">lock</span>
+<span class="text-body-sm">Data is encrypted and private.</span>
+</div>
+<div class="flex gap-4">
+<button class="px-8 py-3 bg-white border border-outline-variant text-on-surface-variant font-bold rounded-xl hover:bg-surface-container-low transition-colors">Previous Step</button>
+<button class="px-12 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-all flex items-center gap-2 group shadow-lg shadow-primary/20">
+                        Continue to Preferences
+                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+<p class="text-center mt-8 text-body-sm text-outline">
+                You can update all of this later in your Workbench Settings.
+            </p>
+</div>
+</main>
+<!-- Floating Chat Support -->
+<button class="fixed bottom-margin-desktop right-margin-desktop w-14 h-14 bg-inverse-surface text-on-primary rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-transform z-[100]">
+<span class="material-symbols-outlined">question_answer</span>
+</button>
+<script>
+        // Simple UI Interaction logic
+        const tabFile = document.getElementById('tab-file');
+        const tabText = document.getElementById('tab-text');
+        const fileZone = document.getElementById('file-drop-zone');
+        const textZone = document.getElementById('text-paste-zone');
+
+        tabFile.addEventListener('click', () => {
+            tabFile.classList.add('bg-white', 'shadow-sm', 'text-primary');
+            tabFile.classList.remove('text-outline');
+            tabText.classList.remove('bg-white', 'shadow-sm', 'text-primary');
+            tabText.classList.add('text-outline');
+            fileZone.classList.remove('hidden');
+            textZone.classList.add('hidden');
+        });
+
+        tabText.addEventListener('click', () => {
+            tabText.classList.add('bg-white', 'shadow-sm', 'text-primary');
+            tabText.classList.remove('text-outline');
+            tabFile.classList.remove('bg-white', 'shadow-sm', 'text-primary');
+            tabFile.classList.add('text-outline');
+            fileZone.classList.add('hidden');
+            textZone.classList.remove('hidden');
+        });
+
+        // Drag and drop visual feedback
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                fileZone.classList.add('drag-active');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                fileZone.classList.remove('drag-active');
+            }, false);
+        });
+    </script>
+
+
+</body></html>

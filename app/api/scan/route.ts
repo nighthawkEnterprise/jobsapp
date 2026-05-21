@@ -1,8 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getPortals, addPortal, deletePortal, scanPortal, scanAllPortals, seedAllPortalsFromDirectory } from '@/lib/scanner';
+import { auth0 } from '@/lib/auth0';
+import { getPortals, addPortal, deletePortal, scanPortal, seedAllPortalsFromDirectory } from '@/lib/scanner';
 import { getPreferences, getJobs, getScanCache, saveScanCache, getDismissedUrls } from '@/lib/store';
 import type { Portal, ScannedJob } from '@/lib/scanner';
 import type { ScoredDiscovery, ScanCache, Preferences } from '@/lib/store';
+
+async function requireAuth() {
+  const session = await auth0.getSession();
+  if (!session) return null;
+  return session.user.sub as string;
+}
 
 const ABBREV: Record<string, string> = {
   pm:  'product manager',
@@ -31,7 +38,6 @@ function prefKeywords(prefs: Preferences): Array<{ full: string; core: string }>
   });
 }
 
-// Common role base phrases used to avoid false positives in word-set matching
 const ROLE_BASE_PHRASES = ['product manager', 'program manager', 'engineering manager', 'general manager'];
 
 function isRelevantTitle(title: string, prefs: Preferences): boolean {
@@ -40,9 +46,6 @@ function isRelevantTitle(title: string, prefs: Preferences): boolean {
   const tWords = new Set(t.split(/\W+/).filter(Boolean));
   return prefKeywords(prefs).some(({ full, core }) => {
     if (t.includes(full) || (core.length > 3 && t.includes(core))) return true;
-    // Word-set match: all words of the configured title appear in the candidate,
-    // AND the same base role phrase appears in both (prevents "Data Science Manager"
-    // from matching "AI Product Manager" just because both contain those words).
     const prefWords = full.split(/\W+/).filter(Boolean);
     if (!prefWords.every(w => tWords.has(w))) return false;
     return ROLE_BASE_PHRASES.some(phrase => full.includes(phrase) && t.includes(phrase));
@@ -100,47 +103,53 @@ function scoreScanResult(job: ScannedJob, prefs: Preferences): { score: number; 
 }
 
 export async function GET(req: Request) {
+  const userId = await requireAuth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { searchParams } = new URL(req.url);
   if (searchParams.get('cache') === 'true') {
-    return NextResponse.json(await getScanCache());
+    return NextResponse.json(await getScanCache(userId));
   }
-  return NextResponse.json(await getPortals());
+  return NextResponse.json(await getPortals(userId));
 }
 
 export async function POST(req: Request) {
+  const userId = await requireAuth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const body = await req.json() as { action: string; portal?: Portal; company?: string };
 
   if (body.action === 'add') {
     if (!body.portal?.company || !body.portal?.careersUrl) {
       return NextResponse.json({ error: 'company and careersUrl are required' }, { status: 400 });
     }
-    await addPortal(body.portal);
+    await addPortal(userId, body.portal);
     return NextResponse.json({ success: true });
   }
 
   if (body.action === 'scan') {
     if (body.company) {
-      const portals = await getPortals();
+      const portals = await getPortals(userId);
       const portal = portals.find(p => p.company === body.company);
       if (!portal) return NextResponse.json({ error: 'Portal not found' }, { status: 404 });
       return NextResponse.json(await scanPortal(portal));
     }
-    return NextResponse.json(await scanAllPortals());
+    const portals = await getPortals(userId);
+    return NextResponse.json(await Promise.all(portals.map(scanPortal)));
   }
 
   if (body.action === 'discover') {
     const [prefs, jobs, dismissedUrls, portals, oldCache] = await Promise.all([
-      getPreferences(),
-      getJobs(),
-      getDismissedUrls(),
-      getPortals(),
-      getScanCache(),
+      getPreferences(userId),
+      getJobs(userId),
+      getDismissedUrls(userId),
+      getPortals(userId),
+      getScanCache(userId),
     ]);
     const existingUrls = new Set(jobs.map(j => j.sourceUrl));
     const excludedSet = new Set(prefs.companiesToExclude.map(c => c.toLowerCase()));
     const encoder = new TextEncoder();
 
-    // Companies that already 404'd in the previous scan — second failure = auto-prune
     const prevFailed404 = new Set(
       (oldCache?.errors ?? [])
         .filter(e => e.error.includes('404'))
@@ -158,9 +167,9 @@ export async function POST(req: Request) {
 
         let effectivePortals = portals;
         if (portals.length === 0) {
-          const seededCount = await seedAllPortalsFromDirectory();
+          const seededCount = await seedAllPortalsFromDirectory(userId);
           if (seededCount > 0) {
-            effectivePortals = await getPortals();
+            effectivePortals = await getPortals(userId);
             send({ type: 'portals-seeded', count: seededCount });
           }
         }
@@ -172,14 +181,11 @@ export async function POST(req: Request) {
             const is404 = result.error.includes('404');
             if (is404) {
               if (prevFailed404.has(result.company)) {
-                // Second consecutive 404 — silently prune this stale portal
-                deletePortal(result.company).catch(() => {});
+                deletePortal(userId, result.company).catch(() => {});
               } else {
-                // First 404 — track internally for next scan, but don't show to user
                 allErrors.push({ company: result.company, error: result.error });
               }
             } else {
-              // Real error (network, auth, etc.) — surface it
               allErrors.push({ company: result.company, error: result.error });
               send({ type: 'error', company: result.company, error: result.error });
             }
@@ -210,7 +216,7 @@ export async function POST(req: Request) {
           discoveries: allDiscoveries,
           errors: allErrors,
         };
-        await saveScanCache(scanCache);
+        await saveScanCache(userId, scanCache);
         send({ type: 'done', scannedAt: scanCache.scannedAt });
         controller.close();
       },
@@ -225,7 +231,10 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  const userId = await requireAuth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const { company } = await req.json() as { company: string };
-  await deletePortal(company);
+  await deletePortal(userId, company);
   return NextResponse.json({ success: true });
 }

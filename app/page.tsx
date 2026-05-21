@@ -75,8 +75,8 @@ const metrics = [
 
 export default async function LandingPage() {
   const session = await auth0.getSession();
-  const ctaHref  = session ? "/dashboard" : "/auth/login?returnTo=/dashboard";
-  const ctaLabel = session ? "Go to dashboard" : "Get started free";
+  const ctaHref  = session ? "/relevant-jobs" : "/auth/login?returnTo=/relevant-jobs";
+  const ctaLabel = session ? "Go to scan" : "Get started free";
 
   return (
     <div className="-mt-8 -mb-8">
@@ -116,8 +116,8 @@ export default async function LandingPage() {
               <div className="hero-cta">
                 {session ? (
                   <div className="flex items-center gap-5 flex-wrap">
-                    <a href="/dashboard" className="inline-flex items-center gap-2.5 bg-[#3B5BDB] text-white px-7 py-4 rounded-xl text-sm font-bold hover:bg-[#3451c7] transition-all shadow-lg shadow-blue-900/50 hover:shadow-blue-900/70 hover:-translate-y-px">
-                      Go to dashboard <ArrowRight className="w-4 h-4" />
+                    <a href="/relevant-jobs" className="inline-flex items-center gap-2.5 bg-[#3B5BDB] text-white px-7 py-4 rounded-xl text-sm font-bold hover:bg-[#3451c7] transition-all shadow-lg shadow-blue-900/50 hover:shadow-blue-900/70 hover:-translate-y-px">
+                      Go to scan <ArrowRight className="w-4 h-4" />
                     </a>
                     <a href="#how-it-works" className="text-sm font-medium text-gray-300 hover:text-white transition-colors flex items-center gap-1">
                       See how it works <ArrowRight className="w-3.5 h-3.5 opacity-60" />

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ApplyOS | Executive Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed-dim": "#aec9e7",
+                    "on-surface": "#011d35",
+                    "inverse-surface": "#19324b",
+                    "on-error": "#ffffff",
+                    "surface-container-low": "#eef4ff",
+                    "secondary": "#46617b",
+                    "inverse-on-surface": "#e9f1ff",
+                    "on-tertiary-fixed-variant": "#812800",
+                    "primary-fixed": "#dae2ff",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "tertiary-fixed-dim": "#ffb59b",
+                    "surface-container": "#e4efff",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#cee5ff",
+                    "on-secondary-fixed-variant": "#2e4962",
+                    "tertiary-container": "#a33500",
+                    "primary-fixed-dim": "#b2c5ff",
+                    "on-secondary-fixed": "#001d32",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#001848",
+                    "on-tertiary": "#ffffff",
+                    "background": "#f8f9ff",
+                    "primary-container": "#0052cc",
+                    "surface": "#f8f9ff",
+                    "surface-container-high": "#dbe9ff",
+                    "primary": "#003d9b",
+                    "on-background": "#011d35",
+                    "surface-variant": "#d1e4ff",
+                    "outline": "#737685",
+                    "on-tertiary-fixed": "#380d00",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffdbcf",
+                    "on-secondary-container": "#48637d",
+                    "surface-tint": "#0c56d0",
+                    "surface-container-highest": "#d1e4ff",
+                    "secondary-container": "#c4e0fe",
+                    "on-surface-variant": "#434654",
+                    "tertiary": "#7b2600",
+                    "on-primary-container": "#c4d2ff",
+                    "on-primary-fixed-variant": "#0040a2",
+                    "outline-variant": "#c3c6d6",
+                    "inverse-primary": "#b2c5ff",
+                    "on-tertiary-container": "#ffc6b2",
+                    "surface-dim": "#c4dcfd"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "container-max": "1440px",
+                    "base": "8px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "40px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-sm": ["Inter"],
+                    "label-md": ["JetBrains Mono"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Hanken Grotesk"],
+                    "headline-xl": ["Hanken Grotesk"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #F8FAFC; /* Level 0 Background */
+            color: #011d35;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); /* Level 1 Shadow */
+        }
+        .interaction-shadow:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); /* Level 2 Shadow */
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-x-hidden">
+<!-- TopNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-on-background border-b border-outline-variant dark:border-on-surface-variant docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full h-16 px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<span class="font-headline-md text-headline-md font-bold text-on-surface dark:text-surface-bright">ApplyOS</span>
+<div class="hidden md:flex items-center gap-6">
+<a class="text-on-surface dark:text-inverse-on-surface font-bold border-b-2 border-primary dark:border-primary-fixed-dim pb-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200" href="#">Pipeline</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200" href="#">Scan</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200" href="#">Resumes</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200" href="#">Stories</a>
+<a class="text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed-dim transition-colors duration-200" href="#">Settings</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-3 pr-4 border-r border-outline-variant">
+<div class="text-right">
+<p class="font-label-md text-label-md text-on-surface font-bold">Nate M.</p>
+<p class="text-[10px] text-on-surface-variant">Executive Plan</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold">
+                        NI
+                    </div>
+</div>
+<button class="text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="max-w-container-max mx-auto px-margin-desktop py-12 flex gap-gutter">
+<!-- SideNav (Filters) -->
+<aside class="hidden lg:block h-full w-64 sticky top-24 shrink-0">
+<div class="flex flex-col gap-8">
+<div class="space-y-2">
+<p class="font-headline-sm text-[20px] font-bold text-on-surface">Advanced Filters</p>
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Narrow your search</p>
+</div>
+<nav class="flex flex-col gap-4">
+<a class="text-primary dark:text-primary-fixed-dim font-bold flex items-center gap-3 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined" data-icon="star">star</span>
+<span class="text-body-md">Min Score</span>
+<span class="ml-auto text-label-md bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full">4.5+</span>
+</a>
+<a class="text-on-surface-variant dark:text-outline-variant flex items-center gap-3 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="text-body-md">Salary</span>
+</a>
+<a class="text-on-surface-variant dark:text-outline-variant flex items-center gap-3 hover:text-primary transition-colors group" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span class="text-body-md">Posted</span>
+</a>
+</nav>
+<div class="h-px bg-outline-variant opacity-50"></div>
+<nav class="flex flex-col gap-4">
+<label class="flex items-center gap-3 cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="home_work">home_work</span>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary">Remote only</span>
+<input class="ml-auto rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="location_on">location_on</span>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary">My locations only</span>
+<input checked="" class="ml-auto rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="visibility_off">visibility_off</span>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary">Hide tracked</span>
+<input class="ml-auto rounded border-outline-variant text-primary focus:ring-primary/20" type="checkbox"/>
+</label>
+</nav>
+</div>
+</aside>
+<!-- Canvas Content -->
+<div class="flex-grow space-y-10">
+<!-- Actionable Hero Area -->
+<section class="relative overflow-hidden rounded-xl bg-on-background p-8 text-white min-h-[320px] flex flex-col justify-center">
+<div class="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
+<img alt="Abstract digital network" class="w-full h-full object-cover" data-alt="A highly complex digital network visualization with interconnected nodes and glowing filaments in deep sapphire blue and vibrant cyan. The aesthetic is clean, sophisticated, and high-tech, representing AI data processing. The lighting is low-key with sharp, luminescent accents against a dark, textured background, creating a sense of precision and advanced engineering." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALccL-y_H9dLSk-P31YMfbKH344clZfs4dAfbtLzTuxuJkW1Z3rSN1EhMBmYOqwJ06macl4KStU7OHkl22H-58LOhpFEPBffjPAJ941QwvIEYNEULKaYDYJk6UJn2z5-IMh4mjEBl-rViaJssUofDgJzU8mVk39KVDn-Cl4cFKOllE4n1wP-7x6spn1pk9hUUnfKl-Tcp7wOR-pWFxe8jTiwj0hb_G7P6ty6MeFdR53JGVu1OJpTamVdaaCQb0x3K6ykDH8DPyNQ"/>
+</div>
+<div class="relative z-10 max-w-2xl space-y-6">
+<div class="space-y-2">
+<span class="bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Priority Today</span>
+<h1 class="font-headline-xl text-headline-xl">Strategic Matches Found</h1>
+<p class="text-on-primary-container font-body-lg">AI has prioritized 3 roles requiring immediate response based on your Platform PM expertise.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-lg interaction-shadow transition-all hover:bg-white/20 cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-primary-fixed-dim">98% Match</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="bolt">bolt</span>
+</div>
+<p class="font-bold text-body-md truncate">Lead Platform PM</p>
+<p class="text-xs text-white/60">Stripe • Remote</p>
+</div>
+<div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-lg interaction-shadow transition-all hover:bg-white/20 cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-primary-fixed-dim">96% Match</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="bolt">bolt</span>
+</div>
+<p class="font-bold text-body-md truncate">Director of Product</p>
+<p class="text-xs text-white/60">Vercel • NYC</p>
+</div>
+<div class="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-lg interaction-shadow transition-all hover:bg-white/20 cursor-pointer">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-md text-primary-fixed-dim">94% Match</span>
+<span class="material-symbols-outlined text-primary-fixed-dim text-sm" data-icon="bolt">bolt</span>
+</div>
+<p class="font-bold text-body-md truncate">Sr. Technical PM</p>
+<p class="text-xs text-white/60">Datadog • Hybrid</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Compact Metric Cards Row -->
+<section class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl card-shadow border border-outline-variant/30 flex flex-col justify-between hover:border-primary/50 transition-colors cursor-default">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-primary" data-icon="rocket_launch">rocket_launch</span>
+<span class="text-[10px] font-bold text-primary bg-primary-fixed px-2 py-0.5 rounded-full">+2 new</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wide">Active</p>
+<h3 class="text-headline-md font-bold text-on-surface">14</h3>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl card-shadow border border-outline-variant/30 flex flex-col justify-between hover:border-primary/50 transition-colors cursor-default">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-secondary" data-icon="forum">forum</span>
+<span class="text-[10px] font-bold text-secondary bg-secondary-container px-2 py-0.5 rounded-full">3 pending</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wide">Interviewing</p>
+<h3 class="text-headline-md font-bold text-on-surface">4</h3>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl card-shadow border border-outline-variant/30 flex flex-col justify-between hover:border-primary/50 transition-colors cursor-default">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="hub">hub</span>
+<span class="text-[10px] font-bold text-tertiary bg-tertiary-fixed px-2 py-0.5 rounded-full">Top 5%</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wide">New Matches</p>
+<h3 class="text-headline-md font-bold text-on-surface">82</h3>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl card-shadow border border-outline-variant/30 flex flex-col justify-between hover:border-primary/50 transition-colors cursor-default">
+<div class="flex items-center justify-between mb-2">
+<span class="material-symbols-outlined text-primary" data-icon="auto_stories">auto_stories</span>
+<span class="text-[10px] font-bold text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded-full">85% Ready</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface-variant uppercase tracking-wide">STAR Stories</p>
+<h3 class="text-headline-md font-bold text-on-surface">12</h3>
+</div>
+</div>
+</section>
+<!-- Main Insights Grid -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+<!-- Pipeline Velocity Visualization -->
+<section class="xl:col-span-2 bg-surface-container-lowest rounded-xl card-shadow p-8 border border-outline-variant/30">
+<div class="flex items-center justify-between mb-8">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Pipeline Velocity</h2>
+<p class="text-body-sm text-on-surface-variant">Conversion rates and funnel movement</p>
+</div>
+<button class="flex items-center gap-2 text-primary font-bold text-body-sm hover:underline">
+                            View Details <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<!-- Funnel UI -->
+<div class="space-y-6">
+<div class="relative">
+<!-- Stage 1 -->
+<div class="flex items-center gap-4 mb-2">
+<div class="w-24 text-right">
+<span class="font-label-md text-on-surface-variant">Applications</span>
+</div>
+<div class="flex-grow h-10 bg-surface-container rounded-lg overflow-hidden flex items-center px-4 justify-between border border-outline-variant/20">
+<div class="absolute inset-y-0 left-24 bg-primary/10 w-[85%] rounded-lg"></div>
+<span class="relative z-10 font-bold text-primary">142</span>
+<span class="relative z-10 text-[10px] text-on-surface-variant font-bold">100% BASE</span>
+</div>
+</div>
+<!-- Stage 2 -->
+<div class="flex items-center gap-4 mb-2">
+<div class="w-24 text-right">
+<span class="font-label-md text-on-surface-variant">Phone Screen</span>
+</div>
+<div class="flex-grow h-10 bg-surface-container rounded-lg overflow-hidden flex items-center px-4 justify-between border border-outline-variant/20">
+<div class="absolute inset-y-0 left-24 bg-primary/30 w-[45%] rounded-lg"></div>
+<span class="relative z-10 font-bold text-primary">12</span>
+<span class="relative z-10 text-[10px] text-on-surface-variant font-bold">8.4% CONV.</span>
+</div>
+</div>
+<!-- Stage 3 -->
+<div class="flex items-center gap-4 mb-2">
+<div class="w-24 text-right">
+<span class="font-label-md text-on-surface-variant">Technical</span>
+</div>
+<div class="flex-grow h-10 bg-surface-container rounded-lg overflow-hidden flex items-center px-4 justify-between border border-outline-variant/20">
+<div class="absolute inset-y-0 left-24 bg-primary/60 w-[15%] rounded-lg"></div>
+<span class="relative z-10 font-bold text-primary">4</span>
+<span class="relative z-10 text-[10px] text-on-surface-variant font-bold">33% RET.</span>
+</div>
+</div>
+<!-- Stage 4 -->
+<div class="flex items-center gap-4">
+<div class="w-24 text-right">
+<span class="font-label-md text-on-surface-variant">Final Round</span>
+</div>
+<div class="flex-grow h-10 bg-surface-container rounded-lg overflow-hidden flex items-center px-4 justify-between border border-outline-variant/20">
+<div class="absolute inset-y-0 left-24 bg-primary w-[5%] rounded-lg"></div>
+<span class="relative z-10 font-bold text-white">2</span>
+<span class="relative z-10 text-[10px] text-on-surface-variant font-bold">50% RET.</span>
+</div>
+</div>
+</div>
+<div class="p-4 bg-surface-container-low rounded-lg border border-primary/10">
+<div class="flex gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<p class="text-body-sm text-on-surface">
+<strong>Executive Insight:</strong> Your conversion from Application to Phone Screen is <span class="text-primary font-bold">12% above benchmark</span> for Executive Platform roles. Focus on optimizing final round closing conversations.
+                                </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Top Matches Column -->
+<section class="bg-surface-container-lowest rounded-xl card-shadow p-8 border border-outline-variant/30 flex flex-col">
+<div class="mb-6">
+<h2 class="font-headline-md text-[20px] text-on-surface">Top Matches</h2>
+<p class="text-body-sm text-on-surface-variant">High-precision AI alignment</p>
+</div>
+<div class="space-y-4 flex-grow">
+<!-- Match 1 -->
+<div class="group p-4 rounded-xl hover:bg-surface-container-low transition-all border border-transparent hover:border-outline-variant/30 cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-on-surface group-hover:text-primary transition-colors">Staff Product Manager</p>
+<span class="font-label-md text-primary font-bold">4.9</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-2">OpenAI • San Francisco</p>
+<div class="bg-primary/5 p-2 rounded text-[11px] text-on-secondary-fixed-variant leading-relaxed">
+<span class="font-bold">Match Reason:</span> Aligned with your Platform PM expertise and large-scale API infrastructure history.
+                            </div>
+</div>
+<!-- Match 2 -->
+<div class="group p-4 rounded-xl hover:bg-surface-container-low transition-all border border-transparent hover:border-outline-variant/30 cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-on-surface group-hover:text-primary transition-colors">VP of Platform</p>
+<span class="font-label-md text-primary font-bold">4.8</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-2">Scale AI • Remote</p>
+<div class="bg-primary/5 p-2 rounded text-[11px] text-on-secondary-fixed-variant leading-relaxed">
+<span class="font-bold">Match Reason:</span> Matches your 10+ years of leadership and recent "Series C to D" growth success.
+                            </div>
+</div>
+<!-- Match 3 -->
+<div class="group p-4 rounded-xl hover:bg-surface-container-low transition-all border border-transparent hover:border-outline-variant/30 cursor-pointer">
+<div class="flex justify-between items-start mb-1">
+<p class="font-bold text-on-surface group-hover:text-primary transition-colors">Principal Ecosystem PM</p>
+<span class="font-label-md text-primary font-bold">4.8</span>
+</div>
+<p class="text-xs text-on-surface-variant mb-2">Shopify • Canada (Remote)</p>
+<div class="bg-primary/5 p-2 rounded text-[11px] text-on-secondary-fixed-variant leading-relaxed">
+<span class="font-bold">Match Reason:</span> Strong overlap with your Developer Experience (DX) and marketplace background.
+                            </div>
+</div>
+</div>
+<button class="mt-8 w-full py-3 bg-surface-container-low text-primary font-bold rounded-lg hover:bg-primary hover:text-white transition-all">
+                        View All 82 Matches
+                    </button>
+</section>
+</div>
+<!-- Recent Activity List (High-Density) -->
+<section class="bg-surface-container-lowest rounded-xl card-shadow border border-outline-variant/30 overflow-hidden">
+<div class="px-8 py-6 border-b border-outline-variant/30 flex justify-between items-center">
+<h2 class="font-headline-md text-[20px] text-on-surface">Application Timeline</h2>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container rounded-lg text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50">
+<th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Company</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Role</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider">Next Step</th>
+<th class="px-8 py-4 font-label-md text-on-surface-variant uppercase tracking-wider text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/20">
+<tr class="hover:bg-primary-container/5 transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-bold text-on-surface-variant">S</div>
+<span class="font-bold text-on-surface">Stripe</span>
+</div>
+</td>
+<td class="px-8 py-4 text-on-surface-variant">Lead Platform PM</td>
+<td class="px-8 py-4">
+<span class="px-3 py-1 bg-tertiary-fixed text-tertiary-fixed-dim rounded-full text-[10px] font-bold uppercase tracking-widest bg-opacity-20 text-tertiary">Interviewing</span>
+</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="event">event</span>
+<span class="text-body-sm">Final Loop - Oct 12</span>
+</div>
+</td>
+<td class="px-8 py-4 text-right">
+<button class="text-primary hover:bg-primary/10 p-2 rounded transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-primary-container/5 transition-colors group">
+<td class="px-8 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-surface-container flex items-center justify-center font-bold text-on-surface-variant">V</div>
+<span class="font-bold text-on-surface">Vercel</span>
+</div>
+</td>
+<td class="px-8 py-4 text-on-surface-variant">Director of Product</td>
+<td class="px-8 py-4">
+<span class="px-3 py-1 bg-secondary-container text-secondary-fixed-dim rounded-full text-[10px] font-bold uppercase tracking-widest bg-opacity-20 text-secondary">Phone Screen</span>
+</td>
+<td class="px-8 py-4">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="chat">chat</span>
+<span class="text-body-sm">Follow-up sent</span>
+</div>
+</td>
+<td class="px-8 py-4 text-right">
+<button class="text-primary hover:bg-primary/10 p-2 rounded transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+</main>
+<!-- Floating Quick Search -->
+<button class="fixed bottom-10 right-10 w-16 h-16 rounded-full bg-primary text-white shadow-2xl flex items-center justify-center interaction-shadow transform transition hover:scale-110 active:scale-95 z-40">
+<span class="material-symbols-outlined text-3xl" data-icon="search">search</span>
+</button>
+<script>
+        // Micro-interaction for sidebar links
+        document.querySelectorAll('aside nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Toggle active state visualization (simplified for demo)
+                document.querySelectorAll('aside nav a').forEach(l => {
+                    l.classList.remove('text-primary', 'font-bold');
+                    l.classList.add('text-on-surface-variant');
+                });
+                link.classList.add('text-primary', 'font-bold');
+                link.classList.remove('text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

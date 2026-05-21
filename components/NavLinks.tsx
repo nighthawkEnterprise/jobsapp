@@ -4,11 +4,12 @@ import { usePathname } from 'next/navigation';
 import { LogOut } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { href: '/dashboard',     label: 'Pipeline'  },
-  { href: '/relevant-jobs', label: 'Scan'      },
-  { href: '/resumes',       label: 'Resumes'   },
-  { href: '/stories',       label: 'Stories'   },
-  { href: '/settings',      label: 'Settings'  },
+  { href: '/dashboard',     label: 'Dashboard', exact: true  },
+  { href: '/relevant-jobs', label: 'Scan',      exact: false },
+  { href: '/pipeline',      label: 'Pipeline',  exact: true  },
+  { href: '/resumes',       label: 'Resumes',   exact: false },
+  { href: '/stories',       label: 'Stories',   exact: false },
+  { href: '/settings',      label: 'Settings',  exact: false },
 ];
 
 function getInitials(email: string): string {
@@ -21,30 +22,27 @@ function getInitials(email: string): string {
 export function NavLinks({ email }: { email: string }) {
   const pathname = usePathname();
 
-  const isActive = (href: string) =>
-    href === '/dashboard'
-      ? pathname === '/dashboard'
-      : pathname.startsWith(href);
+  const isActive = ({ href, exact }: { href: string; exact: boolean }) =>
+    exact ? pathname === href : pathname.startsWith(href);
 
   const initials = getInitials(email);
 
   return (
     <div className="flex-1 flex items-center justify-between">
-      {/* Primary nav */}
       <nav className="flex items-center gap-6">
-        {NAV_ITEMS.map(({ href, label }) => {
-          const active = isActive(href);
+        {NAV_ITEMS.map((item) => {
+          const active = isActive(item);
           return (
             <a
-              key={href}
-              href={href}
+              key={item.href}
+              href={item.href}
               className={`relative text-sm transition-colors py-1 ${
                 active
                   ? 'text-gray-900 font-semibold'
                   : 'text-gray-500 hover:text-gray-800 font-medium'
               }`}
             >
-              {label}
+              {item.label}
               {active && (
                 <span className="absolute -bottom-[1px] left-0 right-0 h-0.5 rounded-full bg-[#3B5BDB]" />
               )}
@@ -53,7 +51,6 @@ export function NavLinks({ email }: { email: string }) {
         })}
       </nav>
 
-      {/* Utility actions */}
       <div className="flex items-center gap-1.5">
         <a
           href="/profile"
@@ -79,14 +76,14 @@ export function NavLinksGuest() {
     <div className="ml-auto flex items-center gap-4">
       {process.env.NODE_ENV === 'development' && (
         <a
-          href="/api/dev-login?returnTo=/dashboard"
+          href="/api/dev-login?returnTo=/relevant-jobs"
           className="text-xs font-mono text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded hover:bg-amber-100 transition-colors"
         >
           Dev login
         </a>
       )}
       <a
-        href="/auth/login?returnTo=/dashboard"
+        href="/auth/login?returnTo=/relevant-jobs"
         className="text-sm font-semibold text-[#3B5BDB] hover:text-[#3451c7] transition-colors"
       >
         Sign in

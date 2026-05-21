@@ -32,8 +32,8 @@ export interface ScanResult {
 
 type Platform = 'greenhouse' | 'ashby' | 'lever' | 'bamboohr' | 'teamtailor' | 'workday' | 'workable' | 'unknown';
 
-export async function getPortals(): Promise<Portal[]> {
-  const { data } = await supabase.from('portals').select('*').order('company');
+export async function getPortals(userId: string): Promise<Portal[]> {
+  const { data } = await supabase.from('portals').select('*').eq('user_id', userId).order('company');
   if (!data) return [];
   return data.map(r => ({
     company: r.company as string,
@@ -43,41 +43,42 @@ export async function getPortals(): Promise<Portal[]> {
   }));
 }
 
-export async function savePortals(portals: Portal[]): Promise<void> {
-  await supabase.from('portals').delete().neq('company', '');
+export async function savePortals(userId: string, portals: Portal[]): Promise<void> {
+  await supabase.from('portals').delete().eq('user_id', userId);
   if (portals.length > 0) {
     await supabase.from('portals').insert(
-      portals.map(p => ({ company: p.company, careers_url: p.careersUrl, shard: p.shard, site: p.site }))
+      portals.map(p => ({ user_id: userId, company: p.company, careers_url: p.careersUrl, shard: p.shard, site: p.site }))
     );
   }
 }
 
-export async function addPortal(portal: Portal): Promise<void> {
+export async function addPortal(userId: string, portal: Portal): Promise<void> {
   await supabase.from('portals').upsert({
+    user_id: userId,
     company: portal.company,
     careers_url: portal.careersUrl,
     shard: portal.shard,
     site: portal.site,
-  });
+  }, { onConflict: 'user_id,company' });
 }
 
-export async function deletePortal(company: string): Promise<void> {
-  await supabase.from('portals').delete().eq('company', company);
+export async function deletePortal(userId: string, company: string): Promise<void> {
+  await supabase.from('portals').delete().eq('company', company).eq('user_id', userId);
 }
 
-export async function seedAllPortalsFromDirectory(): Promise<number> {
+export async function seedAllPortalsFromDirectory(userId: string): Promise<number> {
   const { data } = await supabase
     .from('company_directory')
     .select('name, careers_url');
 
   if (!data || data.length === 0) return 0;
 
-  const rows = data.map(r => ({ company: r.name as string, careers_url: r.careers_url as string }));
+  const rows = data.map(r => ({ user_id: userId, company: r.name as string, careers_url: r.careers_url as string }));
 
   // Batch upsert in chunks to stay within Supabase request limits
   const CHUNK = 100;
   for (let i = 0; i < rows.length; i += CHUNK) {
-    await supabase.from('portals').upsert(rows.slice(i, i + CHUNK));
+    await supabase.from('portals').upsert(rows.slice(i, i + CHUNK), { onConflict: 'user_id,company' });
   }
 
   return rows.length;
@@ -323,8 +324,8 @@ export async function scanPortal(portal: Portal): Promise<ScanResult> {
   }
 }
 
-export async function scanAllPortals(): Promise<ScanResult[]> {
-  const portals = await getPortals();
+export async function scanAllPortals(userId: string): Promise<ScanResult[]> {
+  const portals = await getPortals(userId);
   return Promise.all(portals.map(scanPortal));
 }
 

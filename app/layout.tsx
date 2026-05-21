@@ -59,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </nav>
 
-        <main className="flex-grow py-8">
+        <main className="flex-grow py-10">
           {children}
         </main>
 

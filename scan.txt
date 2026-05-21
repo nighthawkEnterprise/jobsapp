@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Discover Jobs | ApplyOS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=Inter:wght@400;500&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#380d00",
+                        "surface-container": "#e4efff",
+                        "tertiary-fixed-dim": "#ffb59b",
+                        "on-secondary-container": "#48637d",
+                        "on-tertiary-fixed-variant": "#812800",
+                        "inverse-surface": "#19324b",
+                        "primary-fixed-dim": "#b2c5ff",
+                        "on-tertiary-container": "#ffc6b2",
+                        "on-primary-container": "#c4d2ff",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#cee5ff",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#c4dcfd",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#2e4962",
+                        "background": "#f8f9ff",
+                        "inverse-on-surface": "#e9f1ff",
+                        "surface-tint": "#0c56d0",
+                        "secondary": "#46617b",
+                        "on-surface-variant": "#434654",
+                        "on-background": "#011d35",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed": "#001d32",
+                        "secondary-fixed-dim": "#aec9e7",
+                        "surface-container-highest": "#d1e4ff",
+                        "primary-container": "#0052cc",
+                        "outline": "#737685",
+                        "on-primary-fixed": "#001848",
+                        "tertiary-fixed": "#ffdbcf",
+                        "primary": "#003d9b",
+                        "inverse-primary": "#b2c5ff",
+                        "surface-container-low": "#eef4ff",
+                        "surface-bright": "#f8f9ff",
+                        "outline-variant": "#c3c6d6",
+                        "primary-fixed": "#dae2ff",
+                        "on-error": "#ffffff",
+                        "tertiary": "#7b2600",
+                        "on-surface": "#011d35",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f8f9ff",
+                        "surface-container-high": "#dbe9ff",
+                        "secondary-container": "#c4e0fe",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#d1e4ff",
+                        "on-primary-fixed-variant": "#0040a2",
+                        "tertiary-container": "#a33500"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "container-max": "1440px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["JetBrains Mono"],
+                        "headline-xl": ["Hanken Grotesk"],
+                        "body-sm": ["Inter"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Hanken Grotesk"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-md": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #F8FAFC;
+            color: #011d35;
+        }
+        .executive-card {
+            background: #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .executive-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-filter {
+            color: #003d9b;
+            font-weight: 700;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E2E8F0;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #CBD5E1;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopNavBar -->
+<header class="bg-surface-container-lowest border-b border-outline-variant sticky top-0 z-50">
+<div class="flex justify-between items-center w-full h-16 px-margin-desktop max-w-container-max mx-auto">
+<div class="flex items-center gap-8">
+<a class="font-headline-md text-headline-md font-bold text-on-surface" href="#">ApplyOS</a>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-md text-label-md" href="#">Pipeline</a>
+<a class="text-on-surface font-bold border-b-2 border-primary pb-1 font-label-md text-label-md" href="#">Scan</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-md text-label-md" href="#">Resumes</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-md text-label-md" href="#">Stories</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors duration-200 font-label-md text-label-md" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold shadow-sm">NI</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors" data-icon="logout">logout</button>
+</div>
+</div>
+</header>
+<main class="max-w-container-max mx-auto px-margin-desktop py-8">
+<!-- Sub-Header Section -->
+<section class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl" data-icon="explore">explore</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl tracking-tight">Discover <span class="text-primary">Jobs</span></h1>
+</div>
+<p class="text-on-surface-variant font-body-sm text-body-sm flex items-center gap-2">
+                    Last scanned 15m ago <span class="text-outline-variant">•</span> 82 roles across target companies <span class="text-outline-variant">•</span> <span class="text-error font-medium flex items-center gap-1"><span class="material-symbols-outlined text-[16px]" data-icon="error_outline">error_outline</span> 384 portals errored</span>
+</p>
+</div>
+<button class="bg-on-background text-on-primary px-6 py-2.5 rounded-xl font-label-md text-label-md flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-on-background/10">
+<span class="material-symbols-outlined text-lg" data-icon="refresh">refresh</span>
+                Refresh
+            </button>
+</section><section class="mb-10">
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-4">Strategic Matches</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="executive-card p-4 flex flex-col gap-3 border-l-4 border-primary">
+<div class="flex justify-between items-start">
+<span class="text-primary font-bold text-lg">4.9/5</span>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-bold">TOP MATCH</span>
+</div>
+<div class="space-y-1">
+<h4 class="font-bold text-on-surface truncate">Principal AI Engineer</h4>
+<p class="text-body-sm text-on-surface-variant truncate">OpenAI • San Francisco</p>
+</div>
+<button class="w-full py-2 bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md rounded-lg transition-colors text-center">View Lead</button>
+</div>
+<div class="executive-card p-4 flex flex-col gap-3 border-l-4 border-primary">
+<div class="flex justify-between items-start">
+<span class="text-primary font-bold text-lg">4.8/5</span>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-bold">EXECUTIVE ROLE</span>
+</div>
+<div class="space-y-1">
+<h4 class="font-bold text-on-surface truncate">VP of Product</h4>
+<p class="text-body-sm text-on-surface-variant truncate">Anthropic • Remote</p>
+</div>
+<button class="w-full py-2 bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md rounded-lg transition-colors text-center">View Lead</button>
+</div>
+<div class="executive-card p-4 flex flex-col gap-3 border-l-4 border-primary">
+<div class="flex justify-between items-start">
+<span class="text-primary font-bold text-lg">4.8/5</span>
+<span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded text-[10px] font-bold">HOT LEAD</span>
+</div>
+<div class="space-y-1">
+<h4 class="font-bold text-on-surface truncate">Staff Product Manager</h4>
+<p class="text-body-sm text-on-surface-variant truncate">Weights &amp; Biases • SF</p>
+</div>
+<button class="w-full py-2 bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md rounded-lg transition-colors text-center">View Lead</button>
+</div>
+</div>
+</section>
+<div class="flex gap-10">
+<!-- SideNavBar (Filters) -->
+<aside class="hidden lg:flex flex-col gap-8 w-64 py-base sticky top-24 h-[calc(100vh-140px)] overflow-y-auto pr-4 border-r border-outline-variant/30"><h2 class="font-headline-md text-lg font-bold text-on-surface mb-2">Search Parameters</h2>
+<div class="space-y-2">
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-wider">Advanced Filters</h3>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all text-body-sm" placeholder="Search title or company..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant" data-icon="search">search</span>
+</div>
+</div>
+<!-- Filter Groups -->
+<div class="space-y-6">
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary" data-icon="star">star</span> Min Score
+                        </label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="text-primary focus:ring-primary border-outline-variant w-4 h-4" name="score" type="radio"/>
+<span class="text-body-sm text-on-surface active-filter">Any</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="text-primary focus:ring-primary border-outline-variant w-4 h-4" name="score" type="radio"/>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">3.5+</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="text-primary focus:ring-primary border-outline-variant w-4 h-4" name="score" type="radio"/>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">4.0+</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="text-primary focus:ring-primary border-outline-variant w-4 h-4" name="score" type="radio"/>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">4.5+</span>
+</label>
+</div>
+</div>
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary" data-icon="payments">payments</span> Salary
+                        </label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="text-primary focus:ring-primary border-outline-variant w-4 h-4" name="salary" type="radio"/>
+<span class="text-body-sm text-on-surface active-filter">Any</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="text-primary focus:ring-primary border-outline-variant w-4 h-4" name="salary" type="radio"/>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">$150k+</span>
+</label>
+</div>
+</div>
+<div class="space-y-3">
+<label class="font-label-md text-label-md text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-lg text-primary" data-icon="calendar_today">calendar_today</span> Posted
+                        </label>
+<div class="space-y-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="text-primary focus:ring-primary border-outline-variant w-4 h-4" name="posted" type="radio"/>
+<span class="text-body-sm text-on-surface active-filter">Any time</span>
+</label>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant/30 space-y-3">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary border-outline-variant w-4 h-4" type="checkbox"/>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="home_work">home_work</span> Remote only
+                            </span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="rounded text-primary focus:ring-primary border-outline-variant w-4 h-4" type="checkbox"/>
+<span class="text-body-sm text-on-surface-variant group-hover:text-primary flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="location_on">location_on</span> My locations only
+                            </span>
+</label>
+</div>
+<div class="space-y-3">
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-wider">Watching (603)</h3>
+<div class="space-y-1 max-h-48 overflow-y-auto pr-2">
+<div class="text-body-sm py-1.5 px-2 hover:bg-surface-container rounded-lg cursor-pointer transition-colors text-on-surface">10x Genomics</div>
+<div class="text-body-sm py-1.5 px-2 hover:bg-surface-container rounded-lg cursor-pointer transition-colors text-on-surface">1Password</div>
+<div class="text-body-sm py-1.5 px-2 hover:bg-surface-container rounded-lg cursor-pointer transition-colors text-on-surface font-semibold text-primary bg-primary-container/20">Databricks</div>
+<div class="text-body-sm py-1.5 px-2 hover:bg-surface-container rounded-lg cursor-pointer transition-colors text-on-surface">Stripe</div>
+<div class="text-body-sm py-1.5 px-2 hover:bg-surface-container rounded-lg cursor-pointer transition-colors text-on-surface">Figma</div>
+<div class="text-body-sm py-1.5 px-2 hover:bg-surface-container rounded-lg cursor-pointer transition-colors text-on-surface">37signals</div>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Job Feed -->
+<div class="flex-1 space-y-6">
+<!-- Feed Tabs -->
+<div class="flex items-center gap-8 border-b border-outline-variant mb-6">
+<button class="pb-4 border-b-2 border-primary text-on-surface font-bold font-label-md text-label-md flex items-center gap-2">
+                        Relevant <span class="bg-primary-container text-on-primary-container px-2 py-0.5 rounded-full text-[10px]">82</span>
+</button>
+<button class="pb-4 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md flex items-center gap-2">
+                        Not Interested <span class="bg-surface-container-highest text-on-surface-variant px-2 py-0.5 rounded-full text-[10px]">2</span>
+</button>
+</div>
+<!-- Feed Content -->
+<div class="space-y-4">
+<!-- Job Card 1 -->
+<div class="executive-card p-6 flex items-start gap-6 group">
+<!-- Score Indicator -->
+<div class="flex flex-col items-center justify-center min-w-[80px] h-20 rounded-2xl bg-green-50 border border-green-100">
+<span class="text-green-700 font-bold text-2xl leading-none">4.5</span>
+<span class="text-green-600/60 font-label-md text-[10px] mt-1">/ 5</span>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex items-start justify-between">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded bg-[#FF3621] flex items-center justify-center text-white text-[10px] font-bold">DA</div>
+<h3 class="font-headline-md text-lg font-bold group-hover:text-primary transition-colors">Sr. Product Manager, Databricks AI</h3>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm"><button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">news</span> Research
+</button>
+<button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">check_circle</span> Quick Tailor
+</button>
+<button class="text-primary font-label-md text-label-md hover:underline decoration-2 underline-offset-4">View Original</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Add to Pipeline</button></div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline-variant font-label-md text-label-md mr-2">1mo ago</span>
+<button class="p-2 rounded-lg hover:bg-surface-container text-outline transition-colors"><span class="material-symbols-outlined text-lg" data-icon="share">share</span></button>
+<button class="p-2 rounded-lg hover:bg-surface-container text-outline transition-colors"><span class="material-symbols-outlined text-lg" data-icon="visibility_off">visibility_off</span></button>
+</div>
+</div>
+<div class="my-3 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="auto_awesome">auto_awesome</span>
+<p class="text-body-sm text-on-surface-variant italic">Matches your expertise in AI infrastructure and enterprise SaaS scaling.</p>
+</div><div class="mt-4 flex items-center justify-between">
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-[12px] font-medium">Machine Learning</span>
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-[12px] font-medium">Enterprise SaaS</span>
+</div>
+<div class="flex items-center gap-3"><button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">news</span> Research
+</button>
+<button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">check_circle</span> Quick Tailor
+</button>
+<button class="text-primary font-label-md text-label-md hover:underline decoration-2 underline-offset-4">View Original</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Add to Pipeline</button></div>
+</div>
+</div>
+</div>
+<!-- Job Card 2 -->
+<div class="executive-card p-6 flex items-start gap-6 group">
+<div class="flex flex-col items-center justify-center min-w-[80px] h-20 rounded-2xl bg-green-50 border border-green-100">
+<span class="text-green-700 font-bold text-2xl leading-none">4.8</span>
+<span class="text-green-600/60 font-label-md text-[10px] mt-1">/ 5</span>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex items-start justify-between">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded bg-[#635BFF] flex items-center justify-center text-white text-[10px] font-bold">ST</div>
+<h3 class="font-headline-md text-lg font-bold group-hover:text-primary transition-colors">Product Manager, Growth AI Outreach</h3>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm"><button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">news</span> Research
+</button>
+<button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">check_circle</span> Quick Tailor
+</button>
+<button class="text-primary font-label-md text-label-md hover:underline decoration-2 underline-offset-4">View Original</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Add to Pipeline</button></div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-primary font-bold font-label-md text-label-md mr-2">Today</span>
+<button class="p-2 rounded-lg hover:bg-surface-container text-outline transition-colors"><span class="material-symbols-outlined text-lg" data-icon="share">share</span></button>
+<button class="p-2 rounded-lg hover:bg-surface-container text-outline transition-colors"><span class="material-symbols-outlined text-lg" data-icon="visibility_off">visibility_off</span></button>
+</div>
+</div>
+<div class="my-3 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="auto_awesome">auto_awesome</span>
+<p class="text-body-sm text-on-surface-variant italic">Matches your expertise in AI infrastructure and enterprise SaaS scaling.</p>
+</div><div class="mt-4 flex items-center justify-between">
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-primary-container/10 text-primary rounded-full text-[12px] font-bold">Hot Role</span>
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-[12px] font-medium">Growth</span>
+</div>
+<div class="flex items-center gap-3"><button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">news</span> Research
+</button>
+<button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">check_circle</span> Quick Tailor
+</button>
+<button class="text-primary font-label-md text-label-md hover:underline decoration-2 underline-offset-4">View Original</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Add to Pipeline</button></div>
+</div>
+</div>
+</div>
+<!-- Job Card 3 -->
+<div class="executive-card p-6 flex items-start gap-6 group">
+<div class="flex flex-col items-center justify-center min-w-[80px] h-20 rounded-2xl bg-amber-50 border border-amber-100">
+<span class="text-amber-700 font-bold text-2xl leading-none">3.9</span>
+<span class="text-amber-600/60 font-label-md text-[10px] mt-1">/ 5</span>
+</div>
+<div class="flex-1 flex flex-col gap-1">
+<div class="flex items-start justify-between">
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<div class="w-6 h-6 rounded bg-[#000000] flex items-center justify-center text-white text-[10px] font-bold">FI</div>
+<h3 class="font-headline-md text-lg font-bold group-hover:text-primary transition-colors">Product Manager, AI Platform</h3>
+</div>
+<div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm"><button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">news</span> Research
+</button>
+<button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">check_circle</span> Quick Tailor
+</button>
+<button class="text-primary font-label-md text-label-md hover:underline decoration-2 underline-offset-4">View Original</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Add to Pipeline</button></div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-outline-variant font-label-md text-label-md mr-2">1w ago</span>
+<button class="p-2 rounded-lg hover:bg-surface-container text-outline transition-colors"><span class="material-symbols-outlined text-lg" data-icon="share">share</span></button>
+<button class="p-2 rounded-lg hover:bg-surface-container text-outline transition-colors"><span class="material-symbols-outlined text-lg" data-icon="visibility_off">visibility_off</span></button>
+</div>
+</div>
+<div class="my-3 p-3 bg-surface-container-low rounded-xl border border-outline-variant/30 flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-lg" data-icon="auto_awesome">auto_awesome</span>
+<p class="text-body-sm text-on-surface-variant italic">Matches your expertise in AI infrastructure and enterprise SaaS scaling.</p>
+</div><div class="mt-4 flex items-center justify-between">
+<div class="flex gap-2">
+<span class="px-3 py-1 bg-surface-container text-on-surface-variant rounded-full text-[12px] font-medium">Design Systems</span>
+</div>
+<div class="flex items-center gap-3"><button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">news</span> Research
+</button>
+<button class="text-secondary font-label-md text-label-md hover:text-primary transition-colors flex items-center gap-1">
+<span class="material-symbols-outlined text-base">check_circle</span> Quick Tailor
+</button>
+<button class="text-primary font-label-md text-label-md hover:underline decoration-2 underline-offset-4">View Original</button>
+<button class="bg-primary text-on-primary px-5 py-2 rounded-xl font-label-md text-label-md hover:opacity-90 transition-opacity">Add to Pipeline</button></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Load More / Pagination Placeholder -->
+<div class="pt-8 flex justify-center">
+<button class="text-primary font-bold font-label-md text-label-md border-2 border-primary/20 px-8 py-3 rounded-2xl hover:bg-primary/5 transition-colors">Load More Jobs</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB for Search -->
+<div class="fixed bottom-8 right-8 z-40">
+<button class="w-14 h-14 bg-on-background text-on-primary rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all group">
+<span class="material-symbols-outlined text-2xl group-hover:rotate-12 transition-transform" data-icon="auto_awesome">auto_awesome</span>
+<span class="absolute right-16 bg-white text-on-surface px-4 py-2 rounded-xl border border-outline-variant shadow-lg text-body-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">AI Job Matching</span>
+</button>
+</div>
+<!-- Micro-interaction script -->
+<script>
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const group = e.target.closest('.space-y-2');
+                group.querySelectorAll('span').forEach(s => s.classList.remove('active-filter', 'text-primary'));
+                e.target.nextElementSibling.classList.add('active-filter');
+            });
+        });
+
+        // Simple mock for "Refresh" animation
+        const refreshBtn = document.querySelector('button:has([data-icon="refresh"])');
+        refreshBtn.addEventListener('click', () => {
+            const icon = refreshBtn.querySelector('.material-symbols-outlined');
+            icon.classList.add('animate-spin');
+            setTimeout(() => icon.classList.remove('animate-spin'), 1000);
+        });
+    </script>
+</body></html>

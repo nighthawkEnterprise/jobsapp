@@ -15,12 +15,12 @@ export interface UsageStats {
   updatedAt: string | null;
 }
 
-export async function recordUsage(op: UsageOp, inputTokens: number, outputTokens: number): Promise<void> {
+export async function recordUsage(userId: string, op: UsageOp, inputTokens: number, outputTokens: number): Promise<void> {
   try {
-    const { data } = await supabase.from('token_usage').select('*').eq('id', 1).single();
+    const { data } = await supabase.from('token_usage').select('*').eq('user_id', userId).single();
     const r = data ?? {};
     await supabase.from('token_usage').upsert({
-      id: 1,
+      user_id: userId,
       tailor_input:  (r.tailor_input  ?? 0) + (op === 'tailor' ? inputTokens  : 0),
       tailor_output: (r.tailor_output ?? 0) + (op === 'tailor' ? outputTokens : 0),
       tailor_calls:  (r.tailor_calls  ?? 0) + (op === 'tailor' ? 1 : 0),
@@ -31,15 +31,15 @@ export async function recordUsage(op: UsageOp, inputTokens: number, outputTokens
       other_output:  (r.other_output  ?? 0) + (op === 'other'  ? outputTokens : 0),
       other_calls:   (r.other_calls   ?? 0) + (op === 'other'  ? 1 : 0),
       updated_at: new Date().toISOString(),
-    });
+    }, { onConflict: 'user_id' });
   } catch {
     // Non-critical — never let usage tracking break the main flow
   }
 }
 
-export async function getUsage(): Promise<UsageStats> {
+export async function getUsage(userId: string): Promise<UsageStats> {
   try {
-    const { data } = await supabase.from('token_usage').select('*').eq('id', 1).single();
+    const { data } = await supabase.from('token_usage').select('*').eq('user_id', userId).single();
     if (!data) return empty();
     return {
       tailorInput:  data.tailor_input  ?? 0,

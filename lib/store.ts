@@ -89,9 +89,35 @@ export const defaultPreferences: Preferences = {
   domainsOfInterest: [], companiesToExclude: [], targetCompanies: [], roleType: '', workStyle: '',
 };
 
+// --- One-time legacy data claim ---
+// Before the user-isolation migration, all rows had user_id = NULL (single-row tables)
+// or user_id = '' (multi-row tables). On first login post-migration we adopt those rows.
+async function claimLegacyData(userId: string): Promise<void> {
+  await Promise.all([
+    supabase.from('preferences').update({ user_id: userId }).is('user_id', null),
+    supabase.from('resume').update({ user_id: userId }).is('user_id', null),
+    supabase.from('profile').update({ user_id: userId }).is('user_id', null),
+    supabase.from('scan_cache').update({ user_id: userId }).is('user_id', null),
+    supabase.from('jobs').update({ user_id: userId }).eq('user_id', ''),
+    supabase.from('stories').update({ user_id: userId }).eq('user_id', ''),
+    supabase.from('tailored_resumes').update({ user_id: userId }).eq('user_id', ''),
+    supabase.from('dismissed_urls').update({ user_id: userId }).eq('user_id', ''),
+    supabase.from('portals').update({ user_id: userId }).eq('user_id', ''),
+  ]);
+}
+
 // --- Preferences ---
-export async function getPreferences(): Promise<Preferences> {
-  const { data } = await supabase.from('preferences').select('*').eq('id', 1).single();
+export async function getPreferences(userId: string): Promise<Preferences> {
+  let { data } = await supabase.from('preferences').select('*').eq('user_id', userId).single();
+  if (!data) {
+    // Check for unclaimed legacy row (pre-isolation migration)
+    const { data: legacy } = await supabase.from('preferences').select('id').is('user_id', null).limit(1).maybeSingle();
+    if (legacy) {
+      await claimLegacyData(userId);
+      const { data: reclaimed } = await supabase.from('preferences').select('*').eq('user_id', userId).single();
+      data = reclaimed;
+    }
+  }
   if (!data) return defaultPreferences;
   return {
     jobTitles: data.job_titles ?? [],
@@ -105,9 +131,9 @@ export async function getPreferences(): Promise<Preferences> {
   };
 }
 
-export async function savePreferences(prefs: Preferences): Promise<void> {
+export async function savePreferences(userId: string, prefs: Preferences): Promise<void> {
   const { error } = await supabase.from('preferences').upsert({
-    id: 1,
+    user_id: userId,
     job_titles: prefs.jobTitles,
     salary_floor: prefs.salaryFloor,
     location_preferences: prefs.locationPreferences,
@@ -116,43 +142,43 @@ export async function savePreferences(prefs: Preferences): Promise<void> {
     target_companies: prefs.targetCompanies,
     role_type: prefs.roleType,
     work_style: prefs.workStyle,
-  });
+  }, { onConflict: 'user_id' });
   if (error) throw new Error(`savePreferences failed: ${error.message}`);
 }
 
 // --- Resume ---
-export async function getMasterResume(): Promise<string> {
-  const { data } = await supabase.from('resume').select('content').eq('id', 1).single();
+export async function getMasterResume(userId: string): Promise<string> {
+  const { data } = await supabase.from('resume').select('content').eq('user_id', userId).single();
   return data?.content ?? '';
 }
 
-export async function saveMasterResume(content: string): Promise<void> {
-  await supabase.from('resume').upsert({ id: 1, content });
+export async function saveMasterResume(userId: string, content: string): Promise<void> {
+  await supabase.from('resume').upsert({ user_id: userId, content }, { onConflict: 'user_id' });
 }
 
-export async function getResumeHasDocx(): Promise<boolean> {
-  const { data } = await supabase.from('resume').select('has_docx').eq('id', 1).single();
+export async function getResumeHasDocx(userId: string): Promise<boolean> {
+  const { data } = await supabase.from('resume').select('has_docx').eq('user_id', userId).single();
   return data?.has_docx ?? false;
 }
 
-export async function setResumeHasDocx(hasDocx: boolean): Promise<void> {
-  await supabase.from('resume').upsert({ id: 1, has_docx: hasDocx });
+export async function setResumeHasDocx(userId: string, hasDocx: boolean): Promise<void> {
+  await supabase.from('resume').upsert({ user_id: userId, has_docx: hasDocx }, { onConflict: 'user_id' });
 }
 
 // --- Profile ---
-export async function getProfile(): Promise<string> {
-  const { data } = await supabase.from('profile').select('content').eq('id', 1).single();
+export async function getProfile(userId: string): Promise<string> {
+  const { data } = await supabase.from('profile').select('content').eq('user_id', userId).single();
   return data?.content ?? '';
 }
 
-export async function saveProfile(content: string): Promise<void> {
-  const { error } = await supabase.from('profile').upsert({ id: 1, content });
+export async function saveProfile(userId: string, content: string): Promise<void> {
+  const { error } = await supabase.from('profile').upsert({ user_id: userId, content }, { onConflict: 'user_id' });
   if (error) throw new Error(`saveProfile failed: ${error.message}`);
 }
 
 // --- Stories ---
-export async function getStories(): Promise<Story[]> {
-  const { data } = await supabase.from('stories').select('*').order('title');
+export async function getStories(userId: string): Promise<Story[]> {
+  const { data } = await supabase.from('stories').select('*').eq('user_id', userId).order('title');
   if (!data) return [];
   return data.map(r => ({
     id: r.id,
@@ -167,8 +193,9 @@ export async function getStories(): Promise<Story[]> {
   }));
 }
 
-export async function addStory(story: Omit<Story, 'id'>): Promise<Story> {
+export async function addStory(userId: string, story: Omit<Story, 'id'>): Promise<Story> {
   const { data, error } = await supabase.from('stories').insert({
+    user_id: userId,
     title: story.title,
     situation: story.situation,
     task: story.task,
@@ -182,7 +209,7 @@ export async function addStory(story: Omit<Story, 'id'>): Promise<Story> {
   return { ...story, id: data.id };
 }
 
-export async function updateStory(id: string, updates: Partial<Story>): Promise<void> {
+export async function updateStory(userId: string, id: string, updates: Partial<Story>): Promise<void> {
   const row: Record<string, unknown> = {};
   if (updates.title !== undefined)        row.title = updates.title;
   if (updates.situation !== undefined)    row.situation = updates.situation;
@@ -192,11 +219,11 @@ export async function updateStory(id: string, updates: Partial<Story>): Promise<
   if (updates.competencies !== undefined) row.competencies = updates.competencies;
   if (updates.domains !== undefined)      row.domains = updates.domains;
   if (updates.metrics !== undefined)      row.metrics = updates.metrics;
-  await supabase.from('stories').update(row).eq('id', id);
+  await supabase.from('stories').update(row).eq('id', id).eq('user_id', userId);
 }
 
-export async function deleteStory(id: string): Promise<void> {
-  await supabase.from('stories').delete().eq('id', id);
+export async function deleteStory(userId: string, id: string): Promise<void> {
+  await supabase.from('stories').delete().eq('id', id).eq('user_id', userId);
 }
 
 // --- Jobs ---
@@ -219,16 +246,17 @@ function rowToJob(r: Record<string, unknown>): Job {
   };
 }
 
-export async function getJobs(): Promise<Job[]> {
-  const { data } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
+export async function getJobs(userId: string): Promise<Job[]> {
+  const { data } = await supabase.from('jobs').select('*').eq('user_id', userId).order('created_at', { ascending: false });
   if (!data) return [];
   return data.map(r => rowToJob(r as Record<string, unknown>));
 }
 
-export async function addJob(jobData: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'notes'>): Promise<Job> {
+export async function addJob(userId: string, jobData: Omit<Job, 'id' | 'createdAt' | 'updatedAt' | 'status' | 'notes'>): Promise<Job> {
   const now = new Date().toISOString();
   const { data, error } = await supabase.from('jobs').insert({
     id: uuidv4(),
+    user_id: userId,
     company: jobData.company,
     title: jobData.title,
     location: jobData.location,
@@ -245,7 +273,7 @@ export async function addJob(jobData: Omit<Job, 'id' | 'createdAt' | 'updatedAt'
   return rowToJob(data as Record<string, unknown>);
 }
 
-export async function updateJob(id: string, updates: Partial<Job>): Promise<void> {
+export async function updateJob(userId: string, id: string, updates: Partial<Job>): Promise<void> {
   const row: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (updates.company !== undefined)    row.company = updates.company;
   if (updates.title !== undefined)      row.title = updates.title;
@@ -258,16 +286,16 @@ export async function updateJob(id: string, updates: Partial<Job>): Promise<void
   if (updates.score !== undefined)      row.score = updates.score;
   if (updates.dimensions !== undefined) row.dimensions = updates.dimensions;
   if (updates.scoredAt !== undefined)   row.scored_at = updates.scoredAt;
-  await supabase.from('jobs').update(row).eq('id', id);
+  await supabase.from('jobs').update(row).eq('id', id).eq('user_id', userId);
 }
 
-export async function deleteJob(id: string): Promise<void> {
-  await supabase.from('jobs').delete().eq('id', id);
+export async function deleteJob(userId: string, id: string): Promise<void> {
+  await supabase.from('jobs').delete().eq('id', id).eq('user_id', userId);
 }
 
 // --- Scan Cache ---
-export async function getScanCache(): Promise<ScanCache | null> {
-  const { data } = await supabase.from('scan_cache').select('*').eq('id', 1).single();
+export async function getScanCache(userId: string): Promise<ScanCache | null> {
+  const { data } = await supabase.from('scan_cache').select('*').eq('user_id', userId).single();
   if (!data?.scanned_at) return null;
   return {
     scannedAt: data.scanned_at,
@@ -276,34 +304,35 @@ export async function getScanCache(): Promise<ScanCache | null> {
   };
 }
 
-export async function saveScanCache(cache: ScanCache): Promise<void> {
+export async function saveScanCache(userId: string, cache: ScanCache): Promise<void> {
   await supabase.from('scan_cache').upsert({
-    id: 1,
+    user_id: userId,
     scanned_at: cache.scannedAt,
     discoveries: cache.discoveries,
     errors: cache.errors,
-  });
+  }, { onConflict: 'user_id' });
 }
 
 // --- Dismissed URLs ---
-export async function getDismissedUrls(): Promise<Set<string>> {
-  const { data } = await supabase.from('dismissed_urls').select('url');
+export async function getDismissedUrls(userId: string): Promise<Set<string>> {
+  const { data } = await supabase.from('dismissed_urls').select('url').eq('user_id', userId);
   return new Set((data ?? []).map(r => r.url as string));
 }
 
-export async function addDismissedUrl(url: string): Promise<void> {
-  await supabase.from('dismissed_urls').upsert({ url });
+export async function addDismissedUrl(userId: string, url: string): Promise<void> {
+  await supabase.from('dismissed_urls').upsert({ user_id: userId, url }, { onConflict: 'user_id,url' });
 }
 
-export async function removeDismissedUrl(url: string): Promise<void> {
-  await supabase.from('dismissed_urls').delete().eq('url', url);
+export async function removeDismissedUrl(userId: string, url: string): Promise<void> {
+  await supabase.from('dismissed_urls').delete().eq('url', url).eq('user_id', userId);
 }
 
 // --- Tailored Resumes ---
-export async function getTailoredResumes(): Promise<TailoredResume[]> {
+export async function getTailoredResumes(userId: string): Promise<TailoredResume[]> {
   const { data } = await supabase
     .from('tailored_resumes')
     .select('*')
+    .eq('user_id', userId)
     .order('updated_at', { ascending: false });
   if (!data) return [];
   return data.map(r => ({
@@ -314,11 +343,12 @@ export async function getTailoredResumes(): Promise<TailoredResume[]> {
   }));
 }
 
-export async function saveTailoredResume(id: string, name: string, content: string): Promise<void> {
+export async function saveTailoredResume(userId: string, id: string, name: string, content: string): Promise<void> {
   await supabase.from('tailored_resumes').upsert({
     id,
+    user_id: userId,
     name,
     content,
     updated_at: new Date().toISOString(),
-  });
+  }, { onConflict: 'user_id,id' });
 }

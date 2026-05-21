@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
+import { auth0 } from '@/lib/auth0';
 import Anthropic from '@anthropic-ai/sdk';
 import { recordUsage } from '@/lib/usage';
 
 const client = new Anthropic();
 
 export async function POST(req: Request) {
+  const session = await auth0.getSession();
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const userId = session.user.sub as string;
+
   const { domains } = await req.json() as { domains: string[] };
   if (!domains?.length) return NextResponse.json({ companies: [] });
 
@@ -21,7 +26,7 @@ Return ONLY a JSON array of company name strings. No explanation, no markdown.`,
     }],
   });
 
-  void recordUsage('other', message.usage.input_tokens, message.usage.output_tokens);
+  void recordUsage(userId, 'other', message.usage.input_tokens, message.usage.output_tokens);
 
   try {
     const text = message.content[0].type === 'text' ? message.content[0].text.trim() : '[]';
