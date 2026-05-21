@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth0 } from '@/lib/auth0';
-import { getPortals, addPortal, deletePortal, scanPortal, seedAllPortalsFromDirectory } from '@/lib/scanner';
+import { getPortals, addPortal, deletePortal, scanPortal, getDirectoryPortals } from '@/lib/scanner';
 import { getPreferences, getJobs, getScanCache, saveScanCache, getDismissedUrls } from '@/lib/store';
 import type { Portal, ScannedJob } from '@/lib/scanner';
 import type { ScoredDiscovery, ScanCache, Preferences } from '@/lib/store';
@@ -139,16 +139,24 @@ export async function POST(req: Request) {
   }
 
   if (body.action === 'discover') {
-    const [prefs, jobs, dismissedUrls, portals, oldCache] = await Promise.all([
+    const [prefs, jobs, dismissedUrls, userPortals, directoryPortals, oldCache] = await Promise.all([
       getPreferences(userId),
       getJobs(userId),
       getDismissedUrls(userId),
       getPortals(userId),
+      getDirectoryPortals(),
       getScanCache(userId),
     ]);
     const existingUrls = new Set(jobs.map(j => j.sourceUrl));
     const excludedSet = new Set(prefs.companiesToExclude.map(c => c.toLowerCase()));
     const encoder = new TextEncoder();
+
+    // Scan pool = union of the user's curated portals + the global company directory.
+    // User entries win on company-name collision so a custom careersUrl override is respected.
+    const byCompany = new Map<string, Portal>();
+    for (const p of directoryPortals) byCompany.set(p.company.toLowerCase(), p);
+    for (const p of userPortals)      byCompany.set(p.company.toLowerCase(), p);
+    const effectivePortals = Array.from(byCompany.values());
 
     const prevFailed404 = new Set(
       (oldCache?.errors ?? [])
@@ -164,15 +172,6 @@ export async function POST(req: Request) {
       async start(controller) {
         const send = (msg: object) =>
           controller.enqueue(encoder.encode(JSON.stringify(msg) + '\n'));
-
-        let effectivePortals = portals;
-        if (portals.length === 0) {
-          const seededCount = await seedAllPortalsFromDirectory(userId);
-          if (seededCount > 0) {
-            effectivePortals = await getPortals(userId);
-            send({ type: 'portals-seeded', count: seededCount });
-          }
-        }
 
         await Promise.all(effectivePortals.map(async portal => {
           const result = await scanPortal(portal);

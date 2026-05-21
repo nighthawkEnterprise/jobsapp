@@ -368,7 +368,7 @@ export default function RelevantJobsPage() {
   const [minSalary, setMinSalary] = useState(0);
   const [maxAgeDays, setMaxAgeDays] = useState<number | null>(null);
   const [remoteOnly, setRemoteOnly] = useState(false);
-  const [myLocationsOnly, setMyLocationsOnly] = useState(false);
+  const [myLocationsOnly, setMyLocationsOnly] = useState(true);
   const [prefLocations, setPrefLocations] = useState<string[]>([]);
   const [showUndated, setShowUndated] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
@@ -441,8 +441,7 @@ export default function RelevantJobsPage() {
   type StreamMsg =
     | { type: 'job'; job: Discovery }
     | { type: 'error'; company: string; error: string }
-    | { type: 'done'; scannedAt: string }
-    | { type: 'portals-seeded'; count: number };
+    | { type: 'done'; scannedAt: string };
 
   const runScan = async () => {
     setScanning(true); setActiveTab('relevant'); setVisibleCount(20);
@@ -465,9 +464,7 @@ export default function RelevantJobsPage() {
           if (!line.trim()) continue;
           try {
             const msg = JSON.parse(line) as StreamMsg;
-            if (msg.type === 'portals-seeded') {
-              loadPortals();
-            } else if (msg.type === 'job') {
+            if (msg.type === 'job') {
               setCache(prev => {
                 if (!prev) return prev;
                 const discoveries = [...prev.discoveries];
@@ -553,8 +550,9 @@ export default function RelevantJobsPage() {
     return true;
   });
 
-  const hasActiveFilters = search || minScore > 0 || minSalary > 0 || maxAgeDays !== null || remoteOnly || myLocationsOnly;
-  const clearFilters = () => { setSearch(''); setMinScore(0); setMinSalary(0); setMaxAgeDays(null); setRemoteOnly(false); setMyLocationsOnly(false); };
+  // "My locations only" defaults to on, so it counts as active only when the user has turned it OFF.
+  const hasActiveFilters = search || minScore > 0 || minSalary > 0 || maxAgeDays !== null || remoteOnly || !myLocationsOnly;
+  const clearFilters = () => { setSearch(''); setMinScore(0); setMinSalary(0); setMaxAgeDays(null); setRemoteOnly(false); setMyLocationsOnly(true); };
 
   const { dated, undated } = (() => {
     if (maxAgeDays === null) return { dated: filtered, undated: [] as Discovery[] };

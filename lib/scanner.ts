@@ -66,22 +66,15 @@ export async function deletePortal(userId: string, company: string): Promise<voi
   await supabase.from('portals').delete().eq('company', company).eq('user_id', userId);
 }
 
-export async function seedAllPortalsFromDirectory(userId: string): Promise<number> {
+export async function getDirectoryPortals(): Promise<Portal[]> {
   const { data } = await supabase
     .from('company_directory')
     .select('name, careers_url');
-
-  if (!data || data.length === 0) return 0;
-
-  const rows = data.map(r => ({ user_id: userId, company: r.name as string, careers_url: r.careers_url as string }));
-
-  // Batch upsert in chunks to stay within Supabase request limits
-  const CHUNK = 100;
-  for (let i = 0; i < rows.length; i += CHUNK) {
-    await supabase.from('portals').upsert(rows.slice(i, i + CHUNK), { onConflict: 'user_id,company' });
-  }
-
-  return rows.length;
+  if (!data) return [];
+  return data.map(r => ({
+    company: r.name as string,
+    careersUrl: r.careers_url as string,
+  }));
 }
 
 function detectPlatform(url: string): Platform {
