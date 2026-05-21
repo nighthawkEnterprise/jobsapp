@@ -24,7 +24,7 @@ CREATE INDEX IF NOT EXISTS idx_company_directory_name_trgm
 -- ─────────────────────────────────────────────────────────────────────────────
 INSERT INTO company_directory (name, slug, ats) VALUES
 
-('1Password',            'agilebits',          'greenhouse'),
+-- 1Password migrated off Greenhouse (agilebits) in 2026 — now on Ashby; see Ashby section.
 ('Abnormal Security',    'abnormalsecurity',    'greenhouse'),
 ('Acorns',               'acorns',             'greenhouse'),
 ('Acquia',               'acquia',             'greenhouse'),
@@ -289,7 +289,10 @@ INSERT INTO company_directory (name, slug, ats) VALUES
 -- ─────────────────────────────────────────────────────────────────────────────
 -- ASHBY  (jobs.ashbyhq.com/{slug})
 -- ─────────────────────────────────────────────────────────────────────────────
+-- Insert at the top so 1Password sits with the other A's alphabetically below.
+-- ─────────────────────────────────────────────────────────────────────────────
 
+('1Password',            '1password',          'ashby'),
 ('Attio',                'attio',              'ashby'),
 ('Beehiiv',              'beehiiv',            'ashby'),
 ('Browserbase',          'browserbase',        'ashby'),

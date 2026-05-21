@@ -49,6 +49,18 @@ function relativeDate(iso?: string): string | null {
   return `${Math.floor(days / 365)}y ago`;
 }
 
+const NEW_THRESHOLD_MS = 24 * 60 * 60 * 1000;
+
+function isNewJob(iso?: string): boolean {
+  if (!iso) return false;
+  return Date.now() - new Date(iso).getTime() < NEW_THRESHOLD_MS;
+}
+
+function ageInDays(iso?: string): number | null {
+  if (!iso) return null;
+  return (Date.now() - new Date(iso).getTime()) / 86400000;
+}
+
 function formatSalary(salary?: JobSalary): string | null {
   if (!salary || (!salary.min && !salary.max)) return null;
   const k = (n: number) => `$${Math.round(n / 1000)}k`;
@@ -154,6 +166,7 @@ function JobCard({
   const tags = getJobTags(job);
   const pay = formatSalary(job.salary);
   const posted = relativeDate(job.postedAt);
+  const isNew = isNewJob(job.postedAt);
   const { bg, text, border } = scoreStyle(job.score);
 
   return (
@@ -206,7 +219,13 @@ function JobCard({
 
           {/* Right column: time + dismiss */}
           <div className="flex-none flex flex-col items-end gap-1.5">
-            {posted && <span className="text-xs text-gray-400 whitespace-nowrap">{posted}</span>}
+            {isNew ? (
+              <span className="text-[10px] font-bold tracking-wider bg-green-100 text-green-700 px-2 py-0.5 rounded-full whitespace-nowrap">
+                NEW
+              </span>
+            ) : posted ? (
+              <span className="text-xs text-gray-400 whitespace-nowrap">{posted}</span>
+            ) : null}
             <div className="flex items-center gap-0.5">
               <a
                 href={job.url}
@@ -316,9 +335,13 @@ export default function RelevantJobsPage() {
   const [search, setSearch] = useState('');
   const [minScore, setMinScore] = useState(0);
   const [minSalary, setMinSalary] = useState(0);
+  const [maxAgeDays, setMaxAgeDays] = useState<number | null>(null);
   const [remoteOnly, setRemoteOnly] = useState(false);
   const [myLocationsOnly, setMyLocationsOnly] = useState(false);
   const [prefLocations, setPrefLocations] = useState<string[]>([]);
+
+  // Undated group toggle (only meaningful when a time filter is active)
+  const [showUndated, setShowUndated] = useState(false);
 
   // Pagination
   const [visibleCount, setVisibleCount] = useState(20);
@@ -530,15 +553,31 @@ export default function RelevantJobsPage() {
     return true;
   });
 
-  const hasActiveFilters = search || minScore > 0 || minSalary > 0 || remoteOnly || myLocationsOnly;
+  const hasActiveFilters = search || minScore > 0 || minSalary > 0 || maxAgeDays !== null || remoteOnly || myLocationsOnly;
   const clearFilters = () => {
-    setSearch(''); setMinScore(0); setMinSalary(0); setRemoteOnly(false); setMyLocationsOnly(false);
+    setSearch(''); setMinScore(0); setMinSalary(0); setMaxAgeDays(null); setRemoteOnly(false); setMyLocationsOnly(false);
   };
 
-  const visibleFiltered = filtered.slice(0, visibleCount);
+  // Partition by posted date when a time filter is active.
+  // Jobs without postedAt land in `undated` (shown in a collapsible group);
+  // jobs with postedAt older than the window are dropped entirely.
+  const { dated, undated } = (() => {
+    if (maxAgeDays === null) return { dated: filtered, undated: [] as Discovery[] };
+    const d: Discovery[] = [];
+    const u: Discovery[] = [];
+    for (const job of filtered) {
+      const age = ageInDays(job.postedAt);
+      if (age === null) u.push(job);
+      else if (age <= maxAgeDays) d.push(job);
+    }
+    return { dated: d, undated: u };
+  })();
 
-  // Companies visible in current results (for highlighting in sidebar)
-  const visibleCompanies = new Set(filtered.map(j => j.company));
+  const visibleDated = dated.slice(0, visibleCount);
+
+  // Companies visible in current results (for highlighting in sidebar) —
+  // include undated so the sidebar doesn't go dark when a freshness filter is active.
+  const visibleCompanies = new Set([...dated, ...undated].map(j => j.company));
 
   if (pageLoading) return (
     <div className="max-w-7xl mx-auto px-6">
@@ -647,6 +686,14 @@ export default function RelevantJobsPage() {
               <RadioOption label="$150k+" active={minSalary === 150000} onClick={() => setMinSalary(150000)} />
               <RadioOption label="$200k+" active={minSalary === 200000} onClick={() => setMinSalary(200000)} />
               <RadioOption label="$250k+" active={minSalary === 250000} onClick={() => setMinSalary(250000)} />
+            </FilterSection>
+
+            <FilterSection label="Posted">
+              <RadioOption label="Any"      active={maxAgeDays === null} onClick={() => { setMaxAgeDays(null); setVisibleCount(20); }} />
+              <RadioOption label="Last 24h" active={maxAgeDays === 1}    onClick={() => { setMaxAgeDays(1);    setVisibleCount(20); }} />
+              <RadioOption label="3 days"   active={maxAgeDays === 3}    onClick={() => { setMaxAgeDays(3);    setVisibleCount(20); }} />
+              <RadioOption label="7 days"   active={maxAgeDays === 7}    onClick={() => { setMaxAgeDays(7);    setVisibleCount(20); }} />
+              <RadioOption label="14 days"  active={maxAgeDays === 14}   onClick={() => { setMaxAgeDays(14);   setVisibleCount(20); }} />
             </FilterSection>
 
             <div className="space-y-2">
@@ -807,7 +854,7 @@ export default function RelevantJobsPage() {
                 <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
                   activeTab === 'relevant' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'
                 }`}>
-                  {filtered.length}
+                  {dated.length + undated.length}
                 </span>
               </button>
               <button
@@ -834,14 +881,16 @@ export default function RelevantJobsPage() {
           {cache && activeTab === 'relevant' && (
             <>
               <div className="space-y-3">
-                {!scanning && filtered.length === 0 && (
+                {!scanning && dated.length === 0 && (
                   <div className="p-10 border border-dashed rounded-2xl text-center text-gray-400 bg-white">
-                    {hasActiveFilters
-                      ? 'No jobs match your current filters — try relaxing the score or salary threshold.'
-                      : 'All relevant PM roles are already in your pipeline.'}
+                    {undated.length > 0
+                      ? `No jobs match the freshness filter — ${undated.length} undated job${undated.length === 1 ? '' : 's'} available below.`
+                      : hasActiveFilters
+                        ? 'No jobs match your current filters — try relaxing the score, salary, or freshness threshold.'
+                        : 'All relevant PM roles are already in your pipeline.'}
                   </div>
                 )}
-                {visibleFiltered.map(job => (
+                {visibleDated.map(job => (
                   <JobCard
                     key={job.url}
                     job={job}
@@ -854,15 +903,43 @@ export default function RelevantJobsPage() {
               </div>
 
               {/* Load More */}
-              {filtered.length > visibleCount && (
+              {dated.length > visibleCount && (
                 <div className="mt-6 flex justify-center">
                   <button
                     onClick={() => setVisibleCount(n => n + 20)}
                     className="px-8 py-2.5 border border-gray-200 rounded-xl text-sm font-semibold text-gray-600 hover:border-gray-300 hover:bg-white bg-gray-50 transition-all"
                   >
                     Load More Jobs
-                    <span className="ml-2 text-gray-400 font-normal">({filtered.length - visibleCount} remaining)</span>
+                    <span className="ml-2 text-gray-400 font-normal">({dated.length - visibleCount} remaining)</span>
                   </button>
+                </div>
+              )}
+
+              {/* Undated group — only meaningful when a time filter is active */}
+              {undated.length > 0 && (
+                <div className="mt-8 border-t border-gray-200 pt-5">
+                  <button
+                    onClick={() => setShowUndated(v => !v)}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-gray-700 mb-3"
+                  >
+                    {showUndated ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    Undated · {undated.length} job{undated.length === 1 ? '' : 's'}
+                    <span className="text-gray-400 font-normal ml-1">(date not reported by source)</span>
+                  </button>
+                  {showUndated && (
+                    <div className="space-y-3">
+                      {undated.map(job => (
+                        <JobCard
+                          key={job.url}
+                          job={job}
+                          onAdd={addToPipeline}
+                          isAdding={adding.has(job.url)}
+                          onDismiss={dismissJob}
+                          isDismissing={dismissing.has(job.url)}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </>
