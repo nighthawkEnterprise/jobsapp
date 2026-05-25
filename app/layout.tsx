@@ -1,6 +1,6 @@
 import './globals.css';
 import { auth0 } from "@/lib/auth0";
-import { Bricolage_Grotesque, Outfit } from 'next/font/google';
+import { Bricolage_Grotesque, Outfit, Hanken_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
 import type { Metadata } from 'next';
 import { FeedbackWidget } from '@/components/FeedbackWidget';
 import { TokenUsageWidget } from '@/components/TokenUsageWidget';
@@ -25,12 +25,33 @@ const outfit = Outfit({
   display: 'swap',
 });
 
+const hanken = Hanken_Grotesk({
+  subsets: ['latin'],
+  weight: ['600', '700', '800'],
+  variable: '--font-hanken',
+  display: 'swap',
+});
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['500'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await auth0.getSession();
 
   return (
     <html lang="en">
-      <body className={`${bricolage.variable} ${outfit.variable} bg-gray-50 text-gray-900 min-h-screen flex flex-col`}>
+      <body className={`${bricolage.variable} ${outfit.variable} ${hanken.variable} ${inter.variable} ${jetbrains.variable} bg-gray-50 text-gray-900 min-h-screen flex flex-col`}>
 
         <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto flex items-center h-16 px-6 md:px-12">
@@ -59,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </div>
         </nav>
 
-        <main className="flex-grow py-10">
+        <main className="flex-grow py-6 md:py-10">
           {children}
         </main>
 

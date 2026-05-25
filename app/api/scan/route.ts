@@ -1,105 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth0 } from '@/lib/auth0';
 import { getPortals, addPortal, deletePortal, scanPortal, getDirectoryPortals } from '@/lib/scanner';
-import { getPreferences, getJobs, getScanCache, saveScanCache, getDismissedUrls } from '@/lib/store';
-import type { Portal, ScannedJob } from '@/lib/scanner';
-import type { ScoredDiscovery, ScanCache, Preferences } from '@/lib/store';
+import { getPreferences, getJobs, getScanCache, saveScanCache, getDismissedUrls, getStories } from '@/lib/store';
+import type { Portal } from '@/lib/scanner';
+import type { ScoredDiscovery, ScanCache } from '@/lib/store';
+import { buildScoringContext, isRelevantTitle, scoreScanResult } from '@/lib/discovery-scoring';
 
 async function requireAuth() {
   const session = await auth0.getSession();
   if (!session) return null;
   return session.user.sub as string;
-}
-
-const ABBREV: Record<string, string> = {
-  pm:  'product manager',
-  tpm: 'technical program manager',
-  em:  'engineering manager',
-  gm:  'general manager',
-};
-
-const SENIORITY = new Set([
-  'senior', 'sr', 'staff', 'principal', 'lead', 'junior', 'jr',
-  'associate', 'assoc', 'head', 'director', 'vp', 'vice', 'president', 'group',
-]);
-
-function expandTitle(title: string): string {
-  return title.toLowerCase().split(/\s+/).map(w => ABBREV[w] ?? w).join(' ');
-}
-
-function coreRole(expanded: string): string {
-  return expanded.split(/\s+/).filter(w => !SENIORITY.has(w)).join(' ');
-}
-
-function prefKeywords(prefs: Preferences): Array<{ full: string; core: string }> {
-  return prefs.jobTitles.map(pt => {
-    const full = expandTitle(pt);
-    return { full, core: coreRole(full) };
-  });
-}
-
-const ROLE_BASE_PHRASES = ['product manager', 'program manager', 'engineering manager', 'general manager'];
-
-function isRelevantTitle(title: string, prefs: Preferences): boolean {
-  if (prefs.jobTitles.length === 0) return true;
-  const t = expandTitle(title);
-  const tWords = new Set(t.split(/\W+/).filter(Boolean));
-  return prefKeywords(prefs).some(({ full, core }) => {
-    if (t.includes(full) || (core.length > 3 && t.includes(core))) return true;
-    const prefWords = full.split(/\W+/).filter(Boolean);
-    if (!prefWords.every(w => tWords.has(w))) return false;
-    return ROLE_BASE_PHRASES.some(phrase => full.includes(phrase) && t.includes(phrase));
-  });
-}
-
-function scoreScanResult(job: ScannedJob, prefs: Preferences): { score: number; reasons: string[] } {
-  let score = 3.0;
-  const reasons: string[] = [];
-  const expandedTitle = expandTitle(job.title);
-  const keywords = prefKeywords(prefs);
-
-  const targetSet = new Set(prefs.targetCompanies.map(c => c.toLowerCase()));
-  if (targetSet.has(job.company.toLowerCase())) {
-    score += 1.0;
-    reasons.push(`"${job.company}" is one of your target companies (+1.0)`);
-  }
-
-  const matchedFull = keywords.find(({ full }) => expandedTitle.includes(full));
-  const matchedCore = !matchedFull && keywords.find(({ core }) => core.length > 3 && expandedTitle.includes(core));
-
-  if (matchedFull) {
-    score += 1.0;
-    reasons.push(`Title matches preferred role "${matchedFull.full}" (+1.0)`);
-  } else if (matchedCore) {
-    score += 0.5;
-    reasons.push(`Title contains role keyword "${matchedCore.core}" (+0.5)`);
-  }
-
-  if (prefs.domainsOfInterest.length > 0) {
-    const matchedDomain = prefs.domainsOfInterest.find(d => expandedTitle.includes(d.toLowerCase()));
-    if (matchedDomain) {
-      score += 0.3;
-      reasons.push(`Title mentions domain of interest "${matchedDomain}" (+0.3)`);
-    }
-  }
-
-  if (job.location) {
-    const matchedLoc = prefs.locationPreferences.find(loc =>
-      job.location.toLowerCase().includes(loc.toLowerCase()) ||
-      (loc.toLowerCase() === 'remote' && job.location.toLowerCase().includes('remote'))
-    );
-    if (matchedLoc) {
-      score += 0.5;
-      reasons.push(`Location "${job.location}" matches preference "${matchedLoc}" (+0.5)`);
-    } else {
-      reasons.push(`Location "${job.location}" doesn't match your preferences (${prefs.locationPreferences.join(', ')}) (±0)`);
-    }
-  } else {
-    score += 0.1;
-    reasons.push('Location not listed — benefit of the doubt (+0.1)');
-  }
-
-  return { score: Math.min(Math.round(score * 10) / 10, 5.0), reasons };
 }
 
 export async function GET(req: Request) {
@@ -139,16 +49,18 @@ export async function POST(req: Request) {
   }
 
   if (body.action === 'discover') {
-    const [prefs, jobs, dismissedUrls, userPortals, directoryPortals, oldCache] = await Promise.all([
+    const [prefs, jobs, dismissedUrls, userPortals, directoryPortals, oldCache, stories] = await Promise.all([
       getPreferences(userId),
       getJobs(userId),
       getDismissedUrls(userId),
       getPortals(userId),
       getDirectoryPortals(),
       getScanCache(userId),
+      getStories(userId),
     ]);
     const existingUrls = new Set(jobs.map(j => j.sourceUrl));
     const excludedSet = new Set(prefs.companiesToExclude.map(c => c.toLowerCase()));
+    const scoringCtx = buildScoringContext(prefs, stories);
     const encoder = new TextEncoder();
 
     // Scan pool = union of the user's curated portals + the global company directory.
@@ -196,7 +108,7 @@ export async function POST(req: Request) {
             if (!isRelevantTitle(job.title, prefs)) continue;
             if (seenUrls.has(job.url)) continue;
             seenUrls.add(job.url);
-            const { score, reasons } = scoreScanResult(job, prefs);
+            const { score, reasons } = scoreScanResult(job, scoringCtx);
             const discovery: ScoredDiscovery = {
               company: job.company, title: job.title, url: job.url,
               location: job.location, score, scoreReasons: reasons,

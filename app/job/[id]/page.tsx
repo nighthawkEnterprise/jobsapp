@@ -29,7 +29,7 @@ export default function JobDetailPage() {
   }, [id]);
 
   if (loading) return (
-    <div className="max-w-6xl mx-auto px-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-6">
       <Skeleton className="h-4 w-32 mb-6" />
       <SkeletonJobDetailHeader />
       <div className="flex gap-2 border-b border-gray-100 mb-8">
@@ -47,12 +47,12 @@ export default function JobDetailPage() {
   if (!job) return <div className="p-8 text-center text-gray-500">Job not found</div>;
 
   return (
-    <div className="max-w-6xl mx-auto px-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-6">
       <Link href="/dashboard" className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors mb-6">
         <ArrowLeft className="w-4 h-4 mr-1.5" /> Back to Pipeline
       </Link>
 
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 md:p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 mb-2">{job.title}</h1>
           <div className="text-lg font-medium text-gray-600 mb-4">{job.company} <span className="text-gray-300 mx-2">•</span> {job.location}</div>
@@ -89,7 +89,17 @@ export default function JobDetailPage() {
         <DetailsTab job={job} />
       </div>
       <div className={activeTab === 'tailor' ? 'block' : 'hidden'}>
-        <TailorTab jobId={job.id} job={{ title: job.title, company: job.company }} />
+        <TailorTab
+          jobId={job.id}
+          job={{
+            title: job.title,
+            company: job.company,
+            location: job.location,
+            status: job.status,
+            content: job.content,
+            overall: job.dimensions?.overall ?? null,
+          }}
+        />
       </div>
       <div className={activeTab === 'prep' ? 'block' : 'hidden'}>
         <PrepTab jobId={job.id} />

@@ -66,6 +66,49 @@ body {
 .docx-preview em { font-style: italic; }
 .docx-preview a { color: #2563eb; text-decoration: underline; }
 
+/* ── Tailor Resume screen (mock: resume_tailoring.md) ── */
+.tailor-screen {
+  --tlr-primary: #003d9b;
+  --tlr-primary-container: #0052cc;
+  --tlr-primary-fixed: #dae2ff;
+  --tlr-primary-fixed-dim: #b2c5ff;
+  --tlr-on-primary: #ffffff;
+  --tlr-on-primary-fixed: #001848;
+  --tlr-secondary: #46617b;
+  --tlr-secondary-container: #c4e0fe;
+  --tlr-on-secondary-container: #48637d;
+  --tlr-surface: #f8f9ff;
+  --tlr-surface-container-low: #eef4ff;
+  --tlr-surface-container: #e4efff;
+  --tlr-surface-container-high: #dbe9ff;
+  --tlr-surface-container-highest: #d1e4ff;
+  --tlr-surface-container-lowest: #ffffff;
+  --tlr-on-surface: #011d35;
+  --tlr-on-surface-variant: #434654;
+  --tlr-outline: #737685;
+  --tlr-outline-variant: #c3c6d6;
+  font-family: var(--font-inter), system-ui, sans-serif;
+  color: var(--tlr-on-surface);
+}
+.tailor-screen .editor-grid {
+  background-image:
+    linear-gradient(#f1f5f9 1px, transparent 1px),
+    linear-gradient(90deg, #f1f5f9 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.tailor-screen .resume-page {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 8.5in;
+  min-height: 11in;
+  margin: 0 auto;
+  background: white;
+  padding: 0.75in;
+  color: #1e293b;
+}
+.tailor-screen .font-headline { font-family: var(--font-hanken), system-ui, sans-serif; }
+.tailor-screen .font-mono-label { font-family: var(--font-jetbrains), ui-monospace, monospace; letter-spacing: 0.05em; font-weight: 500; }
+.tailor-screen .resume-page h2.r-name { font-family: var(--font-hanken), system-ui, sans-serif; }
+
 /* Toast */
 @keyframes toast-up {
   from { opacity: 0; transform: translateY(12px); }

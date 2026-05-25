@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { FileText, CheckCircle2, AlertCircle, Download } from 'lucide-react';
+import {
+  Wand2, Sparkles, Lightbulb, KeyRound, CheckCircle2, Download, Share2,
+  Bold, Italic, List, ZoomIn, ZoomOut, FileText, AlertCircle, GitCompare,
+} from 'lucide-react';
 
 interface TailorResult {
   tailoredResume: string;
@@ -10,231 +13,194 @@ interface TailorResult {
   storiesUsed: string[];
 }
 
-type StepStatus = 'pending' | 'active' | 'done';
-interface Step { label: string; status: StepStatus }
+type SidebarTab = 'jd' | 'strategy' | 'gaps';
 
-const STEP_LABELS = [
-  'Loading resume & profile',
-  'Analyzing job description',
-  'Rewriting with Claude',
-  'Saving tailored version',
-];
+function extractResume(acc: string): string {
+  const openIdx = acc.indexOf('<resume>');
+  // Before <resume> arrives, show nothing yet (avoid flashing any preamble)
+  if (openIdx < 0) return '';
+  const afterOpen = acc.slice(openIdx + '<resume>'.length);
+  const closeIdx = afterOpen.indexOf('</resume>');
+  return (closeIdx >= 0 ? afterOpen.slice(0, closeIdx) : afterOpen).trim();
+}
 
-function StepRow({ step }: { step: Step }) {
-  if (step.status === 'done') {
-    return (
-      <div className="flex items-center gap-4 py-1.5">
-        <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center flex-none">
-          <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <span className="text-sm text-gray-500">{step.label}</span>
-      </div>
-    );
-  }
-  if (step.status === 'active') {
-    return (
-      <div className="flex items-center gap-4 py-1.5">
-        <div className="relative flex-none w-6 h-6">
-          <div className="absolute inset-0 rounded-full bg-blue-100 animate-ping opacity-75" />
-          <div className="relative w-6 h-6 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-        </div>
-        <span className="text-sm font-semibold text-blue-600">{step.label}</span>
-      </div>
-    );
-  }
+function parseFullOutput(acc: string): TailorResult {
+  const tailoredResume = extractResume(acc);
+  const explMatch = acc.match(/<explanation>([\s\S]*?)<\/explanation>/);
+  const explanation = explMatch ? explMatch[1].trim() : '';
+  const storiesMatch = acc.match(/<stories>([\s\S]*?)<\/stories>/);
+  const storiesText = storiesMatch ? storiesMatch[1] : '';
+  const storiesUsed = storiesText
+    .split('\n')
+    .map(l => l.replace(/^[-*]\s*/, '').trim())
+    .filter(Boolean);
+  return { tailoredResume, explanation, storiesUsed };
+}
+
+function ResumeRender({ markdown }: { markdown: string }) {
   return (
-    <div className="flex items-center gap-4 py-1.5 opacity-30">
-      <div className="w-6 h-6 rounded-full border-2 border-gray-300 flex-none" />
-      <span className="text-sm text-gray-400">{step.label}</span>
-    </div>
+    <ReactMarkdown
+      components={{
+        h1: ({ children }) => (
+          <h1 className="r-name text-[32px] font-bold tracking-tight mb-2 uppercase text-center font-headline">{children}</h1>
+        ),
+        h2: ({ children }) => (
+          <h2 className="text-[14px] font-bold border-b border-[#cbd5e1] mb-3 pb-1 uppercase tracking-wider text-[#475569] mt-8 first:mt-0">{children}</h2>
+        ),
+        h3: ({ children }) => (
+          <h3 className="text-[14px] font-bold mt-4 mb-0.5">{children}</h3>
+        ),
+        p: ({ children }) => (
+          <p className="text-[13px] leading-relaxed mb-2">{children}</p>
+        ),
+        ul: ({ children }) => (
+          <ul className="list-disc ml-5 text-[13px] space-y-2 mb-3">{children}</ul>
+        ),
+        li: ({ children }) => (
+          <li className="text-[13px] leading-relaxed">{children}</li>
+        ),
+        strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+        em: ({ children }) => <em className="italic">{children}</em>,
+        hr: () => <hr className="border-[#cbd5e1] my-4" />,
+        a: ({ href, children }) => (
+          <a href={href} className="text-[#003d9b] underline" target="_blank" rel="noopener noreferrer">{children}</a>
+        ),
+      }}
+    >
+      {markdown}
+    </ReactMarkdown>
   );
 }
 
-function GeneratingPanel({ steps }: { steps: Step[] }) {
-  const doneCount = steps.filter(s => s.status === 'done').length;
-  const pct = Math.round((doneCount / steps.length) * 100);
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm h-[750px] flex flex-col items-center justify-center p-12">
-      <div className="w-full max-w-xs">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-6">Generating tailored resume</p>
-
-        <div className="space-y-1 mb-8">
-          {steps.map((step, i) => <StepRow key={i} step={step} />)}
-        </div>
-
-        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <p className="text-right text-[11px] text-gray-400 mt-1.5">{pct}%</p>
-      </div>
-    </div>
-  );
-}
-
-function DocumentPreview({ markdown }: { markdown: string }) {
-  return (
-    <div className="bg-white overflow-auto h-[750px] border border-gray-200 rounded-xl shadow-sm">
-      <div className="max-w-[660px] mx-auto px-12 py-10 font-serif text-gray-900">
-        <ReactMarkdown
-          components={{
-            h1: ({ children }) => (
-              <h1 className="text-[22px] font-bold text-center tracking-tight mb-0.5 font-sans">{children}</h1>
-            ),
-            h2: ({ children }) => (
-              <h2 className="text-[10px] font-bold uppercase tracking-widest border-b border-gray-400 pb-0.5 mt-5 mb-2 text-gray-600 font-sans">{children}</h2>
-            ),
-            h3: ({ children }) => (
-              <h3 className="text-[13px] font-bold mb-0 font-sans">{children}</h3>
-            ),
-            p: ({ children }) => (
-              <p className="text-[12px] mb-2 leading-relaxed">{children}</p>
-            ),
-            ul: ({ children }) => (
-              <ul className="list-disc list-outside ml-4 mb-2 space-y-0.5">{children}</ul>
-            ),
-            li: ({ children }) => (
-              <li className="text-[12px] leading-relaxed">{children}</li>
-            ),
-            strong: ({ children }) => <strong className="font-bold">{children}</strong>,
-            em: ({ children }) => <em className="italic">{children}</em>,
-            hr: () => <hr className="border-gray-300 my-3" />,
-            a: ({ href, children }) => (
-              <a href={href} className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">{children}</a>
-            ),
-          }}
-        >
-          {markdown}
-        </ReactMarkdown>
-      </div>
-    </div>
-  );
-}
-
-function DiffPreview({ master, tailored }: { master: string; tailored: string }) {
-  const masterLineSet = new Set(
-    master.split('\n').map(l => l.trim()).filter(Boolean)
-  );
+function DiffRender({ master, tailored }: { master: string; tailored: string }) {
+  const masterLineSet = new Set(master.split('\n').map(l => l.trim()).filter(Boolean));
   const tailoredLines = tailored.split('\n');
-
   return (
-    <div className="bg-white overflow-auto h-[750px] border border-gray-200 rounded-xl shadow-sm">
-      <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-5 text-xs font-medium text-gray-500 sticky top-0">
+    <div className="font-mono text-[11px] leading-relaxed">
+      <div className="mb-3 flex items-center gap-5 text-xs font-medium text-gray-500">
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-green-100 border border-green-300 inline-block" />
-          Rewritten / new
+          <span className="w-3 h-3 rounded bg-green-100 border border-green-300 inline-block" /> Rewritten / new
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded bg-white border border-gray-200 inline-block" />
-          Unchanged
+          <span className="w-3 h-3 rounded bg-white border border-gray-200 inline-block" /> Unchanged
         </span>
       </div>
-      <div className="font-mono text-[11px] leading-relaxed p-5">
-        {tailoredLines.map((line, i) => {
-          const trimmed = line.trim();
-          const isChanged = trimmed.length > 0 && !masterLineSet.has(trimmed);
-          return (
-            <div
-              key={i}
-              className={`px-2 py-px rounded ${isChanged ? 'bg-green-50 border-l-2 border-green-400 text-gray-800' : 'text-gray-500'}`}
-            >
-              {line || ' '}
-            </div>
-          );
-        })}
-      </div>
+      {tailoredLines.map((line, i) => {
+        const trimmed = line.trim();
+        const isChanged = trimmed.length > 0 && !masterLineSet.has(trimmed);
+        return (
+          <div
+            key={i}
+            className={`px-2 py-px rounded ${isChanged ? 'bg-green-50 border-l-2 border-green-400 text-gray-800' : 'text-gray-500'}`}
+          >
+            {line || ' '}
+          </div>
+        );
+      })}
     </div>
   );
 }
 
-export default function TailorTab({ jobId, job }: { jobId: string; job?: { title: string; company: string } }) {
+interface TailorTabProps {
+  jobId: string;
+  job?: { title: string; company: string; location?: string; status?: string; content?: string; overall?: number | null };
+}
+
+export default function TailorTab({ jobId, job }: TailorTabProps) {
   const [tailoring, setTailoring] = useState(false);
-  const [steps, setSteps] = useState<Step[]>(STEP_LABELS.map(label => ({ label, status: 'pending' })));
   const [result, setResult] = useState<TailorResult | null>(null);
   const [masterResume, setMasterResume] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState(false);
-  const [view, setView] = useState<'document' | 'diff'>('document');
-  const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
-
-  const setStep = (index: number, status: StepStatus) =>
-    setSteps(prev => prev.map((s, i) => i === index ? { ...s, status } : s));
+  const [downloadingDocx, setDownloadingDocx] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('strategy');
+  const [showDiff, setShowDiff] = useState(false);
+  const [zoom, setZoom] = useState(85);
 
   const handleTailor = async () => {
-    timeouts.current.forEach(clearTimeout);
-    timeouts.current = [];
-    setSteps(STEP_LABELS.map(label => ({ label, status: 'pending' })));
     setTailoring(true);
     setError(null);
-    setResult(null);
+    setShowDiff(false);
+    setResult({ tailoredResume: '', explanation: '', storiesUsed: [] });
 
-    // Step 0: active immediately
-    setStep(0, 'active');
-
-    timeouts.current.push(setTimeout(() => {
-      setStep(0, 'done');
-      setStep(1, 'active');
-    }, 700));
-
-    timeouts.current.push(setTimeout(() => {
-      setStep(1, 'done');
-      setStep(2, 'active');
-    }, 1500));
+    // Fetch master resume in parallel for the diff view
+    fetch('/api/resumes').then(r => r.json()).then(d => setMasterResume(d.master ?? null)).catch(() => {});
 
     try {
-      const [tailorRes, resumeRes] = await Promise.all([
-        fetch('/api/tailor', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jobId }),
-        }),
-        fetch('/api/resumes'),
-      ]);
-      const data = await tailorRes.json();
-      const resumeData = await resumeRes.json();
+      const tailorRes = await fetch('/api/tailor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jobId }),
+      });
 
-      if (!tailorRes.ok || data.error) {
-        setSteps(STEP_LABELS.map(label => ({ label, status: 'pending' })));
-        setError(data.error ?? 'Tailoring failed');
-      } else {
-        setStep(2, 'done');
-        setStep(3, 'active');
-        setMasterResume(resumeData.master ?? null);
-
-        await new Promise(r => { timeouts.current.push(setTimeout(r, 500)); });
-        setStep(3, 'done');
-
-        await new Promise(r => { timeouts.current.push(setTimeout(r, 300)); });
-        setResult(data as TailorResult);
+      if (!tailorRes.ok) {
+        const data = await tailorRes.json().catch(() => ({}));
+        const msg = data.detail
+          ? `${data.error ?? 'Tailoring failed'} — ${data.detail}`
+          : (data.error ?? `HTTP ${tailorRes.status}`);
+        setError(msg);
+        setResult(null);
+        return;
       }
-    } catch {
-      setSteps(STEP_LABELS.map(label => ({ label, status: 'pending' })));
-      setError('Request failed — check your connection.');
+      if (!tailorRes.body) {
+        setError('No response body from server.');
+        setResult(null);
+        return;
+      }
+
+      const reader = tailorRes.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = '';
+
+      // Stream loop — update preview on every chunk
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        acc += decoder.decode(value, { stream: true });
+
+        const tailoredResume = extractResume(acc);
+        setResult(prev => ({
+          tailoredResume,
+          explanation: prev?.explanation ?? '',
+          storiesUsed: prev?.storiesUsed ?? [],
+        }));
+      }
+
+      // Did the server stream an error marker?
+      const errIdx = acc.indexOf('[[STREAM_ERROR]]');
+      if (errIdx >= 0) {
+        setError(`Tailoring failed — ${acc.slice(errIdx + '[[STREAM_ERROR]]'.length).trim()}`);
+        setResult(null);
+        return;
+      }
+
+      // Final parse for explanation + stories
+      setResult(parseFullOutput(acc));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Request failed — check your connection.');
+      setResult(null);
     } finally {
       setTailoring(false);
     }
   };
 
-  const downloadDocx = async () => {
+  const download = async (format: 'docx' | 'pdf') => {
     if (!result?.tailoredResume) return;
-    setDownloading(true);
+    const setBusy = format === 'pdf' ? setDownloadingPdf : setDownloadingDocx;
+    setBusy(true);
     try {
-      const nameMatch = masterResume?.match(/^#\s+(.+)$/m);
+      const nameMatch = (masterResume ?? result.tailoredResume).match(/^#\s+(.+)$/m);
       const personName = nameMatch ? nameMatch[1].trim() : 'Resume';
       const company = job?.company ?? 'Company';
       const role = job?.title ?? 'Role';
       const slug = (s: string) => s.replace(/[^a-zA-Z0-9]+/g, ' ').trim();
-      const filename = `${slug(personName)} - ${slug(company)} - ${slug(role)}.docx`;
+      const filename = `${slug(personName)} - ${slug(company)} - ${slug(role)}.${format}`;
 
       const res = await fetch('/api/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: result.tailoredResume, filename }),
+        body: JSON.stringify({ content: result.tailoredResume, filename, format }),
       });
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
@@ -244,112 +210,271 @@ export default function TailorTab({ jobId, job }: { jobId: string; job?: { title
       a.click();
       URL.revokeObjectURL(url);
     } finally {
-      setDownloading(false);
+      setBusy(false);
     }
   };
 
+  const tab = (id: SidebarTab, label: string) => (
+    <button
+      key={id}
+      onClick={() => setSidebarTab(id)}
+      className={`flex-1 py-5 text-[11px] tracking-widest font-mono-label uppercase transition-colors ${
+        sidebarTab === id
+          ? 'font-bold text-[#003d9b] border-b-2 border-[#003d9b]'
+          : 'text-[#434654] hover:bg-[#eef4ff]'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <div className="bg-white p-8 rounded-xl border border-gray-200 shadow-sm">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Tailor Resume</h2>
-        <p className="text-gray-600 mb-8 text-sm leading-relaxed">
-          Generate a targeted version of your master resume for this specific role. The LLM rewrites bullets to emphasize matching experience and weaves in your STAR stories.
-        </p>
-        <button
-          onClick={handleTailor}
-          disabled={tailoring}
-          className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-lg shadow hover:bg-blue-700 disabled:opacity-50 transition-all mb-8 flex justify-center items-center gap-2"
-        >
-          {tailoring
-            ? <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Generating…</>
-            : 'Generate Tailored Resume'}
-        </button>
+    <div className="tailor-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] border border-[#c3c6d6] rounded-xl overflow-hidden bg-white">
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start gap-3 text-red-800">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-none mt-0.5" />
-            <div>
-              <strong className="block mb-1 text-red-700 text-sm font-bold">Generation failed</strong>
-              <p className="text-sm">{error}</p>
-            </div>
+        {/* ── Left sidebar ───────────────────────────────────────────── */}
+        <aside className="bg-white border-r border-[#c3c6d6] flex flex-col h-[calc(100vh-200px)] min-h-[720px]">
+          <div className="flex border-b border-[#c3c6d6]">
+            {tab('jd', 'Job Description')}
+            {tab('strategy', 'Tailor Strategy')}
+            {tab('gaps', 'Gaps')}
           </div>
-        )}
 
-        {result && (
-          <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 p-5 rounded-xl text-green-900 flex items-start gap-3">
-              <CheckCircle2 className="w-6 h-6 text-green-600 flex-none" />
-              <div>
-                <strong className="block mb-1 text-green-800">Generated!</strong>
-                <p className="text-sm text-green-700">Saved to <code className="bg-green-100 px-1 py-0.5 rounded text-xs font-mono">output/</code></p>
-              </div>
-            </div>
+          <div className="flex-grow overflow-y-auto px-7 py-8 space-y-10">
+            {sidebarTab === 'jd' && (
+              <section>
+                <h3 className="text-[11px] font-mono-label font-bold text-[#011d35] mb-3 flex items-center gap-2 uppercase tracking-widest">
+                  <FileText className="w-4 h-4 text-[#003d9b]" />
+                  Job Description
+                </h3>
+                {job?.content ? (
+                  <div className="prose text-[13px] text-[#434654] leading-relaxed whitespace-pre-wrap">
+                    {job.content}
+                  </div>
+                ) : (
+                  <p className="text-[13px] text-[#737685] italic">No description available for this role.</p>
+                )}
+              </section>
+            )}
 
-            <button
-              onClick={downloadDocx}
-              disabled={downloading}
-              className="w-full flex items-center justify-center gap-2 border border-blue-200 bg-blue-50 text-blue-700 py-2.5 rounded-xl font-semibold text-sm hover:bg-blue-100 disabled:opacity-50 transition-all"
-            >
-              <Download className="w-4 h-4" />
-              {downloading ? 'Downloading…' : 'Download as .docx'}
-            </button>
+            {sidebarTab === 'strategy' && (
+              <>
+                <div>
+                  <button
+                    onClick={handleTailor}
+                    disabled={tailoring}
+                    className="w-full bg-[#003d9b] text-white py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-[#0052cc] disabled:opacity-60 transition-all shadow-md"
+                  >
+                    {tailoring ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Generating…
+                      </>
+                    ) : (
+                      <>
+                        <Wand2 className="w-4 h-4" />
+                        {result ? 'Regenerate' : 'Generate Tailored Resume'}
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[13px] text-[#434654] mt-3 italic text-center">
+                    Uses Claude to align your experience with job requirements.
+                  </p>
+                </div>
 
-            {result.explanation && (
-              <div className="bg-gray-50 border border-gray-200 p-5 rounded-xl">
-                <h3 className="font-bold text-xs text-gray-500 uppercase tracking-wider mb-3">Strategy</h3>
-                <p className="text-sm text-gray-800 leading-relaxed italic border-l-4 border-blue-500 pl-3">
-                  {result.explanation}
-                </p>
-                {result.storiesUsed.length > 0 && (
-                  <div className="mt-4 text-xs font-medium text-gray-500 flex flex-wrap gap-2 items-center">
-                    <span>Stories used:</span>
-                    {result.storiesUsed.map(s => (
-                      <span key={s} className="bg-white border border-gray-200 px-2 py-1 rounded shadow-sm">{s}</span>
-                    ))}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 p-3 rounded-lg flex items-start gap-2 text-red-800">
+                    <AlertCircle className="w-4 h-4 text-red-500 flex-none mt-0.5" />
+                    <div>
+                      <strong className="block text-red-700 text-[13px] font-bold">Generation failed</strong>
+                      <p className="text-[12px]">{error}</p>
+                    </div>
                   </div>
                 )}
-              </div>
+
+                <section>
+                  <h3 className="text-[11px] font-mono-label font-bold text-[#011d35] mb-4 flex items-center gap-2 uppercase tracking-widest">
+                    <Lightbulb className="w-4 h-4 text-[#003d9b]" />
+                    Strategy
+                  </h3>
+                  {result?.explanation ? (
+                    <div className="bg-[#eef4ff] p-4 rounded-lg border-l-4 border-[#003d9b]">
+                      <p className="text-[13px] text-[#011d35] leading-relaxed">{result.explanation}</p>
+                      {result.storiesUsed.length > 0 && (
+                        <ul className="mt-4 space-y-2">
+                          {result.storiesUsed.map(s => (
+                            <li key={s} className="flex gap-2 text-[13px] text-[#011d35]">
+                              <CheckCircle2 className="w-4 h-4 text-[#003d9b] flex-none mt-0.5" />
+                              <span>Wove in story: <span className="font-medium">{s}</span></span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-[#eef4ff] p-4 rounded-lg border border-dashed border-[#c3c6d6] text-[13px] text-[#737685] italic">
+                      Generate a tailored resume to see the strategy.
+                    </div>
+                  )}
+                </section>
+
+                <section>
+                  <h3 className="text-[11px] font-mono-label font-bold text-[#011d35] mb-4 flex items-center gap-2 uppercase tracking-widest">
+                    <KeyRound className="w-4 h-4 text-[#003d9b]" />
+                    Stories Used
+                  </h3>
+                  {result?.storiesUsed.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {result.storiesUsed.map(s => (
+                        <span key={s} className="px-2 py-1 bg-[#c4e0fe] text-[#48637d] rounded text-[11px] font-mono-label uppercase tracking-widest border border-[#c3c6d6]">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-[13px] text-[#737685] italic">No stories surfaced yet.</p>
+                  )}
+                </section>
+
+                {job?.overall != null && (
+                  <div className="pt-6 border-t border-[#c3c6d6]">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[11px] font-mono-label text-[#434654] uppercase tracking-widest">Fit Score</span>
+                      <span className="text-[11px] font-mono-label font-bold text-[#003d9b]">{job.overall.toFixed(1)} / 5</span>
+                    </div>
+                    <div className="w-full bg-[#d1e4ff] h-2 rounded-full overflow-hidden">
+                      <div className="bg-[#003d9b] h-full" style={{ width: `${(job.overall / 5) * 100}%` }} />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {sidebarTab === 'gaps' && (
+              <section>
+                <h3 className="text-[11px] font-mono-label font-bold text-[#011d35] mb-4 flex items-center gap-2 uppercase tracking-widest">
+                  <Sparkles className="w-4 h-4 text-[#003d9b]" />
+                  Competency Gaps
+                </h3>
+                <div className="bg-[#eef4ff] p-4 rounded-lg border border-dashed border-[#c3c6d6] text-[13px] text-[#737685] italic">
+                  Coming soon — surface specific skills the JD asks for that aren&apos;t reflected in your resume.
+                </div>
+              </section>
             )}
           </div>
-        )}
-      </div>
 
-      <div>
-        {tailoring ? (
-          <GeneratingPanel steps={steps} />
-        ) : result?.tailoredResume ? (
-          <div className="space-y-3">
-            <div className="flex gap-2">
+          <div className="px-7 py-5 bg-[#eef4ff] border-t border-[#c3c6d6] flex justify-between items-center">
+            <button
+              onClick={() => download('pdf')}
+              disabled={!result?.tailoredResume || tailoring || downloadingPdf || downloadingDocx}
+              className="flex items-center gap-1.5 text-[#434654] hover:text-[#003d9b] disabled:opacity-40 disabled:hover:text-[#434654] transition-colors text-[13px] font-medium"
+            >
+              <Download className="w-4 h-4" />
+              {downloadingPdf ? 'Exporting…' : 'Export PDF'}
+            </button>
+            <button
+              onClick={() => download('docx')}
+              disabled={!result?.tailoredResume || tailoring || downloadingPdf || downloadingDocx}
+              className="flex items-center gap-1.5 text-[#434654] hover:text-[#003d9b] disabled:opacity-40 disabled:hover:text-[#434654] transition-colors text-[13px] font-medium"
+            >
+              <Share2 className="w-4 h-4" />
+              {downloadingDocx ? 'Exporting…' : 'Export DOCX'}
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Right canvas ───────────────────────────────────────────── */}
+        <section className="bg-[#eef4ff] editor-grid relative overflow-hidden flex flex-col h-[calc(100vh-200px)] min-h-[720px]">
+          {/* Toolbar */}
+          <div className="bg-white border-b border-[#c3c6d6] px-8 py-4 flex items-center justify-between shadow-sm sticky top-0 z-10">
+            <div className="flex items-center gap-5">
+              <div className="flex items-center bg-[#eef4ff] rounded-lg p-1 border border-[#c3c6d6] opacity-60 gap-0.5" title="Editing coming soon">
+                <button className="p-1.5 rounded cursor-not-allowed" disabled><Bold className="w-4 h-4 text-[#434654]" /></button>
+                <button className="p-1.5 rounded cursor-not-allowed" disabled><Italic className="w-4 h-4 text-[#434654]" /></button>
+                <button className="p-1.5 rounded cursor-not-allowed" disabled><List className="w-4 h-4 text-[#434654]" /></button>
+              </div>
+              <div className="h-6 w-px bg-[#c3c6d6]" />
               <button
-                onClick={() => setView('document')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                  view === 'document' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                }`}
+                onClick={() => setShowDiff(d => !d)}
+                disabled={!result?.tailoredResume || !masterResume || tailoring}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-[#003d9b] text-[#003d9b] rounded-lg hover:bg-[#003d9b] hover:text-white disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-[#003d9b] transition-all text-[13px] font-medium"
               >
-                <FileText className="w-3.5 h-3.5" /> Document
+                <GitCompare className="w-4 h-4" />
+                {showDiff ? 'Hide changes' : 'Show changes'}
               </button>
-              {masterResume && (
-                <button
-                  onClick={() => setView('diff')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                    view === 'diff' ? 'bg-gray-900 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                  }`}
-                >
-                  Changes
-                </button>
+            </div>
+            <div className="flex items-center gap-3">
+              {tailoring ? (
+                <span className="flex items-center gap-2 px-2.5 py-1 bg-[#003d9b]/10 text-[#003d9b] rounded-full text-[12px] font-medium mr-3">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-[#003d9b] opacity-75 animate-ping" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-[#003d9b]" />
+                  </span>
+                  Streaming…
+                </span>
+              ) : result?.tailoredResume ? (
+                <span className="text-[13px] text-[#434654] italic mr-3">Saved</span>
+              ) : null}
+              <button
+                onClick={() => setZoom(z => Math.max(50, z - 10))}
+                disabled={zoom <= 50}
+                className="p-1.5 text-[#434654] hover:text-[#003d9b] disabled:opacity-40"
+              >
+                <ZoomOut className="w-4 h-4" />
+              </button>
+              <span className="text-[11px] font-mono-label text-[#434654] w-10 text-center">{zoom}%</span>
+              <button
+                onClick={() => setZoom(z => Math.min(150, z + 10))}
+                disabled={zoom >= 150}
+                className="p-1.5 text-[#434654] hover:text-[#003d9b] disabled:opacity-40"
+              >
+                <ZoomIn className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Content area */}
+          <div className="flex-grow overflow-auto p-10 lg:p-16">
+            <div
+              style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}
+              className="transition-transform duration-200"
+            >
+              {result ? (
+                <article className="resume-page">
+                  {showDiff && masterResume && !tailoring
+                    ? <DiffRender master={masterResume} tailored={result.tailoredResume} />
+                    : (
+                      <>
+                        {result.tailoredResume
+                          ? <ResumeRender markdown={result.tailoredResume} />
+                          : (
+                            <div className="flex flex-col items-center justify-center text-center text-[#737685] h-full min-h-[400px]">
+                              <Wand2 className="w-8 h-8 mb-3 text-[#003d9b] animate-pulse" />
+                              <p className="text-[13px] italic">Claude is thinking…</p>
+                            </div>
+                          )
+                        }
+                        {tailoring && result.tailoredResume && (
+                          <span className="inline-block w-[2px] h-[14px] bg-[#003d9b] animate-pulse align-middle ml-0.5" />
+                        )}
+                      </>
+                    )
+                  }
+                </article>
+              ) : (
+                <article className="resume-page flex flex-col items-center justify-center text-center text-[#737685]">
+                  <FileText className="w-12 h-12 mb-4 text-[#c3c6d6]" />
+                  <h3 className="font-headline text-[20px] font-bold text-[#011d35] mb-2">No tailored resume yet</h3>
+                  <p className="text-[13px] max-w-sm">
+                    Open <span className="font-medium text-[#003d9b]">Tailor Strategy</span> in the sidebar and click
+                    {' '}<span className="font-medium text-[#003d9b]">Generate Tailored Resume</span> to rewrite your
+                    master resume for this role.
+                  </p>
+                </article>
               )}
             </div>
-            {view === 'document'
-              ? <DocumentPreview markdown={result.tailoredResume} />
-              : masterResume && <DiffPreview master={masterResume} tailored={result.tailoredResume} />
-            }
           </div>
-        ) : (
-          <div className="bg-gray-100 border border-gray-200 border-dashed rounded-2xl h-[750px] flex flex-col items-center justify-center text-gray-400 p-8 text-center">
-            <FileText className="w-12 h-12 mb-4 text-gray-300" />
-            <p>Generated resume will appear here.</p>
-          </div>
-        )}
+        </section>
       </div>
     </div>
   );

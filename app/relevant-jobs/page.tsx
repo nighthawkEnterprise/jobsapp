@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Target, RefreshCw, ExternalLink, Plus, Check, ChevronDown, ChevronUp, EyeOff, RotateCcw, Search, X, Trash2, AlertCircle, Sparkles, BookOpen, Zap, Star, DollarSign, CalendarDays, MapPin, Building2 } from 'lucide-react';
+import { Target, RefreshCw, ExternalLink, Plus, Check, ChevronDown, ChevronUp, EyeOff, RotateCcw, Search, X, Trash2, AlertCircle, Sparkles, BookOpen, Zap, Star, DollarSign, CalendarDays, MapPin, Building2, SlidersHorizontal } from 'lucide-react';
 import { Toast } from '@/components/Toast';
 import { Skeleton } from '@/components/Skeleton';
 import type { Portal } from '@/lib/scanner';
@@ -372,6 +372,7 @@ export default function RelevantJobsPage() {
   const [prefLocations, setPrefLocations] = useState<string[]>([]);
   const [showUndated, setShowUndated] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [pageLoading, setPageLoading] = useState(true);
   const [portals, setPortals] = useState<Portal[]>([]);
@@ -531,9 +532,9 @@ export default function RelevantJobsPage() {
   };
 
   const allDiscoveries = cache?.discoveries ?? [];
-  const relevantJobs = allDiscoveries.filter(j => !j.dismissed);
+  const relevantJobs = allDiscoveries.filter(j => !j.dismissed && !j.alreadyTracked);
   const dismissedJobs = allDiscoveries.filter(j => j.dismissed);
-  const topMatches = relevantJobs.filter(j => !j.alreadyTracked).slice(0, 3);
+  const topMatches = relevantJobs.slice(0, 3);
 
   const filtered = relevantJobs.filter(job => {
     if (job.score < minScore) return false;
@@ -569,16 +570,16 @@ export default function RelevantJobsPage() {
   const visibleCompanies = new Set([...dated, ...undated].map(j => j.company));
 
   if (pageLoading) return (
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="mb-8 flex items-center justify-between border-b border-gray-100 pb-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-6">
         <div className="flex items-center gap-4">
-          <Skeleton className="w-16 h-16 rounded-2xl" />
-          <div className="space-y-2"><Skeleton className="h-8 w-48" /><Skeleton className="h-4 w-64" /></div>
+          <Skeleton className="w-12 h-12 md:w-16 md:h-16 rounded-2xl" />
+          <div className="space-y-2"><Skeleton className="h-7 w-40 md:h-8 md:w-48" /><Skeleton className="h-4 w-48 md:w-64" /></div>
         </div>
         <Skeleton className="h-10 w-28 rounded-xl" />
       </div>
-      <div className="flex gap-8">
-        <div className="w-60 flex-none space-y-4">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <div className="hidden lg:block w-60 flex-none space-y-4">
           <Skeleton className="h-9 w-full rounded-lg" />
           {[0,1,2,3,4].map(i => <Skeleton key={i} className="h-4 w-full" />)}
         </div>
@@ -597,44 +598,51 @@ export default function RelevantJobsPage() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-6">
+    <div className="max-w-7xl mx-auto px-4 md:px-6">
 
       {/* ── Header ── */}
-      <div className="mb-6 flex items-center justify-between border-b border-gray-200 pb-5">
-        <div className="flex items-center gap-4">
-          <div className="bg-blue-50 text-[#3B5BDB] p-3.5 rounded-2xl">
-            <Target className="w-7 h-7" />
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 pb-5">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="bg-blue-50 text-[#3B5BDB] p-3 md:p-3.5 rounded-2xl flex-none">
+            <Target className="w-5 h-5 md:w-7 md:h-7" />
           </div>
-          <div>
-            <h1 className="text-3xl font-extrabold text-gray-900 leading-tight">
+          <div className="min-w-0">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
               Discover <span className="text-[#3B5BDB]">Jobs</span>
             </h1>
             {cache ? (
-              <p className="text-gray-500 text-sm mt-0.5 flex items-center gap-2 flex-wrap">
+              <p className="text-gray-500 text-xs md:text-sm mt-0.5 flex items-center gap-2 flex-wrap">
                 <span>Last scanned {timeAgo(cache.scannedAt)}</span>
                 <span className="text-gray-300">·</span>
-                <span className="font-medium text-gray-700">{relevantJobs.length} roles across target companies</span>
+                <span className="font-medium text-gray-700">{relevantJobs.length} roles</span>
                 {cache.errors.length > 0 && (
-                  <>
-                    <span className="text-gray-300">·</span>
-                    <span className="flex items-center gap-1 text-orange-500 font-medium">
-                      <AlertCircle className="w-3.5 h-3.5" />{cache.errors.length} portals errored
-                    </span>
-                  </>
+                  <span className="flex items-center gap-1 text-orange-500 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5" />{cache.errors.length} errors
+                  </span>
                 )}
               </p>
             ) : (
-              <p className="text-gray-500 text-sm mt-0.5">Scan your target companies for PM roles</p>
+              <p className="text-gray-500 text-xs md:text-sm mt-0.5">Scan your target companies for PM roles</p>
             )}
           </div>
         </div>
-        <button
-          onClick={runScan} disabled={scanning}
-          className="flex items-center gap-2 bg-[#1C1F2E] text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
-        >
-          <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
-          {scanning ? 'Scanning…' : cache ? 'Refresh' : 'Scan now'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setFiltersOpen(v => !v)}
+            className="lg:hidden flex items-center gap-1.5 bg-white border border-gray-200 text-gray-600 px-3 py-2 rounded-xl font-semibold text-sm hover:border-gray-300 transition-all"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Filters
+            {hasActiveFilters && <span className="w-1.5 h-1.5 rounded-full bg-[#3B5BDB] inline-block" />}
+          </button>
+          <button
+            onClick={runScan} disabled={scanning}
+            className="flex items-center gap-2 bg-[#1C1F2E] text-white px-4 md:px-5 py-2 md:py-2.5 rounded-xl font-semibold text-sm hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
+          >
+            <RefreshCw className={`w-4 h-4 ${scanning ? 'animate-spin' : ''}`} />
+            {scanning ? 'Scanning…' : cache ? 'Refresh' : 'Scan now'}
+          </button>
+        </div>
       </div>
 
       {/* ── Strategic Matches ── */}
@@ -668,10 +676,10 @@ export default function RelevantJobsPage() {
         </section>
       )}
 
-      <div className="flex gap-8 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
 
         {/* ── Sidebar ── */}
-        <aside className="w-60 flex-none sticky top-24 space-y-6">
+        <aside className={`w-full lg:w-60 lg:flex-none lg:sticky top-24 space-y-6 ${filtersOpen ? 'block' : 'hidden'} lg:block`}>
           <div>
             <h2 className="text-base font-bold text-gray-900 mb-4">Search Parameters</h2>
 
@@ -972,7 +980,7 @@ export default function RelevantJobsPage() {
       </div>
 
       {/* ── FAB ── */}
-      <div className="fixed bottom-8 right-8 z-40">
+      <div className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-40">
         <button
           onClick={runScan}
           disabled={scanning}

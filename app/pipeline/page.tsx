@@ -118,7 +118,7 @@ export default function PipelinePage() {
   const archivedJobs = jobs.filter(j => ['rejected', 'withdrawn'].includes(j.status));
 
   if (loading) return (
-    <div className="max-w-6xl mx-auto px-6">
+    <div className="max-w-6xl mx-auto px-4 md:px-6">
       <div className="mb-8">
         <div className="animate-pulse h-8 w-48 bg-gray-100 rounded-lg mb-2" />
         <div className="animate-pulse h-4 w-32 bg-gray-100 rounded" />
@@ -135,8 +135,8 @@ export default function PipelinePage() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-6">
-      <div className="flex justify-between items-end mb-8">
+    <div className="max-w-6xl mx-auto px-4 md:px-6">
+      <div className="flex flex-wrap justify-between items-end gap-3 mb-6 md:mb-8">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900">Active Pipeline</h1>
           <p className="text-gray-500 text-sm mt-1">
@@ -172,7 +172,7 @@ export default function PipelinePage() {
         </div>
 
         {/* Add job panel */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 sticky top-24">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 lg:sticky top-24">
           <h2 className="font-bold text-gray-900 mb-1">Add Job Manually</h2>
           <p className="text-xs text-gray-400 mb-4">Paste the full JD — the AI will extract title, company, location, and salary.</p>
           <textarea

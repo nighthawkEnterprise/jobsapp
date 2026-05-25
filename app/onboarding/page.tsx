@@ -311,8 +311,8 @@ export default function OnboardingPage() {
   return (
     <div className="fixed inset-0 z-[200] bg-[#f8f9ff] flex overflow-hidden">
 
-      {/* ── Sidebar ── */}
-      <aside className="w-64 flex-none bg-white border-r border-gray-200 flex flex-col">
+      {/* ── Sidebar (desktop only) ── */}
+      <aside className="hidden md:flex md:w-64 md:flex-none bg-white border-r border-gray-200 flex-col">
         <div className="px-8 py-8 pb-10">
           <a href="/" className="font-heading text-xl font-extrabold tracking-tight select-none">
             <span className="text-gray-900">Apply</span><span className="text-[#3B5BDB]">OS</span>
@@ -348,18 +348,26 @@ export default function OnboardingPage() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Header */}
-        <header className="h-16 flex-none bg-white border-b border-gray-200 flex items-center justify-end px-10 gap-5">
-          <span className="text-xs text-gray-400 flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5" /> Data encrypted & private
-          </span>
-          <div className="w-px h-4 bg-gray-200" />
-          <button
-            onClick={handleFinish}
-            disabled={saving}
-            className="bg-[#3B5BDB] text-white text-sm font-bold px-6 py-2 rounded-xl hover:bg-[#3451c7] disabled:opacity-60 transition-all"
-          >
-            {saving ? 'Saving…' : 'Save & Exit'}
-          </button>
+        <header className="h-16 flex-none bg-white border-b border-gray-200 flex items-center justify-between px-4 md:px-10 gap-4">
+          {/* Mobile step indicator */}
+          <div className="flex md:hidden items-center gap-2">
+            {STEPS.map((_, i) => (
+              <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i === step ? 'w-6 bg-[#3B5BDB]' : i < step ? 'w-3 bg-[#3B5BDB]/40' : 'w-3 bg-gray-200'}`} />
+            ))}
+          </div>
+          <div className="flex items-center justify-end gap-3 md:gap-5 ml-auto">
+            <span className="hidden sm:flex text-xs text-gray-400 items-center gap-1.5">
+              <Lock className="w-3.5 h-3.5" /> Data encrypted & private
+            </span>
+            <div className="hidden sm:block w-px h-4 bg-gray-200" />
+            <button
+              onClick={handleFinish}
+              disabled={saving}
+              className="bg-[#3B5BDB] text-white text-sm font-bold px-4 md:px-6 py-2 rounded-xl hover:bg-[#3451c7] disabled:opacity-60 transition-all"
+            >
+              {saving ? 'Saving…' : 'Save & Exit'}
+            </button>
+          </div>
         </header>
 
         {/* Main */}

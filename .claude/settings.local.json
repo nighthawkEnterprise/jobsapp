@@ -49,7 +49,16 @@
       "Bash(del *)",
       "Bash(Remove-Item *)",
       "Bash(npx tsx *)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(npx next *)",
+      "Bash(git stash *)",
+      "Bash(tasklist /FI \"IMAGENAME eq node.exe\")",
+      "PowerShell(Get-Process *)",
+      "Bash(grep -iE \"\\\\.\\(test|spec\\)\\\\.\\(ts|tsx|js\\)$\")",
+      "Bash(node_modules/.bin/tsx *)",
+      "Bash(node_modules/.bin/tsc --noEmit -p tsconfig.json)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\nithi\\\\documents\\\\projects\\\\jobapps\\\\app\" -Recurse -File)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

@@ -188,10 +188,10 @@ export default async function DashboardPage() {
   const storiesReady = Math.min(Math.round((stories.length / 5) * 100), 100);
 
   return (
-    <div className="max-w-7xl mx-auto px-6 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-6 md:space-y-8">
 
       {/* ── Hero ── */}
-      <section className="relative overflow-hidden rounded-2xl bg-[#1C1F2E] p-8 min-h-[280px] flex flex-col justify-center">
+      <section className="relative overflow-hidden rounded-2xl bg-[#1C1F2E] p-5 md:p-8 min-h-[220px] md:min-h-[280px] flex flex-col justify-center">
         {/* Background texture */}
         <div className="absolute inset-0 opacity-[0.04]"
           style={{ backgroundImage: 'radial-gradient(circle at 70% 50%, #3B5BDB 0%, transparent 60%), radial-gradient(circle at 30% 80%, #60a5fa 0%, transparent 50%)' }} />

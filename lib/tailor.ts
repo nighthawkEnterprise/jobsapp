@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
+import type { MessageStream } from '@anthropic-ai/sdk/lib/MessageStream';
 import type { Job, Story } from './store';
-import { recordUsage } from './usage';
 
 const client = new Anthropic();
 
@@ -10,7 +10,7 @@ export interface TailorResult {
   storiesUsed: string[];
 }
 
-function buildPrompt(resume: string, profile: string, stories: Story[], job: Job): string {
+export function buildTailorPrompt(resume: string, profile: string, stories: Story[], job: Job): string {
   const storyBlock = stories.length > 0
     ? stories.map((s, i) => `### Story ${i + 1}: ${s.title}
 Competencies: ${s.competencies.join(', ')}
@@ -51,35 +51,43 @@ Rewrite the master resume to maximize fit for this specific role. Rules:
 - Preserve Markdown formatting (headings, bullets, bold)
 - Keep it to a natural single-page or two-page length — do not pad
 
-Respond with ONLY valid JSON. The tailoredResume value must be a JSON string (escape newlines as \\n):
-{
-  "tailoredResume": "<full resume in Markdown with \\n for newlines>",
-  "explanation": "<2-3 sentences describing the tailoring strategy>",
-  "storiesUsed": ["<story title>"]
-}`;
+Output ONLY in this exact format, nothing else:
+
+<resume>
+[full resume in Markdown, starting with # Name]
+</resume>
+<explanation>
+[2-3 sentences describing the tailoring strategy]
+</explanation>
+<stories>
+- [story title used]
+- [another story title]
+</stories>`;
 }
 
-export async function tailorResumeWithLLM(
-  job: Job,
-  resume: string,
-  profile: string,
-  stories: Story[],
-  userId: string,
-): Promise<TailorResult> {
-  const message = await client.messages.create({
+export function startTailorStream(prompt: string): MessageStream {
+  return client.messages.stream({
     model: 'claude-sonnet-4-6',
     max_tokens: 4096,
-    messages: [{ role: 'user', content: buildPrompt(resume, profile, stories, job) }],
+    messages: [{ role: 'user', content: prompt }],
   });
+}
 
-  void recordUsage(userId, 'tailor', message.usage.input_tokens, message.usage.output_tokens);
-  const raw = message.content[0].type === 'text' ? message.content[0].text : '';
-  // Strip markdown fences Claude sometimes adds despite instructions
-  const cleaned = raw.replace(/^```(?:json)?\s*/m, '').replace(/\s*```$/m, '').trim();
-  const parsed = JSON.parse(cleaned) as TailorResult;
-  return {
-    tailoredResume: parsed.tailoredResume ?? '',
-    explanation: parsed.explanation ?? '',
-    storiesUsed: Array.isArray(parsed.storiesUsed) ? parsed.storiesUsed : [],
-  };
+export function parseTailorOutput(full: string): TailorResult {
+  const openIdx = full.indexOf('<resume>');
+  const afterOpen = openIdx >= 0 ? full.slice(openIdx + '<resume>'.length) : full;
+  const closeIdx = afterOpen.indexOf('</resume>');
+  const tailoredResume = (closeIdx >= 0 ? afterOpen.slice(0, closeIdx) : afterOpen).trim();
+
+  const explMatch = full.match(/<explanation>([\s\S]*?)<\/explanation>/);
+  const explanation = explMatch ? explMatch[1].trim() : '';
+
+  const storiesMatch = full.match(/<stories>([\s\S]*?)<\/stories>/);
+  const storiesText = storiesMatch ? storiesMatch[1] : '';
+  const storiesUsed = storiesText
+    .split('\n')
+    .map(l => l.replace(/^[-*]\s*/, '').trim())
+    .filter(Boolean);
+
+  return { tailoredResume, explanation, storiesUsed };
 }

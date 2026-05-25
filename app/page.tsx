@@ -82,7 +82,7 @@ export default async function LandingPage() {
     <div className="-mt-8 -mb-8">
 
       {/* ════════ HERO */}
-      <section className="bg-[#1C1F2E] px-6 md:px-12 pt-28 pb-32 lg:pt-32 lg:pb-40 relative overflow-hidden">
+      <section className="bg-[#1C1F2E] px-4 md:px-12 pt-14 pb-16 md:pt-28 md:pb-32 lg:pt-32 lg:pb-40 relative overflow-hidden">
         {/* Subtle grid texture */}
         <div className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0)',
@@ -189,7 +189,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ════════ COMPARISON */}
-      <section id="how-it-works" className="bg-[#F7F6F3] py-24 px-6 md:px-12">
+      <section id="how-it-works" className="bg-[#F7F6F3] py-14 md:py-24 px-4 md:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <p className="text-xs font-semibold text-[#3B5BDB] tracking-widest uppercase mb-4">Why applyOS</p>
@@ -237,7 +237,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ════════ FEATURE 1 — SCAN & SCORE */}
-      <section className="bg-white py-24 px-6 md:px-12">
+      <section className="bg-white py-14 md:py-24 px-4 md:px-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 xl:gap-24 items-center">
 
           <div>
@@ -314,7 +314,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ════════ FEATURE 2 — CV TAILORING */}
-      <section className="bg-[#F7F6F3] py-24 px-6 md:px-12">
+      <section className="bg-[#F7F6F3] py-14 md:py-24 px-4 md:px-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 xl:gap-24 items-center">
 
           {/* CV tailoring mockup */}
@@ -393,7 +393,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ════════ FEATURE 3 — INTERVIEW PREP */}
-      <section className="bg-white py-24 px-6 md:px-12">
+      <section className="bg-white py-14 md:py-24 px-4 md:px-12">
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 xl:gap-24 items-center">
 
           <div>
@@ -462,7 +462,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ════════ METRICS */}
-      <section className="bg-[#1C1F2E] py-16 px-6 md:px-12">
+      <section className="bg-[#1C1F2E] py-12 md:py-16 px-4 md:px-12">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {metrics.map(({ value, label }) => (
             <div key={value}>
@@ -474,7 +474,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ════════ CTA FOOTER */}
-      <section className="bg-[#1C1F2E] border-t border-white/5 py-24 px-6 md:px-12 text-center">
+      <section className="bg-[#1C1F2E] border-t border-white/5 py-14 md:py-24 px-4 md:px-12 text-center">
         <div className="max-w-2xl mx-auto">
           <h2 className="font-heading font-extrabold text-white text-4xl md:text-5xl leading-tight mb-4">
             Stop managing your<br />job search.

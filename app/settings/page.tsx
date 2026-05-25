@@ -376,15 +376,15 @@ export default function SettingsPage() {
   const completion = Math.round((completionItems.filter(Boolean).length / completionItems.length) * 100);
 
   if (loading) return (
-    <div className="max-w-5xl mx-auto px-6 space-y-8">
-      <div className="flex justify-between items-center py-8 border-b border-gray-100">
+    <div className="max-w-5xl mx-auto px-4 md:px-6 space-y-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 py-8 border-b border-gray-100">
         <div className="space-y-2">
           <Skeleton className="h-8 w-44" />
           <Skeleton className="h-4 w-72" />
         </div>
         <Skeleton className="h-10 w-32 rounded-xl" />
       </div>
-      <div className="grid grid-cols-[220px_1fr] gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8">
         <Skeleton className="h-64 rounded-2xl" />
         <div className="space-y-6">
           <SkeletonFormSection />
@@ -395,10 +395,10 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="max-w-5xl mx-auto px-6 pb-16">
+    <div className="max-w-5xl mx-auto px-4 md:px-6 pb-16">
 
       {/* Header */}
-      <div className="flex items-center justify-between py-8 mb-2 border-b border-gray-100">
+      <div className="flex flex-wrap items-center justify-between gap-4 py-8 mb-2 border-b border-gray-100">
         <div>
           <h1 className="text-2xl font-extrabold text-gray-900">Setup Profile</h1>
           <p className="text-sm text-gray-500 mt-0.5">Configure your target criteria and base resume material</p>
@@ -421,10 +421,10 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-[220px_1fr] gap-8 items-start pt-6">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8 items-start pt-6">
 
         {/* Sidebar */}
-        <aside className="sticky top-24 space-y-4">
+        <aside className="md:sticky top-24 space-y-4">
 
           {/* Progress */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
